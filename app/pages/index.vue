@@ -65,7 +65,28 @@
 
 <nav>
     <ul>
-        <li><NuxtLink to="scratch/baloons-tower-defence/">Baloons Tower Defence</NuxtLink></li>
+        <li><NuxtLink to="scratch/minecraft-3d/">Minecraft 3D</NuxtLink></li>
+    </ul>
+</nav>
+
+<!-- Dieser Container sorgt dafür, dass das Bild auf der Webseite genau in der Mitte steht -->
+<div style="display: flex; justify-content: center; width: 100%; margin: 20px 0;">
+
+  <!-- Das ist dein zugeschnittenes Scratch-Bild (ohne Flagge und Leiste) -->
+  <div style="width: 480px; height: 360px; overflow: hidden; position: relative; pointer-events: none;">
+    <iframe src="https://turbowarp.org/1134135118/embed" 
+            width="540" 
+            height="460" 
+            style="border: none; position: absolute; top: -56px; left: -30px;" 
+            scrolling="no">
+    </iframe>
+  </div>
+
+</div>
+
+<nav>
+    <ul>
+        <li><NuxtLink to="scratch/minecraft-3d/">Minecraft 3D</NuxtLink></li>
     </ul>
 </nav>
 
