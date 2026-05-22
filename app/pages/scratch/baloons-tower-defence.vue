@@ -6,7 +6,7 @@
 </h1>
 
 <iframe src="https://turbowarp.org/1269546899/embed"
-        width="100%" height="100%" scrolling="no"
+        scrolling="no"
         frameborder="0" allowfullscreen>
 </iframe>
 
@@ -23,6 +23,6 @@ h1 {
 iframe {
   border: none;
   width: 100%;
-  height: 100%;
+  height: 90vh;
 }
 </style>

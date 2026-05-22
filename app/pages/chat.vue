@@ -2,7 +2,7 @@
     <div>
         <h1>Chat</h1>
         <p>Welcome to the chat page! Here you can find People to chat with or just chat with ur friends.</p>
-        <chats></chats>
+        
     </div>
 </template>
 
