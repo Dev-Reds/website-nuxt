@@ -65,7 +65,7 @@
 
 <nav>
     <ul>
-        <li><NuxtLink to="scratch/minecraft-3d/">Minecraft 3D</NuxtLink></li>
+        <li><NuxtLink to="scratch/baloons-tower-defence/">Baloons Tower Defence</NuxtLink></li>
     </ul>
 </nav>
 
