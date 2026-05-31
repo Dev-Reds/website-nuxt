@@ -521,13 +521,16 @@ function markRead(chatId) {
 }
 
 // ── NEW CHAT ───────────────────────────────────────────────────────────
-function openNewChatModal() { newChatMode.value = 'dm'; resetModal(); showNewChat.value = true }
+function openNewChatModal() { allUsers.value = getUsers(); newChatMode.value = 'dm'; resetModal(); showNewChat.value = true }
 function closeNewChat() { showNewChat.value = false; resetModal() }
 function resetModal() { newGroupName.value = ''; modalSearch.value = ''; modalUserResults.value = []; selectedMembers.value = [] }
 function doModalSearch() {
   const q = modalSearch.value.trim().toLowerCase()
   if (!q) { modalUserResults.value = []; return }
-  modalUserResults.value = allUsers.value.filter(u => u.id !== currentUser.value.id && u.name.toLowerCase().includes(q))
+  // Always read fresh from localStorage so newly registered users appear
+  const fresh = getUsers()
+  allUsers.value = fresh
+  modalUserResults.value = fresh.filter(u => u.id !== currentUser.value.id && u.name.toLowerCase().includes(q))
 }
 function onUserClick(user) {
   if (newChatMode.value === 'dm') {
