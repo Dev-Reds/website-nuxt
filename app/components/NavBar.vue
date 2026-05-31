@@ -4,7 +4,7 @@
     <lo><NuxtLink to="/youtube">YouTube</NuxtLink></lo>
     <lo><NuxtLink to="/todo-list">ToDo List</NuxtLink></lo>
     <lo><NuxtLink to="/time-calc">Lebenskalender</NuxtLink></lo>
-
+    <lo><NuxtLink to="/chat">Chat</NuxtLink></lo>
   </div>
 </template>
 

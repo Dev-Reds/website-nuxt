@@ -1,5 +1,8 @@
 <template>
   <div class="app-root">
+    <!-- Free line spacer -->
+    <div class="app-spacer"></div>
+    <div class="app-container">
     <!-- Top bar -->
     <div class="top-bar">
       <svg width="18" height="18" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#e53935"/><path d="M24 8C15.163 8 8 15.163 8 24c0 2.836.745 5.5 2.05 7.813L8 40l8.45-2.013A15.93 15.93 0 0024 40c8.837 0 16-7.163 16-16S32.837 8 24 8z" fill="white" fill-opacity=".9"/></svg>
@@ -332,6 +335,7 @@
     </div>
 
     </div><!-- /app-inner -->
+    </div><!-- /app-container -->
   </div>
 </template>
 
@@ -603,14 +607,20 @@ onBeforeUnmount(() => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-.app-root{font-family:'DM Sans',sans-serif;width:100%;overflow:hidden;background:#1a0a0a;color:#e9edef;display:flex;flex-direction:column}
+.app-root{font-family:'DM Sans',sans-serif;width:100%;height:100vh;background:transparent;display:flex;flex-direction:column;align-items:stretch;color:#e9edef}
+
+/* ONE FREE LINE on top */
+.app-spacer{height:36px;flex-shrink:0}
+
+/* MAIN CONTAINER — 90% tall, 100% wide */
+.app-container{width:100%;height:90vh;display:flex;flex-direction:column;overflow:hidden}
 
 /* TOP BAR */
 .top-bar{height:36px;min-height:36px;background:#e53935;display:flex;align-items:center;gap:8px;padding:0 16px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 .top-bar span{font-size:13px;font-weight:600;color:white;letter-spacing:.3px}
 
 /* APP INNER — fills remaining height */
-.app-inner{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.app-inner{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;background:#1a0a0a}
 
 /* AUTH */
 .auth-screen{flex:1;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(135deg,#1a0505,#1a0a0a,#280808)}
@@ -762,7 +772,7 @@ onBeforeUnmount(() => {
 .profile-msg.err{color:#ff6b6b;background:rgba(255,107,107,.1)}
 
 @media(max-width:768px){
-  .sidebar{position:fixed;top:36px;left:0;width:100%;min-width:unset;z-index:50;transform:translateX(-100%);transition:transform .3s ease}
+  .sidebar{position:fixed;top:72px;left:0;width:100%;min-width:unset;z-index:50;transform:translateX(-100%);transition:transform .3s ease}
   .sidebar.sidebar-open{transform:translateX(0)}
   .chat-window{width:100%}
   .mobile-back{display:flex}

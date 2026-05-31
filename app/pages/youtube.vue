@@ -1,7 +1,7 @@
 <template>
     <div>
         <h1>YouTube</h1>
-        <NuxtLink to="https://www.youtube.com/@Sams2525" target="_blank">My YouTube Channel (Klick here)</NuxtLink>
+        <NuxtLink to="https://www.youtube.com/@Sams2525" target="_blank">Mein Youtube (Klick)</NuxtLink>
         <img src="/channels4_profile.png" alt="YouTube Profile Image" />
     </div>
 </template>
