@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="gw-wrap">
         <div v-for="(year, index) in life" :key="index" class="grid-row">
            <div v-for="(week, weekIndex) in year" :key="weekIndex" class="grid-square" :class="{used:(weekIndex  + index * WEEKS_PER_YEAR) < weeksused}">
            </div>
@@ -52,18 +52,24 @@ const life = computed(() => generateEmptyGrid())
 </script>
 
 <style scoped>
+.gw-wrap {
+  width: 100%;
+}
+
 .grid-square {
-    width: 15px;
-    height: 15px;
-    background: white;
-    border: 1px solid black;
+  aspect-ratio: 1;
+  background: white;
+  border: 1px solid black;
+  box-sizing: border-box;
 }
 
 .grid-square.used {
-    background: rgb(255, 0, 0);
+  background: rgb(255, 0, 0);
 }
 
 .grid-row {
-    display: flex;
+  display: grid;
+  grid-template-columns: repeat(52, 1fr);
+  width: 100%;
 }
 </style>

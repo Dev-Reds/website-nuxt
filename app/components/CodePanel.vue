@@ -27,7 +27,7 @@ defineProps({
 
 const copyCode = () => {
     const codeElement = document.getElementById('html-code');
-    const text = codeElement.innerText;
+    const text = codeElement.textContent;
     navigator.clipboard.writeText(text);
 };
 
@@ -96,5 +96,11 @@ const copyCode = () => {
             overflow-x: auto;
             font-size: 14px;
             line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+          .code-body {
+            display: none;
+          }
         }
 </style>

@@ -87,8 +87,8 @@ h1 {
 
 .todo-input {
   display: flex;
-  gap: 12px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
@@ -124,6 +124,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 12px 14px;
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -133,6 +134,7 @@ h1 {
 
 .todo-list span {
   word-break: break-word;
+  min-width: 0;
 }
 
 .todo-item {

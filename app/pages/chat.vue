@@ -3,11 +3,6 @@
     <!-- Free line spacer -->
     <div class="app-spacer"></div>
     <div class="app-container">
-    <!-- Top bar -->
-    <div class="top-bar">
-      <svg width="18" height="18" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#e53935"/><path d="M24 8C15.163 8 8 15.163 8 24c0 2.836.745 5.5 2.05 7.813L8 40l8.45-2.013A15.93 15.93 0 0024 40c8.837 0 16-7.163 16-16S32.837 8 24 8z" fill="white" fill-opacity=".9"/></svg>
-      <span>NachrichtenApp</span>
-    </div>
     <div class="app-inner">
 
     <!-- ═══ AUTH ═══ -->
@@ -40,7 +35,6 @@
           <p v-if="authError" class="auth-error">{{ authError }}</p>
           <button class="btn-primary" @click="handleRegister">Konto erstellen</button>
         </div>
-        <p class="demo-hint">💡 Tipp: Mehrere Tabs mit verschiedenen E-Mails öffnen</p>
       </div>
     </div>
 
@@ -139,7 +133,7 @@
         <template v-else>
           <!-- Header -->
           <div class="chat-header">
-            <button class="icon-btn mobile-back" @click="mobileSidebarOpen=true">
+            <button class="icon-btn mobile-back" @click="mobileSidebarOpen=true;activeChatId=null">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </button>
             <div v-if="activeChat?.type==='group'" class="av sm group-av">
@@ -399,7 +393,7 @@ const messages      = reactive({})
 const unreadCounts  = reactive({})
 const activeChatId  = ref(null)
 const newMsg        = ref('')
-const mobileSidebarOpen = ref(false)
+const mobileSidebarOpen = ref(true)
 const showEmoji     = ref(false)
 const messagesArea  = ref(null)
 const msgInput      = ref(null)
@@ -487,6 +481,7 @@ async function logout() {
   const users = await api.getUsers(); const i = users.findIndex(x => x.id === currentUser.value?.id)
   if (i !== -1) { users[i].online = false; await api.saveUsers(users) }
   sessionStorage.removeItem(SK+'session')
+  sessionStorage.removeItem(SK+'activeChat')
   currentUser.value = null; activeChatId.value = null
   chats.value = []; Object.keys(messages).forEach(k => delete messages[k])
 }
@@ -552,7 +547,8 @@ function startPoll() {
 async function selectChat(id) {
   activeChatId.value = id; mobileSidebarOpen.value = false
   unreadCounts[id] = 0; await markRead(id)
-  nextTick(() => { scrollBottom(); msgInput.value?.focus() })
+  sessionStorage.setItem(SK+'activeChat', id)
+  nextTick(() => { scrollBottom(); msgInput.value?.focus(); setTimeout(scrollBottom, 150) })
 }
 async function sendMessage() {
   const text = newMsg.value.trim()
@@ -695,6 +691,8 @@ onMounted(async () => {
       const users = await api.getUsers()
       const u = users.find(x => x.id === sid)
       if (u) await loginUser(u)
+      const aid = sessionStorage.getItem(SK+'activeChat')
+      if (aid) { activeChatId.value = aid; setTimeout(scrollBottom, 200) }
     }
   } catch {}
   document.addEventListener('click', e => {
@@ -713,18 +711,15 @@ onBeforeUnmount(async () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-.app-root{font-family:'DM Sans',sans-serif;width:100%;height:100vh;background:transparent;display:flex;flex-direction:column;align-items:stretch;color:#e9edef}
+.app-root{font-family:'DM Sans',sans-serif;position:fixed;inset:0;z-index:1;background:#130808;display:flex;flex-direction:column;align-items:stretch;color:#e9edef}
 
 /* ONE FREE LINE on top */
-.app-spacer{height:36px;flex-shrink:0}
+.app-spacer{height:45px;flex-shrink:0}
 
 /* MAIN CONTAINER — 90% tall, 100% wide */
-.app-container{width:100%;height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.app-container{width:100%;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
 
 /* TOP BAR */
-.top-bar{height:36px;min-height:36px;background:#e53935;display:flex;align-items:center;gap:8px;padding:0 16px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.top-bar span{font-size:13px;font-weight:600;color:white;letter-spacing:.3px}
-
 /* APP INNER — fills remaining height */
 .app-inner{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;background:#1a0a0a}
 
@@ -750,8 +745,6 @@ onBeforeUnmount(async () => {
 .btn-primary{width:100%;padding:12px;background:#e53935;border:none;border-radius:10px;color:white;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s}
 .btn-primary:hover{background:#c62828}
 .btn-primary:disabled{opacity:.45;cursor:not-allowed}
-.demo-hint{margin-top:18px;font-size:12px;color:#4a5568;text-align:center;padding:10px;border:1px dashed #3d1a1a;border-radius:8px}
-
 /* APP */
 .chat-app{display:flex;flex:1;min-height:0}
 
@@ -897,9 +890,11 @@ onBeforeUnmount(async () => {
 .modal-user-item:hover .req-sent{color:#e9edef}
 
 @media(max-width:768px){
-  .sidebar{position:fixed;top:72px;left:0;width:100%;min-width:unset;z-index:50;transform:translateX(-100%);transition:transform .3s ease}
+  .sidebar{position:fixed;top:0;left:0;width:100%;min-width:unset;height:100dvh;padding-top:56px;box-sizing:border-box;z-index:50;transform:translateX(-100%);transition:transform .3s ease}
   .sidebar.sidebar-open{transform:translateX(0)}
-  .chat-window{width:100%}
+  .chat-window{position:fixed;top:0;left:0;width:100%;height:100dvh;padding-top:56px;box-sizing:border-box;z-index:40;display:flex;flex-direction:column}
   .mobile-back{display:flex}
 }
+
+
 </style>

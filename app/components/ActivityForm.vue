@@ -118,7 +118,9 @@ watch(
     background: rgb(48, 48, 48);
     border: 1px solid #000000;
     border-radius: 4px;
-    width: 200px;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
   }
 
   button {

@@ -1,52 +1,51 @@
-interface User {
-  id: string
-  name: string
-  email: string
-  password: string
-  online: boolean
-  avatar: string | null
+import { resolve } from 'path'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+
+const DATA_DIR = resolve(process.cwd(), '.data')
+const DB_FILE = resolve(DATA_DIR, 'db.json')
+
+interface StoredData {
+  users: User[]
+  chats: Chat[]
+  messages: Record<string, Message[]>
+  friendRequests: FriendRequest[]
 }
 
-interface Chat {
-  id: string
-  type: 'dm' | 'group'
-  name: string
-  members: string[]
-  partnerId?: string
-  createdBy: string
-  createdAt: number
+function loadData(): StoredData {
+  if (!existsSync(DB_FILE)) return { users: [], chats: [], messages: {}, friendRequests: [] }
+  try {
+    return JSON.parse(readFileSync(DB_FILE, 'utf-8'))
+  } catch {
+    return { users: [], chats: [], messages: {}, friendRequests: [] }
+  }
 }
 
-interface Message {
-  id: string
-  senderId: string
-  senderName: string
-  text: string
-  ts: number
-  read: boolean
+function saveData(data: StoredData) {
+  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true })
+  writeFileSync(DB_FILE, JSON.stringify(data), 'utf-8')
 }
 
-interface FriendRequest {
-  id: string
-  fromUserId: string
-  fromUserName: string
-  toUserId: string
-  status: 'pending' | 'accepted' | 'rejected'
-  createdAt: number
-}
-
-const _users: User[] = []
-const _chats: Chat[] = []
-const _messages: Record<string, Message[]> = {}
-const _friendRequests: FriendRequest[] = []
+let stored = loadData()
 
 export const db = {
-  getUsers: () => _users,
-  setUsers: (data: User[]) => { _users.splice(0, _users.length, ...data) },
-  getChats: () => _chats,
-  setChats: (data: Chat[]) => { _chats.splice(0, _chats.length, ...data) },
-  getMessages: (chatId: string) => _messages[chatId] || [],
-  setMessages: (chatId: string, data: Message[]) => { _messages[chatId] = data },
-  getFriendRequests: () => _friendRequests,
-  setFriendRequests: (data: FriendRequest[]) => { _friendRequests.splice(0, _friendRequests.length, ...data) },
+  getUsers: () => stored.users,
+  setUsers: (data: User[]) => {
+    stored.users = data
+    saveData(stored)
+  },
+  getChats: () => stored.chats,
+  setChats: (data: Chat[]) => {
+    stored.chats = data
+    saveData(stored)
+  },
+  getMessages: (chatId: string) => stored.messages[chatId] || [],
+  setMessages: (chatId: string, data: Message[]) => {
+    stored.messages[chatId] = data
+    saveData(stored)
+  },
+  getFriendRequests: () => stored.friendRequests,
+  setFriendRequests: (data: FriendRequest[]) => {
+    stored.friendRequests = data
+    saveData(stored)
+  },
 }
