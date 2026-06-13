@@ -70,6 +70,25 @@
           </button>
         </div>
 
+        <div v-if="pendingReceived.length>0" class="fr-section">
+          <div class="fr-section-header">Freundschaftsanfragen</div>
+          <div v-for="req in pendingReceived" :key="req.id" class="fr-item">
+            <div class="av sm" :style="avatarStyle(getUserById(req.fromUserId))">
+              <img v-if="getUserById(req.fromUserId)?.avatar" :src="getUserById(req.fromUserId).avatar" class="av-img"/>
+              <span v-else>{{ req.fromUserName[0].toUpperCase() }}</span>
+            </div>
+            <div class="fr-info">
+              <span class="fr-name">{{ req.fromUserName }}</span>
+              <span class="fr-sub">möchte dich kennenlernen</span>
+            </div>
+            <button class="fr-btn accept" @click.stop="acceptRequest(req.id)" title="Annehmen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            </button>
+            <button class="fr-btn reject" @click.stop="rejectRequest(req.id)" title="Ablehnen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
         <div class="chat-list">
           <div v-if="chatList.length===0" class="no-chats">
             <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#3d1a1a" stroke-width="1.5">
@@ -87,10 +106,10 @@
             <div v-if="chat.type==='group'" class="av group-av">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
             </div>
-            <div v-else class="av" :style="avatarStyle(getPartnerUser(chat))">
+             <div v-else class="av" :style="avatarStyle(getPartnerUser(chat))">
               <img v-if="getPartnerUser(chat)?.avatar" :src="getPartnerUser(chat).avatar" class="av-img"/>
               <span v-else>{{ chat.displayName[0].toUpperCase() }}</span>
-              <span :class="['dot',{online:isOnline(chat.partnerId)}]"></span>
+              <span :class="['dot',{online:isOnline(getDmPartnerId(chat))}]"></span>
             </div>
             <div class="chat-info">
               <div class="chat-top">
@@ -134,7 +153,7 @@
               <span class="header-name">{{ activeChat?.displayName }}</span>
               <span class="header-sub">
                 <template v-if="activeChat?.type==='group'">{{ activeChat.members.length }} Mitglieder</template>
-                <template v-else>{{ isOnline(activeChat?.partnerId) ? 'Online' : 'Zuletzt online kürzlich' }}</template>
+                <template v-else>{{ isOnline(getDmPartnerId(activeChat)) ? 'Online' : 'Zuletzt online kürzlich' }}</template>
               </span>
             </div>
             <button v-if="activeChat?.type==='group'" class="icon-btn" @click="showGroupInfo=true">
@@ -290,7 +309,29 @@
             <div v-if="newChatMode==='group'" class="checkbox" :class="{checked:isMemberSelected(user)}">
               <svg v-if="isMemberSelected(user)" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
-            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <div v-else class="dm-status">
+              <template v-if="chats.find(c=>c.type==='dm'&&c.members.includes(user.id)&&c.members.includes(currentUser.value?.id))">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              </template>
+              <template v-else-if="getRequestStatus(user.id)">
+                <template v-if="getRequestStatus(user.id)?.fromUserId===currentUser.value?.id">
+                  <span class="req-sent">Anfrage gesendet</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2" style="cursor:pointer;flex-shrink:0" @click.stop="cancelRequest(getRequestStatus(user.id).id)" title="Abbrechen"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </template>
+                <template v-else>
+                  <span class="req-recv">Anfrage erhalten</span>
+                  <button class="fr-btn accept sm" @click.stop="acceptRequest(getRequestStatus(user.id).id)" title="Annehmen">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                  </button>
+                  <button class="fr-btn reject sm" @click.stop="rejectRequest(getRequestStatus(user.id).id)" title="Ablehnen">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  </button>
+                </template>
+              </template>
+              <template v-else>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              </template>
+            </div>
           </div>
         </div>
 
@@ -364,6 +405,7 @@ const messagesArea  = ref(null)
 const msgInput      = ref(null)
 const pollInterval  = ref(null)
 const emojis = ['😀','😂','😍','🥰','😊','👍','❤️','🔥','🎉','😎','🤔','😅','👋','✨','💯','🙏','😭','🥳','👀','💪']
+const friendRequests = ref([])
 
 // ── MODALS ─────────────────────────────────────────────────────────────
 const showNewChat      = ref(false)
@@ -387,7 +429,8 @@ const chatList = computed(() =>
     .filter(c => c.members.includes(currentUser.value?.id))
     .map(c => {
       if (c.type === 'group') return { ...c, displayName: c.name }
-      const partner = allUsers.value.find(u => u.id === c.partnerId)
+      const pid = c.members.find(id => id !== currentUser.value?.id)
+      const partner = allUsers.value.find(u => u.id === pid)
       return { ...c, displayName: partner?.name || 'Unbekannt' }
     })
     .sort((a, b) => {
@@ -399,147 +442,150 @@ const chatList = computed(() =>
 const activeChat     = computed(() => chatList.value.find(c => c.id === activeChatId.value) || null)
 const activeMessages = computed(() => messages[activeChatId.value] || [])
 
-// ── STORAGE ────────────────────────────────────────────────────────────
-const getUsers  = ()      => { try { return JSON.parse(localStorage.getItem(SK+'users')  || '[]') } catch { return [] } }
-const saveUsers = u       => localStorage.setItem(SK+'users',  JSON.stringify(u))
-const getChats  = ()      => { try { return JSON.parse(localStorage.getItem(SK+'chats')  || '[]') } catch { return [] } }
-const saveChats = c       => localStorage.setItem(SK+'chats',  JSON.stringify(c))
-const getMsgs   = id      => { try { return JSON.parse(localStorage.getItem(SK+'m_'+id)  || '[]') } catch { return [] } }
-const saveMsgs  = (id, m) => localStorage.setItem(SK+'m_'+id, JSON.stringify(m))
+// ── API ────────────────────────────────────────────────────────────────
+async function apiGet(path) { const r = await fetch(path); return r.json() }
+async function apiPut(path, d) { await fetch(path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}) }
+const api = {
+  getUsers:  ()            => apiGet('/api/users'),
+  saveUsers: u             => apiPut('/api/users', u),
+  getChats:  ()            => apiGet('/api/chats'),
+  saveChats: c             => apiPut('/api/chats', c),
+  getMsgs:   id            => apiGet('/api/messages/'+id),
+  saveMsgs:  (id,m)        => apiPut('/api/messages/'+id, m),
+  getRequests: ()           => apiGet('/api/requests'),
+  saveRequests: r            => apiPut('/api/requests', r),
+}
 
 // ── AUTH ───────────────────────────────────────────────────────────────
-function handleLogin() {
+async function handleLogin() {
   authError.value = ''
   if (!loginEmail.value || !loginPassword.value) { authError.value = 'Bitte alle Felder ausfüllen.'; return }
-  const u = getUsers().find(u => u.email === loginEmail.value && u.password === loginPassword.value)
+  const users = await api.getUsers()
+  const u = users.find(u => u.email === loginEmail.value && u.password === loginPassword.value)
   if (!u) { authError.value = 'E-Mail oder Passwort falsch.'; return }
-  loginUser(u)
+  await loginUser(u)
 }
-function handleRegister() {
+async function handleRegister() {
   authError.value = ''
   if (!regName.value || !regEmail.value || !regPassword.value) { authError.value = 'Bitte alle Felder ausfüllen.'; return }
   if (regPassword.value.length < 6) { authError.value = 'Passwort muss mindestens 6 Zeichen haben.'; return }
-  const users = getUsers()
+  const users = await api.getUsers()
   if (users.find(u => u.email === regEmail.value)) { authError.value = 'E-Mail bereits registriert.'; return }
   const nu = { id: 'u_'+Date.now()+'_'+Math.random().toString(36).slice(2), name: regName.value, email: regEmail.value, password: regPassword.value, online: true, avatar: null }
-  users.push(nu); saveUsers(users); loginUser(nu)
+  users.push(nu); await api.saveUsers(users); await loginUser(nu)
 }
-function loginUser(u) {
-  const users = getUsers(); const i = users.findIndex(x => x.id === u.id)
-  if (i !== -1) { users[i].online = true; saveUsers(users); u = { ...u, ...users[i] } }
+async function loginUser(u) {
+  const users = await api.getUsers(); const i = users.findIndex(x => x.id === u.id)
+  if (i !== -1) { users[i].online = true; await api.saveUsers(users); u = { ...u, ...users[i] } }
   u.online = true; currentUser.value = u
   profileName.value = u.name
-  sessionStorage.setItem(SK+'session', JSON.stringify(u))
-  loadData(); startPoll()
+  sessionStorage.setItem(SK+'session', u.id)
+  await loadData(); startPoll()
 }
-function logout() {
+async function logout() {
   clearInterval(pollInterval.value)
-  const users = getUsers(); const i = users.findIndex(x => x.id === currentUser.value?.id)
-  if (i !== -1) { users[i].online = false; saveUsers(users) }
+  const users = await api.getUsers(); const i = users.findIndex(x => x.id === currentUser.value?.id)
+  if (i !== -1) { users[i].online = false; await api.saveUsers(users) }
   sessionStorage.removeItem(SK+'session')
   currentUser.value = null; activeChatId.value = null
   chats.value = []; Object.keys(messages).forEach(k => delete messages[k])
 }
 
 // ── PROFILE ────────────────────────────────────────────────────────────
-function onAvatarChange(e) {
+async function onAvatarChange(e) {
   const file = e.target.files[0]; if (!file) return
   if (file.size > 2 * 1024 * 1024) { profileMsg.value = 'Bild zu groß (max. 2 MB).'; profileMsgOk.value = false; return }
   const reader = new FileReader()
-  reader.onload = ev => {
+  reader.onload = async (ev) => {
     const dataUrl = ev.target.result
     currentUser.value = { ...currentUser.value, avatar: dataUrl }
-    // persist immediately so preview updates
-    const users = getUsers(); const i = users.findIndex(x => x.id === currentUser.value.id)
-    if (i !== -1) { users[i].avatar = dataUrl; saveUsers(users) }
-    sessionStorage.setItem(SK+'session', JSON.stringify(currentUser.value))
+    const users = await api.getUsers(); const i = users.findIndex(x => x.id === currentUser.value.id)
+    if (i !== -1) { users[i].avatar = dataUrl; await api.saveUsers(users) }
   }
   reader.readAsDataURL(file)
 }
-function removeAvatar() {
+async function removeAvatar() {
   currentUser.value = { ...currentUser.value, avatar: null }
-  const users = getUsers(); const i = users.findIndex(x => x.id === currentUser.value.id)
-  if (i !== -1) { users[i].avatar = null; saveUsers(users) }
-  sessionStorage.setItem(SK+'session', JSON.stringify(currentUser.value))
+  const users = await api.getUsers(); const i = users.findIndex(x => x.id === currentUser.value.id)
+  if (i !== -1) { users[i].avatar = null; await api.saveUsers(users) }
 }
-function saveProfile() {
+async function saveProfile() {
   profileMsg.value = ''
   if (!profileName.value.trim()) { profileMsg.value = 'Name darf nicht leer sein.'; profileMsgOk.value = false; return }
-  const users = getUsers(); const i = users.findIndex(x => x.id === currentUser.value.id)
-  if (i !== -1) { users[i].name = profileName.value.trim(); saveUsers(users) }
+  const users = await api.getUsers(); const i = users.findIndex(x => x.id === currentUser.value.id)
+  if (i !== -1) { users[i].name = profileName.value.trim(); await api.saveUsers(users) }
   currentUser.value = { ...currentUser.value, name: profileName.value.trim() }
-  sessionStorage.setItem(SK+'session', JSON.stringify(currentUser.value))
   profileMsg.value = 'Gespeichert ✓'; profileMsgOk.value = true
   setTimeout(() => { profileMsg.value = '' }, 2000)
 }
 
 // ── DATA ───────────────────────────────────────────────────────────────
-function loadData() {
-  allUsers.value = getUsers()
-  const stored = getChats(); chats.value = stored
-  stored.forEach(c => { messages[c.id] = getMsgs(c.id) })
+async function loadData() {
+  allUsers.value = await api.getUsers()
+  const stored = await api.getChats(); chats.value = stored
+  for (const c of stored) { messages[c.id] = await api.getMsgs(c.id) }
+  friendRequests.value = await api.getRequests()
 }
 function startPoll() {
-  pollInterval.value = setInterval(() => {
-    allUsers.value = getUsers()
-    const stored = getChats()
-    stored.forEach(c => { if (!chats.value.find(x => x.id === c.id)) { chats.value.push(c); messages[c.id] = [] } })
-    chats.value = stored
-    stored.forEach(c => {
-      if (!c.members.includes(currentUser.value?.id)) return
-      const fresh = getMsgs(c.id); const prev = messages[c.id] || []
-      if (fresh.length !== prev.length) {
-        messages[c.id] = fresh
-        if (activeChatId.value !== c.id)
-          unreadCounts[c.id] = fresh.filter(m => m.senderId !== currentUser.value.id && !m.read).length
+  pollInterval.value = setInterval(async () => {
+    try {
+      allUsers.value = await api.getUsers()
+      const stored = await api.getChats()
+      stored.forEach(c => { if (!chats.value.find(x => x.id === c.id)) { chats.value.push(c); messages[c.id] = [] } })
+      chats.value = stored
+      for (const c of stored) {
+        if (!c.members.includes(currentUser.value?.id)) continue
+        const fresh = await api.getMsgs(c.id); const prev = messages[c.id] || []
+        if (fresh.length !== prev.length) {
+          messages[c.id] = fresh
+          if (activeChatId.value !== c.id)
+            unreadCounts[c.id] = fresh.filter(m => m.senderId !== currentUser.value.id && !m.read).length
+        }
       }
-    })
-    if (activeChatId.value) { markRead(activeChatId.value); unreadCounts[activeChatId.value] = 0; nextTick(scrollBottom) }
+      if (activeChatId.value) { await markRead(activeChatId.value); unreadCounts[activeChatId.value] = 0; nextTick(scrollBottom) }
+      friendRequests.value = await api.getRequests()
+    } catch {}
   }, 1000)
 }
 
 // ── MESSAGING ──────────────────────────────────────────────────────────
-function selectChat(id) {
+async function selectChat(id) {
   activeChatId.value = id; mobileSidebarOpen.value = false
-  unreadCounts[id] = 0; markRead(id)
+  unreadCounts[id] = 0; await markRead(id)
   nextTick(() => { scrollBottom(); msgInput.value?.focus() })
 }
-function sendMessage() {
+async function sendMessage() {
   const text = newMsg.value.trim()
   if (!text || !activeChatId.value || !currentUser.value) return
   const msg = { id: 'm_'+Date.now()+'_'+Math.random().toString(36).slice(2), senderId: currentUser.value.id, senderName: currentUser.value.name, text, ts: Date.now(), read: false }
-  const stored = getMsgs(activeChatId.value); stored.push(msg); saveMsgs(activeChatId.value, stored)
+  const stored = await api.getMsgs(activeChatId.value); stored.push(msg); await api.saveMsgs(activeChatId.value, stored)
   if (!messages[activeChatId.value]) messages[activeChatId.value] = []
   messages[activeChatId.value].push(msg)
   newMsg.value = ''; showEmoji.value = false
   nextTick(() => { scrollBottom(); msgInput.value?.focus() })
 }
-function markRead(chatId) {
-  const msgs = getMsgs(chatId); let changed = false
+async function markRead(chatId) {
+  const msgs = await api.getMsgs(chatId); let changed = false
   msgs.forEach(m => { if (m.senderId !== currentUser.value.id && !m.read) { m.read = true; changed = true } })
-  if (changed) saveMsgs(chatId, msgs)
+  if (changed) await api.saveMsgs(chatId, msgs)
 }
 
 // ── NEW CHAT ───────────────────────────────────────────────────────────
-function openNewChatModal() { allUsers.value = getUsers(); newChatMode.value = 'dm'; resetModal(); showNewChat.value = true }
+async function openNewChatModal() { allUsers.value = await api.getUsers(); newChatMode.value = 'dm'; resetModal(); showNewChat.value = true }
 function closeNewChat() { showNewChat.value = false; resetModal() }
 function resetModal() { newGroupName.value = ''; modalSearch.value = ''; modalUserResults.value = []; selectedMembers.value = [] }
-function doModalSearch() {
+async function doModalSearch() {
   const q = modalSearch.value.trim().toLowerCase()
   if (!q) { modalUserResults.value = []; return }
-  // Always read fresh from localStorage so newly registered users appear
-  const fresh = getUsers()
+  const fresh = await api.getUsers()
   allUsers.value = fresh
   modalUserResults.value = fresh.filter(u => u.id !== currentUser.value.id && u.name.toLowerCase().includes(q))
 }
-function onUserClick(user) {
+async function onUserClick(user) {
   if (newChatMode.value === 'dm') {
     const existing = chats.value.find(c => c.type === 'dm' && c.members.includes(user.id) && c.members.includes(currentUser.value.id))
-    if (existing) { closeNewChat(); selectChat(existing.id); return }
-    const chat = { id: 'c_'+Date.now()+'_'+Math.random().toString(36).slice(2), type: 'dm', name: user.name, members: [currentUser.value.id, user.id], partnerId: user.id, createdBy: currentUser.value.id, createdAt: Date.now() }
-    const all = getChats(); all.push(chat); saveChats(all)
-    chats.value.push(chat); messages[chat.id] = []
-    closeNewChat(); selectChat(chat.id)
+    if (existing) { closeNewChat(); await selectChat(existing.id); return }
+    await sendFriendRequest(user)
   } else { toggleMember(user) }
 }
 function toggleMember(user) {
@@ -547,12 +593,61 @@ function toggleMember(user) {
   if (i === -1) selectedMembers.value.push(user); else selectedMembers.value.splice(i, 1)
 }
 function isMemberSelected(user) { return selectedMembers.value.some(m => m.id === user.id) }
-function createGroup() {
+async function createGroup() {
   if (!newGroupName.value.trim() || selectedMembers.value.length === 0) return
   const chat = { id: 'c_'+Date.now()+'_'+Math.random().toString(36).slice(2), type: 'group', name: newGroupName.value.trim(), members: [currentUser.value.id, ...selectedMembers.value.map(m => m.id)], createdBy: currentUser.value.id, createdAt: Date.now() }
-  const all = getChats(); all.push(chat); saveChats(all)
+  const all = await api.getChats(); all.push(chat); await api.saveChats(all)
   chats.value.push(chat); messages[chat.id] = []
-  closeNewChat(); selectChat(chat.id)
+  closeNewChat(); await selectChat(chat.id)
+}
+
+// ── FRIEND REQUESTS ─────────────────────────────────────────────────────
+const pendingReceived = computed(() =>
+  friendRequests.value.filter(r => r.toUserId === currentUser.value?.id && r.status === 'pending')
+)
+const pendingSent = computed(() =>
+  friendRequests.value.filter(r => r.fromUserId === currentUser.value?.id && r.status === 'pending')
+)
+function getRequestStatus(otherUserId) {
+  const r = friendRequests.value.find(r =>
+    (r.fromUserId === currentUser.value?.id && r.toUserId === otherUserId) ||
+    (r.toUserId === currentUser.value?.id && r.fromUserId === otherUserId)
+  )
+  return r || null
+}
+async function acceptRequest(reqId) {
+  const all = await api.getRequests()
+  const req = all.find(r => r.id === reqId)
+  if (!req || req.status !== 'pending') return
+  req.status = 'accepted'
+  await api.saveRequests(all)
+  friendRequests.value = all
+  // create chat
+  const chat = { id: 'c_'+Date.now()+'_'+Math.random().toString(36).slice(2), type: 'dm', name: '', members: [req.fromUserId, req.toUserId], createdBy: req.fromUserId, createdAt: Date.now() }
+  const allChats = await api.getChats(); allChats.push(chat); await api.saveChats(allChats)
+  chats.value.push(chat); messages[chat.id] = []
+  await selectChat(chat.id)
+}
+async function rejectRequest(reqId) {
+  const all = await api.getRequests()
+  const req = all.find(r => r.id === reqId)
+  if (!req || req.status !== 'pending') return
+  req.status = 'rejected'
+  await api.saveRequests(all)
+  friendRequests.value = all
+}
+async function sendFriendRequest(user) {
+  const existing = getRequestStatus(user.id)
+  if (existing) return
+  const all = await api.getRequests()
+  const req = { id: 'fr_'+Date.now()+'_'+Math.random().toString(36).slice(2), fromUserId: currentUser.value.id, fromUserName: currentUser.value.name, toUserId: user.id, status: 'pending', createdAt: Date.now() }
+  all.push(req); await api.saveRequests(all)
+  friendRequests.value = all
+}
+async function cancelRequest(reqId) {
+  const all = await api.getRequests()
+  const idx = all.findIndex(r => r.id === reqId)
+  if (idx !== -1) { all.splice(idx, 1); await api.saveRequests(all); friendRequests.value = all }
 }
 
 // ── HELPERS ────────────────────────────────────────────────────────────
@@ -561,7 +656,8 @@ function unread(id) { return unreadCounts[id] || 0 }
 function isOnline(uid) { return allUsers.value.find(u => u.id === uid)?.online || false }
 function getMemberName(uid) { return allUsers.value.find(u => u.id === uid)?.name || 'Unbekannt' }
 function getUserById(uid) { return allUsers.value.find(u => u.id === uid) || null }
-function getPartnerUser(chat) { return chat ? allUsers.value.find(u => u.id === chat.partnerId) || null : null }
+function getDmPartnerId(chat) { if (!chat || chat.type !== 'dm') return null; return chat.members.find(id => id !== currentUser.value?.id) }
+function getPartnerUser(chat) { const pid = getDmPartnerId(chat); return pid ? allUsers.value.find(u => u.id === pid) || null : null }
 function hasDuplicate(name) { return allUsers.value.filter(u => u.name === name && u.id !== currentUser.value?.id).length > 1 }
 function avatarStyle(user) {
   if (!user || user?.avatar) return {}
@@ -592,17 +688,24 @@ function showDivider(i) {
 }
 function addEmoji(e) { newMsg.value += e; showEmoji.value = false; nextTick(()=>msgInput.value?.focus()) }
 
-onMounted(() => {
-  try { const s = sessionStorage.getItem(SK+'session'); if (s) loginUser(JSON.parse(s)) } catch {}
+onMounted(async () => {
+  try {
+    const sid = sessionStorage.getItem(SK+'session')
+    if (sid) {
+      const users = await api.getUsers()
+      const u = users.find(x => x.id === sid)
+      if (u) await loginUser(u)
+    }
+  } catch {}
   document.addEventListener('click', e => {
     if (!e.target.closest('.emoji-btn') && !e.target.closest('.emoji-picker')) showEmoji.value = false
   })
 })
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
   clearInterval(pollInterval.value)
   if (currentUser.value) {
-    const u = getUsers(); const i = u.findIndex(x=>x.id===currentUser.value.id)
-    if(i!==-1){u[i].online=false;saveUsers(u)}
+    const u = await api.getUsers(); const i = u.findIndex(x=>x.id===currentUser.value.id)
+    if(i!==-1){u[i].online=false;await api.saveUsers(u)}
   }
 })
 </script>
@@ -773,6 +876,25 @@ onBeforeUnmount(() => {
 .profile-msg{font-size:12.5px;margin-bottom:10px;padding:8px 12px;border-radius:8px}
 .profile-msg.ok{color:#e53935;background:rgba(229,57,53,.1)}
 .profile-msg.err{color:#ff6b6b;background:rgba(255,107,107,.1)}
+
+/* FRIEND REQUESTS */
+.fr-section{border-bottom:1px solid #2d1010;padding:8px 10px;background:#1e0d0d}
+.fr-section-header{font-size:11px;font-weight:600;color:#e53935;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding:0 4px}
+.fr-item{display:flex;align-items:center;gap:8px;padding:6px 4px;border-radius:8px;transition:background .1s}
+.fr-item:hover{background:#280d0d}
+.fr-info{flex:1;min-width:0}
+.fr-name{display:block;font-size:13px;font-weight:500}
+.fr-sub{display:block;font-size:11px;color:#8696a0}
+.fr-btn{background:none;border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
+.fr-btn.accept{color:#4ecdc4}
+.fr-btn.accept:hover{background:rgba(78,205,196,.15)}
+.fr-btn.reject{color:#ff6b6b}
+.fr-btn.reject:hover{background:rgba(255,107,107,.15)}
+.fr-btn.sm{width:24px;height:24px}
+.dm-status{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.req-sent{font-size:11px;color:#8696a0;white-space:nowrap}
+.req-recv{font-size:11px;color:#4ecdc4;white-space:nowrap}
+.modal-user-item:hover .req-sent{color:#e9edef}
 
 @media(max-width:768px){
   .sidebar{position:fixed;top:72px;left:0;width:100%;min-width:unset;z-index:50;transform:translateX(-100%);transition:transform .3s ease}
