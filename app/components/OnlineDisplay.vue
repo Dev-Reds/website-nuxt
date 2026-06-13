@@ -38,14 +38,12 @@ onUnmounted(() => {
 .online-display {
   position: fixed;
   top: 14px;
-  left: 63px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10000;
   display: flex;
   align-items: center;
   gap: 5px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid rgb(188, 0, 0);
-  border-radius: 10px;
   padding: 4px 10px;
   font-size: 14px;
   color: #fff;

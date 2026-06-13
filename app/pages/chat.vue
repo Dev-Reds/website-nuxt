@@ -384,7 +384,7 @@ const authMode     = ref('login')
 const loginEmail   = ref(''); const loginPassword = ref('')
 const regName      = ref(''); const regEmail = ref(''); const regPassword = ref('')
 const authError    = ref('')
-const currentUser  = ref(null)
+const { currentUser } = useAuth()
 
 // ── CHAT ───────────────────────────────────────────────────────────────
 const allUsers      = ref([])
@@ -711,7 +711,7 @@ onBeforeUnmount(async () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-.app-root{font-family:'DM Sans',sans-serif;position:fixed;inset:0;z-index:1;background:#130808;display:flex;flex-direction:column;align-items:stretch;color:#e9edef}
+.app-root{font-family:'DM Sans',sans-serif;position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:stretch;color:#e9edef}
 
 /* ONE FREE LINE on top */
 .app-spacer{height:45px;flex-shrink:0}
@@ -786,7 +786,7 @@ onBeforeUnmount(async () => {
 
 /* CHAT WINDOW */
 .chat-window{flex:1;display:flex;flex-direction:column;height:100%;min-width:0}
-.no-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#130808;gap:14px;color:#8696a0;text-align:center}
+.no-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#8696a0;text-align:center}
 .no-chat h2{font-size:22px;font-weight:500;color:#e9edef}
 .no-chat p{font-size:14px;line-height:1.9}
 .no-chat strong{color:#e9edef}
@@ -796,7 +796,7 @@ onBeforeUnmount(async () => {
 .header-sub{font-size:12px;color:#8696a0;display:block}
 
 /* Messages — solid dark background, NO pattern */
-.messages-area{flex:1;overflow-y:auto;background:#130808}
+.messages-area{flex:1;overflow-y:auto}
 .messages-area::-webkit-scrollbar{width:4px}
 .messages-area::-webkit-scrollbar-thumb{background:#3d1a1a;border-radius:4px}
 .messages-inner{padding:14px;display:flex;flex-direction:column;gap:2px;min-height:100%}

@@ -438,8 +438,8 @@ function cleanup() {
 
 <style>
 body:has(.geo-page) {
-  background: #0d1117;
-  background-image: none;
+  background: #000 url('/background.png') center/cover no-repeat fixed;
+  min-height: 100vh;
 }
 
 .leaflet-control-attribution {

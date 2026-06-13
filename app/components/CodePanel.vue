@@ -44,7 +44,7 @@ const copyCode = () => {
             margin-bottom: 20px;
             overflow: hidden;
             flex: 1 1 45%;
-            min-width: 320px;
+            min-width: 260px;
             max-width: 100%;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }

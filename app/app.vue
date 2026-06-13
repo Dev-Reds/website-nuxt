@@ -2,6 +2,7 @@
   <div>
     <NavBar/>
     <OnlineDisplay/>
+    <AccountButton/>
     <div class="page-wrap">
       <NuxtPage/>
     </div>
@@ -10,10 +11,9 @@
 
 <style>
 body {
-  background-color: rgb(0, 0, 0);
-  background-image: url('/background.png');
-  background-size: cover;
+  background: #000 url('/background.png') center/cover no-repeat fixed;
   margin: 0;
+  min-height: 100vh;
 }
 .page-wrap {
   min-height: 100vh;
