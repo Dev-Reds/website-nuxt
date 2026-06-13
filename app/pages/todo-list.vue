@@ -29,6 +29,8 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'ToDo List' })
+
 import { ref, onMounted, watch } from 'vue'
 
 const STORAGE_KEY = 'nuxt-todos'

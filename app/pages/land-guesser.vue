@@ -13,10 +13,10 @@
       <div v-if="mapReady" class="target-name">{{ target.nameDe }}</div>
       <div ref="mapContainer" class="map-container">
         <div v-if="!mapReady" class="map-placeholder">Karte wird geladen...</div>
-        <div v-if="!evaluated && hasMarker" class="eval-overlay">
-          <button @click="evaluate" class="action-btn">Auswerten</button>
-        </div>
         <div v-if="evaluated" class="eval-overlay distance-text">Entfernung: {{ distanceText }}</div>
+      </div>
+      <div v-if="!evaluated && hasMarker" class="eval-row">
+        <button @click="evaluate" class="action-btn">Auswerten</button>
       </div>
       <div class="skip-bar">
         <button @click="nextRound" class="action-btn">{{ evaluated ? 'Nächstes Land' : 'Überspringen' }}</button>
@@ -26,6 +26,8 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Land-Guesser' })
+
 import { ref, onMounted } from 'vue'
 import type { Map as LeafletMap, LeafletMouseEvent } from 'leaflet'
 
@@ -331,6 +333,12 @@ function cleanup() {
 .eval-overlay.distance-text {
   color: #ff9800;
   font-size: 18px;
+}
+
+.eval-row {
+  flex-shrink: 0;
+  padding: 8px 0 4px;
+  text-align: center;
 }
 
 .skip-bar {

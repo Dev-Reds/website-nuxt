@@ -1,3 +1,7 @@
+<script setup>
+useHead({ title: 'YouTube' })
+</script>
+
 <template>
     <div>
         <h1>YouTube</h1>

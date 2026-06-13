@@ -1,5 +1,8 @@
 export default defineEventHandler(async (event) => {
-  const { id } = await readBody(event)
-  if (id) heartbeat(id)
+  const { id, leave } = await readBody(event)
+  if (id) {
+    if (leave) removeSession(id)
+    else heartbeat(id)
+  }
   return { count: getOnlineCount() }
 })

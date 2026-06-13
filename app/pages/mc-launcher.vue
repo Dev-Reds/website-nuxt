@@ -1,3 +1,7 @@
+<script setup>
+useHead({ title: 'MC Launcher' })
+</script>
+
 <template>
   <div>
 

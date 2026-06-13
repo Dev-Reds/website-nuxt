@@ -27,11 +27,18 @@ onMounted(() => {
 
   tick()
   heartbeatInterval.value = setInterval(tick, 15000)
+
+  window.addEventListener('beforeunload', leave)
 })
 
 onUnmounted(() => {
   if (heartbeatInterval.value) clearInterval(heartbeatInterval.value)
+  window.removeEventListener('beforeunload', leave)
 })
+
+function leave() {
+  navigator.sendBeacon('/api/online', JSON.stringify({ id: sessionId.value, leave: true }))
+}
 </script>
 
 <style scoped>

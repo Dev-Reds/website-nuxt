@@ -12,6 +12,10 @@ export function heartbeat(id: string) {
   sessions.set(id, Date.now())
 }
 
+export function removeSession(id: string) {
+  sessions.delete(id)
+}
+
 export function getOnlineCount(): number {
   const now = Date.now()
   for (const [id, ts] of sessions) {

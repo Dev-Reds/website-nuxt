@@ -1,3 +1,7 @@
+<script setup>
+useHead({ title: 'Projecte' })
+</script>
+
 <template>
   <div class="index-page">
     <h1>Meine Projekte</h1>

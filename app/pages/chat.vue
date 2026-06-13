@@ -375,6 +375,8 @@
 </template>
 
 <script setup>
+useHead({ title: 'Chat' })
+
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
 const SK = 'napp_'
