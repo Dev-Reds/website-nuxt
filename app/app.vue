@@ -1,6 +1,7 @@
 <template>
   <div>
     <NavBar/>
+    <OnlineDisplay/>
     <div class="page-wrap">
       <NuxtPage/>
     </div>

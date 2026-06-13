@@ -1,0 +1,71 @@
+<template>
+  <div class="online-display" v-if="count > 0">
+    <div class="online-dot"></div>
+    <span class="online-count">Online: {{ count }}</span>
+  </div>
+</template>
+
+<script setup>
+const count = ref(0)
+const sessionId = ref('')
+const heartbeatInterval = ref(null)
+
+onMounted(() => {
+  sessionId.value = Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
+
+  async function tick() {
+    try {
+      const r = await fetch('/api/online', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: sessionId.value })
+      })
+      const d = await r.json()
+      count.value = d.count
+    } catch {}
+  }
+
+  tick()
+  heartbeatInterval.value = setInterval(tick, 15000)
+})
+
+onUnmounted(() => {
+  if (heartbeatInterval.value) clearInterval(heartbeatInterval.value)
+})
+</script>
+
+<style scoped>
+.online-display {
+  position: fixed;
+  top: 14px;
+  left: 63px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgb(188, 0, 0);
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: 14px;
+  color: #fff;
+}
+
+.online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4caf50;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.online-count {
+  font-weight: 700;
+  color: rgb(188, 0, 0);
+}
+</style>

@@ -821,7 +821,7 @@ onBeforeUnmount(async () => {
 .emoji-picker{position:absolute;bottom:68px;left:14px;background:#331515;border:1px solid #3d1a1a;border-radius:14px;padding:12px;display:flex;flex-wrap:wrap;gap:6px;width:260px;box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:100}
 .emoji-picker span{cursor:pointer;font-size:22px;padding:3px;border-radius:6px;transition:transform .1s}
 .emoji-picker span:hover{transform:scale(1.3)}
-.msg-input{flex:1;background:#3d1a1a;border:none;border-radius:10px;padding:11px 16px;color:#e9edef;font-size:14.5px;font-family:inherit;outline:none}
+.msg-input{flex:1;min-width:0;background:#3d1a1a;border:none;border-radius:10px;padding:11px 16px;color:#e9edef;font-size:14.5px;font-family:inherit;outline:none}
 .msg-input::placeholder{color:#8696a0}
 .send-btn{width:44px;height:44px;border-radius:50%;background:#e53935;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 .send-btn:hover{background:#c62828;transform:scale(1.05)}
