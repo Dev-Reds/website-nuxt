@@ -3,7 +3,7 @@ const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST
 const useRedis = !!(KV_URL && KV_TOKEN)
 
 const local: Record<string, any> = {
-  users: [], chats: [], messages: {}, friendRequests: [],
+  users: [], chats: [], messages: {}, friendRequests: [], heartbeats: {}, lastSeen: {},
 }
 
 async function redisGet(key: string): Promise<string | null> {
@@ -35,9 +35,14 @@ async function get<T>(key: string): Promise<T> {
     if (raw !== null) {
       try { return JSON.parse(raw) as T } catch { /* fall through */ }
     }
-    return (key.endsWith('s') || key.startsWith('msg:') ? [] : {}) as T
+    return (isObj(key) ? {} : key.endsWith('s') || key.startsWith('msg:') ? [] : {}) as T
   }
-  return (local[key] ?? (key.endsWith('s') || key.startsWith('msg:') ? [] : {})) as T
+  const loc = local[key]; if (loc !== undefined) return loc as T
+  return (isObj(key) ? {} : key.endsWith('s') || key.startsWith('msg:') ? [] : {}) as T
+}
+
+function isObj(key: string) {
+  return key === 'heartbeats' || key === 'lastSeen'
 }
 
 async function set(key: string, val: any) {
@@ -54,4 +59,8 @@ export const db = {
   setMessages:        (id: string, m: any[]) => set(`msg:${id}`, m),
   getFriendRequests:  ()            => get<any[]>('friendRequests'),
   setFriendRequests:  (r: any)      => set('friendRequests', r),
+  getHeartbeats:      ()            => get<Record<string,number>>('heartbeats'),
+  setHeartbeats:      (h: Record<string,number>) => set('heartbeats', h),
+  getLastSeen:        ()            => get<Record<string,number>>('lastSeen'),
+  setLastSeen:        (l: Record<string,number>) => set('lastSeen', l),
 }

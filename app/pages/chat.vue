@@ -147,7 +147,7 @@
               <span class="header-name">{{ activeChat?.displayName }}</span>
               <span class="header-sub">
                 <template v-if="activeChat?.type==='group'">{{ activeChat.members.length }} Mitglieder</template>
-                <template v-else>{{ isOnline(getDmPartnerId(activeChat)) ? 'Online' : 'Zuletzt online kürzlich' }}</template>
+                <template v-else>{{ isOnline(getDmPartnerId(activeChat)) ? 'Online' : lastSeenText(getDmPartnerId(activeChat)) }}</template>
               </span>
             </div>
             <button v-if="activeChat?.type==='group'" class="icon-btn" @click="showGroupInfo=true">
@@ -398,6 +398,7 @@ const newMsg         = ref('')
 const mobileSidebarOpen = ref(true)
 const showEmoji      = ref(false)
 const onlineUserIds  = ref(new Set())
+const lastSeenMap    = ref<Record<string,number>>({})
 const messagesArea  = ref(null)
 const msgInput      = ref(null)
 const pollInterval  = ref(null)
@@ -545,7 +546,11 @@ async function loadData() {
   await fetchOnlineUsers()
 }
 async function fetchOnlineUsers() {
-  try { const r = await apiGet('/api/online/users'); onlineUserIds.value = new Set(r.ids) } catch {}
+  try {
+    const r = await apiGet('/api/online/users')
+    onlineUserIds.value = new Set(r.ids)
+    if (r.lastSeen) lastSeenMap.value = r.lastSeen
+  } catch {}
 }
 function startPoll() {
   pollInterval.value = setInterval(async () => {
@@ -677,6 +682,16 @@ async function cancelRequest(reqId) {
 function scrollBottom() { if (messagesArea.value) messagesArea.value.scrollTop = messagesArea.value.scrollHeight }
 function unread(id) { return unreadCounts[id] || 0 }
 function isOnline(uid) { return onlineUserIds.value.has(uid) }
+function lastSeenText(uid) {
+  const ts = lastSeenMap.value[uid]
+  if (!ts) return 'Zuletzt online kürzlich'
+  const diff = Date.now() - ts
+  if (diff < 60000) return 'Zuletzt online vor 1 Minute'
+  if (diff < 3600000) return `Zuletzt online vor ${Math.floor(diff/60000)} Minuten`
+  if (diff < 7200000) return 'Zuletzt online vor 1 Stunde'
+  if (diff < 86400000) return `Zuletzt online vor ${Math.floor(diff/3600000)} Stunden`
+  return `Zuletzt online am ${new Date(ts).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})}`
+}
 function getMemberName(uid) { return allUsers.value.find(u => u.id === uid)?.name || 'Unbekannt' }
 function getUserById(uid) { return allUsers.value.find(u => u.id === uid) || null }
 function getDmPartnerId(chat) { if (!chat || chat.type !== 'dm') return null; return chat.members.find(id => id !== currentUser.value?.id) }

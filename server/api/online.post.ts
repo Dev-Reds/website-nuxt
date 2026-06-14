@@ -5,8 +5,8 @@ export default defineEventHandler(async (event) => {
     else heartbeat(id)
   }
   if (userId) {
-    if (userLeave) removeUserSession(userId)
-    else userHeartbeat(userId)
+    if (userLeave) await removeUserSession(userId)
+    else await userHeartbeat(userId)
   }
   return { count: getOnlineCount() }
 })
