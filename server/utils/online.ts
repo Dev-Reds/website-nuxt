@@ -1,67 +1,56 @@
+import { hset, hdel, hgetall } from './db'
+
 const TIMEOUT = 30000
 
-// Anonymous sessions (persistent via db/KV)
 export async function heartbeat(id: string) {
-  const now = Date.now()
-  const s = await db.getSessions()
-  s[id] = now
-  await db.setSessions(s)
+  await hset('sessions', id, Date.now())
 }
 
 export async function removeSession(id: string) {
-  const s = await db.getSessions()
-  delete s[id]
-  await db.setSessions(s)
+  await hdel('sessions', id)
 }
 
 export async function getOnlineCount(): Promise<number> {
-  const s = await db.getSessions()
+  const s = (await hgetall('sessions')) ?? {}
   const now = Date.now()
   let count = 0
   for (const id of Object.keys(s)) {
-    if (now - s[id] > TIMEOUT) delete s[id]
+    if (now - Number(s[id]) > TIMEOUT) await hdel('sessions', id)
     else count++
   }
-  if (Object.keys(s).length > 0) await db.setSessions(s)
   return count
 }
 
-// User heartbeats (persistent via db/KV)
 export async function userHeartbeat(id: string) {
   const now = Date.now()
-  const hb = await db.getHeartbeats()
-  hb[id] = now
-  await db.setHeartbeats(hb)
-
-  const ls = await db.getLastSeen()
-  ls[id] = now
-  await db.setLastSeen(ls)
+  await hset('heartbeats', id, now)
+  await hset('lastSeen', id, now)
 }
 
 export async function removeUserSession(id: string) {
-  const hb = await db.getHeartbeats()
-  delete hb[id]
-  await db.setHeartbeats(hb)
+  await hdel('heartbeats', id)
 }
 
 export async function isUserOnline(id: string): Promise<boolean> {
-  const hb = await db.getHeartbeats()
+  const hb = (await hgetall('heartbeats')) ?? {}
   const ts = hb[id]
-  return ts !== undefined && (Date.now() - ts) < TIMEOUT
+  return ts !== undefined && (Date.now() - Number(ts)) < TIMEOUT
 }
 
 export async function getOnlineUserIds(): Promise<string[]> {
-  const hb = await db.getHeartbeats()
+  const hb = (await hgetall('heartbeats')) ?? {}
   const now = Date.now()
   const online: string[] = []
   for (const id of Object.keys(hb)) {
-    if (now - hb[id] > TIMEOUT) delete hb[id]
+    if (now - Number(hb[id]) > TIMEOUT) await hdel('heartbeats', id)
     else online.push(id)
   }
-  if (online.length > 0 || Object.keys(hb).length > 0) await db.setHeartbeats(hb)
   return online
 }
 
 export async function getLastSeenAll(): Promise<Record<string, number>> {
-  return db.getLastSeen()
+  const ls = (await hgetall('lastSeen')) ?? {}
+  const out: Record<string, number> = {}
+  for (const [k, v] of Object.entries(ls)) out[k] = Number(v)
+  return out
 }

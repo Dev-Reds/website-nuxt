@@ -18,6 +18,18 @@ async function redisGet(key: string): Promise<string | null> {
   } catch { return null }
 }
 
+async function redisCmd(...args: string[]) {
+  try {
+    const res = await fetch(KV_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(args),
+    })
+    const json = await res.json()
+    return json.result
+  } catch { return null }
+}
+
 async function redisSet(key: string, val: any) {
   try {
     const url = `${KV_URL}/set/${encodeURIComponent(key)}`
@@ -48,6 +60,21 @@ function isObj(key: string) {
 async function set(key: string, val: any) {
   if (useRedis) await redisSet(key, val)
   else local[key] = val
+}
+
+export async function hgetall(key: string) {
+  if (useRedis) return (await redisCmd('HGETALL', key)) as Record<string, string> | null
+  return local[key] ?? null
+}
+
+export async function hset(key: string, field: string, val: any) {
+  if (useRedis) await redisCmd('HSET', key, field, String(val))
+  else { if (!local[key]) local[key] = {}; local[key][field] = val }
+}
+
+export async function hdel(key: string, field: string) {
+  if (useRedis) await redisCmd('HDEL', key, field)
+  else { if (local[key]) delete local[key][field] }
 }
 
 export const db = {
