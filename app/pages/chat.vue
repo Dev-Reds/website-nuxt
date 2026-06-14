@@ -375,12 +375,7 @@
 </template>
 
 <script setup>
-useHead({
-  title: 'Chat',
-  style: [
-    { children: 'body { background: #1a0a0a !important; }' }
-  ]
-})
+useHead({ title: 'Chat' })
 
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
