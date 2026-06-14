@@ -375,7 +375,7 @@
 </template>
 
 <script setup>
-useHead({ title: 'Chat' })
+useHead({ title: 'Chat', bodyAttrs: { class: 'chat-page' } })
 
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
@@ -751,6 +751,9 @@ onBeforeUnmount(async () => {
 })
 </script>
 
+<style>
+body.chat-page { background: #1a0a0a !important; }
+</style>
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
