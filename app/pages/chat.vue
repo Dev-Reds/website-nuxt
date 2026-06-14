@@ -375,7 +375,15 @@
 </template>
 
 <script setup>
-useHead({ title: 'Chat', bodyAttrs: { class: 'chat-page' } })
+useHead({ title: 'Chat' })
+const prevBodyBg = ref('')
+onMounted(() => {
+  prevBodyBg.value = document.body.style.background
+  document.body.style.background = '#1a0a0a'
+})
+onBeforeUnmount(() => {
+  document.body.style.background = prevBodyBg.value
+})
 
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
@@ -751,13 +759,10 @@ onBeforeUnmount(async () => {
 })
 </script>
 
-<style>
-body.chat-page { background: #1a0a0a !important; }
-</style>
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-.app-root{font-family:'DM Sans',sans-serif;position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:stretch;color:#e9edef;background:#1a0a0a}
+.app-root{font-family:'DM Sans',sans-serif;position:fixed;top:0;right:0;bottom:0;left:0;z-index:1;display:flex;flex-direction:column;align-items:stretch;color:#e9edef;background:#1a0a0a}
 
 /* ONE FREE LINE on top */
 .app-spacer{height:45px;flex-shrink:0;background:#1a0a0a}
