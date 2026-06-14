@@ -1,7 +1,7 @@
 <template>
-  <div class="app-root">
+  <div class="app-root" style="background:#1a0a0a">
     <!-- Free line spacer -->
-    <div class="app-spacer"></div>
+    <div class="app-spacer" style="background:#1a0a0a"></div>
     <div class="app-container">
     <div class="app-inner">
 
@@ -378,6 +378,17 @@
 useHead({ title: 'Chat' })
 
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+
+onMounted(() => {
+  const s = document.createElement('style')
+  s.id = 'chat-bg-fix'
+  s.textContent = '.page-wrap { background: #1a0a0a !important; }'
+  document.head.appendChild(s)
+})
+onBeforeUnmount(() => {
+  const s = document.getElementById('chat-bg-fix')
+  if (s) s.remove()
+})
 
 const SK = 'napp_'
 
