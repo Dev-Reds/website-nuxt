@@ -828,7 +828,7 @@ onBeforeUnmount(async () => {
 .badge{background:#e53935;color:white;font-size:11px;font-weight:700;border-radius:50px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 
 /* CHAT WINDOW */
-.chat-window{flex:1;display:flex;flex-direction:column;height:100%;min-width:0}
+.chat-window{flex:1;display:flex;flex-direction:column;height:100%;min-width:0;background:#1a0a0a}
 .no-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#8696a0;text-align:center}
 .no-chat h2{font-size:22px;font-weight:500;color:#e9edef}
 .no-chat p{font-size:14px;line-height:1.9}
@@ -839,7 +839,7 @@ onBeforeUnmount(async () => {
 .header-sub{font-size:12px;color:#8696a0;display:block}
 
 /* Messages — solid dark background, NO pattern */
-.messages-area{flex:1;overflow-y:auto}
+.messages-area{flex:1;overflow-y:auto;background:#1a0a0a}
 .messages-area::-webkit-scrollbar{width:4px}
 .messages-area::-webkit-scrollbar-thumb{background:#3d1a1a;border-radius:4px}
 .messages-inner{padding:14px;display:flex;flex-direction:column;gap:2px;min-height:100%}
