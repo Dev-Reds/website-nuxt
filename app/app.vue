@@ -16,7 +16,7 @@ body {
   min-height: 100vh;
 }
 .page-wrap {
-  background: #1a0a0a;
+  background: #000 url('/background.png') center/cover no-repeat fixed;
   min-height: 100vh;
   padding-top: 60px;
   box-sizing: border-box;
