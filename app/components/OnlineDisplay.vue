@@ -6,38 +6,61 @@
 </template>
 
 <script setup>
+const SK = 'ol_'
 const count = ref(0)
 const sessionId = ref('')
 const heartbeatInterval = ref(null)
+const countInterval = ref(null)
 
 onMounted(() => {
-  sessionId.value = Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
+  let sid = sessionStorage.getItem(SK+'sid')
+  if (!sid) {
+    sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
+    sessionStorage.setItem(SK+'sid', sid)
+  }
+  sessionId.value = sid
 
-  async function tick() {
+  async function sendHeartbeat() {
     try {
-      const r = await fetch('/api/online', {
+      await fetch('/api/online', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: sessionId.value })
       })
+    } catch {}
+  }
+
+  async function updateCount() {
+    try {
+      const r = await fetch('/api/online')
       const d = await r.json()
       count.value = d.count
     } catch {}
   }
 
-  tick()
-  heartbeatInterval.value = setInterval(tick, 15000)
+  sendHeartbeat()
+  updateCount()
+  heartbeatInterval.value = setInterval(sendHeartbeat, 15000)
+  countInterval.value = setInterval(updateCount, 3000)
 
   window.addEventListener('beforeunload', leave)
 })
 
 onUnmounted(() => {
   if (heartbeatInterval.value) clearInterval(heartbeatInterval.value)
+  if (countInterval.value) clearInterval(countInterval.value)
   window.removeEventListener('beforeunload', leave)
 })
 
 function leave() {
-  navigator.sendBeacon('/api/online', JSON.stringify({ id: sessionId.value, leave: true }))
+  try {
+    fetch('/api/online', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: sessionId.value, leave: true }),
+      keepalive: true,
+    })
+  } catch {}
 }
 </script>
 

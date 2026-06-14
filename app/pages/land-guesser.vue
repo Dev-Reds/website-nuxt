@@ -128,6 +128,7 @@ onMounted(async () => {
     const match = countries.find((c) => c.nameEn === shared || c.nameDe === shared)
     if (match) target.value = match
   }
+  fetchTargetData()
 })
 
 function initMap() {
@@ -158,6 +159,10 @@ function onMapClick(e: LeafletMouseEvent) {
 async function evaluate() {
   if (evaluating || !marker) return
   evaluating = true
+
+  if (!targetGeoCache) await fetchTargetData()
+  showTargetCountry()
+
   let correct = false
   try {
     const res = await fetch(
@@ -178,41 +183,20 @@ async function evaluate() {
     marker.setStyle({ fillColor: '#9e9e9e' })
   }
 
-  try {
-    const searchRes = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(target.value.nameEn)}&limit=1&polygon_geojson=1`,
-      { headers: { 'User-Agent': 'GeoReferat/1.0' } }
-    )
-    const searchData = await searchRes.json()
-    if (searchData[0]) {
-      const targetLat = parseFloat(searchData[0].lat)
-      const targetLng = parseFloat(searchData[0].lon)
+  if (targetGeoCache) {
+    const userLatLng = L.latLng(marker.lat, marker.lng)
+    const targetLatLng = L.latLng(targetCacheLat, targetCacheLng)
+    const geojson = targetGeoCache.geojson
+    const endPoint = geojson && !correct ? nearestBorder(userLatLng, geojson) : targetLatLng
+    const dist = correct ? 0 : map!.distance(userLatLng, endPoint)
+    distanceText.value = correct ? '0 m' : `${Math.round(dist / 1000).toLocaleString('de-DE')} km`
 
-      if (searchData[0].geojson) {
-        targetMarker = L.geoJSON(searchData[0].geojson, {
-          style: { color: '#2196f3', weight: 2, fillColor: '#2196f3', fillOpacity: 0.15 },
-        }).addTo(map!)
-        targetMarker.bindTooltip(target.value.nameDe, { permanent: true, direction: 'top', className: 'geo-tooltip' })
-      } else {
-        targetMarker = L.circleMarker([targetLat, targetLng], {
-          radius: 10, fillColor: '#2196f3', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8,
-        }).bindTooltip(target.value.nameDe, { permanent: true, direction: 'top', className: 'geo-tooltip' }).addTo(map!)
-      }
-
-      const userLatLng = L.latLng(marker.lat, marker.lng)
-      const targetLatLng = L.latLng(targetLat, targetLng)
-      const geojson = searchData[0].geojson
-      const endPoint = geojson && !correct ? nearestBorder(userLatLng, geojson) : targetLatLng
-      const dist = correct ? 0 : map!.distance(userLatLng, endPoint)
-      distanceText.value = correct ? '0 m' : `${Math.round(dist / 1000).toLocaleString('de-DE')} km`
-
-      if (!correct) {
-        line = L.polyline([userLatLng, endPoint], {
-          color: '#ff9800', weight: 3, opacity: 0.9, dashArray: '8 12',
-        }).addTo(map!)
-      }
+    if (!correct) {
+      line = L.polyline([userLatLng, endPoint], {
+        color: '#ff9800', weight: 3, opacity: 0.9, dashArray: '8 12',
+      }).addTo(map!)
     }
-  } catch {}
+  }
 
   evaluated.value = true
   evaluating = false
@@ -240,10 +224,49 @@ function nearestBorder(point: any, geojson: any) {
 }
 
 const target = ref<Country>(countries[Math.floor(Math.random() * countries.length)])
+let targetGeoCache: any = null
+let targetCacheLat = 0
+let targetCacheLng = 0
+
+const TARGET_CACHE: Record<string, any> = {}
+
+async function fetchTargetData() {
+  const en = target.value.nameEn
+  if (TARGET_CACHE[en]) { targetGeoCache = TARGET_CACHE[en]; targetCacheLat = targetGeoCache.lat; targetCacheLng = targetGeoCache.lon; return }
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(en)}&limit=1&polygon_geojson=1`,
+      { headers: { 'User-Agent': 'GeoReferat/1.0' } }
+    )
+    const data = await res.json()
+    if (data[0]) {
+      targetGeoCache = data[0]
+      targetCacheLat = parseFloat(data[0].lat)
+      targetCacheLng = parseFloat(data[0].lon)
+      TARGET_CACHE[en] = data[0]
+    }
+  } catch {}
+}
+
+function showTargetCountry() {
+  if (!targetGeoCache || !map) return
+  if (targetMarker) { map.removeLayer(targetMarker); targetMarker = null }
+  if (targetGeoCache.geojson) {
+    targetMarker = L.geoJSON(targetGeoCache.geojson, {
+      style: { color: '#2196f3', weight: 2, fillColor: '#2196f3', fillOpacity: 0.15 },
+    }).addTo(map)
+  } else {
+    targetMarker = L.circleMarker([targetCacheLat, targetCacheLng], {
+      radius: 10, fillColor: '#2196f3', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8,
+    }).addTo(map)
+  }
+  targetMarker.bindTooltip(target.value.nameDe, { permanent: true, direction: 'top', className: 'geo-tooltip' })
+}
 
 function nextRound() {
   cleanup()
   target.value = countries[Math.floor(Math.random() * countries.length)]
+  fetchTargetData()
 }
 
 function selectCountry() {
@@ -255,6 +278,7 @@ function selectCountry() {
   customTarget.value = ''
   cleanup()
   target.value = match
+  fetchTargetData()
 }
 
 function shareCountry() {

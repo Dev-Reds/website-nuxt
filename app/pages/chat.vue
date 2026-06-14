@@ -389,14 +389,15 @@ const authError    = ref('')
 const { currentUser } = useAuth()
 
 // ── CHAT ───────────────────────────────────────────────────────────────
-const allUsers      = ref([])
-const chats         = ref([])
-const messages      = reactive({})
-const unreadCounts  = reactive({})
-const activeChatId  = ref(null)
-const newMsg        = ref('')
+const allUsers       = ref([])
+const chats          = ref([])
+const messages       = reactive({})
+const unreadCounts   = reactive({})
+const activeChatId   = ref(null)
+const newMsg         = ref('')
 const mobileSidebarOpen = ref(true)
-const showEmoji     = ref(false)
+const showEmoji      = ref(false)
+const onlineUserIds  = ref(new Set())
 const messagesArea  = ref(null)
 const msgInput      = ref(null)
 const pollInterval  = ref(null)
@@ -476,12 +477,31 @@ async function loginUser(u) {
   u.online = true; currentUser.value = u
   profileName.value = u.name
   sessionStorage.setItem(SK+'session', u.id)
-  await loadData(); startPoll()
+  await loadData(); startPoll(); startUserHeartbeat()
+}
+let userHbInterval = null
+function startUserHeartbeat() {
+  clearInterval(userHbInterval)
+  if (!currentUser.value) return
+  async function tick() {
+    if (!currentUser.value) return
+    try {
+      await fetch('/api/online', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser.value.id })
+      })
+    } catch {}
+  }
+  tick(); userHbInterval = setInterval(tick, 15000)
 }
 async function logout() {
-  clearInterval(pollInterval.value)
+  clearInterval(pollInterval.value); clearInterval(userHbInterval)
   const users = await api.getUsers(); const i = users.findIndex(x => x.id === currentUser.value?.id)
   if (i !== -1) { users[i].online = false; await api.saveUsers(users) }
+  if (currentUser.value) {
+    navigator.sendBeacon('/api/online', JSON.stringify({ userId: currentUser.value.id, userLeave: true }))
+  }
   sessionStorage.removeItem(SK+'session')
   sessionStorage.removeItem(SK+'activeChat')
   currentUser.value = null; activeChatId.value = null
@@ -522,6 +542,10 @@ async function loadData() {
   const stored = await api.getChats(); chats.value = stored
   for (const c of stored) { messages[c.id] = await api.getMsgs(c.id) }
   friendRequests.value = await api.getRequests()
+  await fetchOnlineUsers()
+}
+async function fetchOnlineUsers() {
+  try { const r = await apiGet('/api/online/users'); onlineUserIds.value = new Set(r.ids) } catch {}
 }
 function startPoll() {
   pollInterval.value = setInterval(async () => {
@@ -541,6 +565,7 @@ function startPoll() {
       }
       if (activeChatId.value) { await markRead(activeChatId.value); unreadCounts[activeChatId.value] = 0; nextTick(scrollBottom) }
       friendRequests.value = await api.getRequests()
+      await fetchOnlineUsers()
     } catch {}
   }, 1000)
 }
@@ -651,7 +676,7 @@ async function cancelRequest(reqId) {
 // ── HELPERS ────────────────────────────────────────────────────────────
 function scrollBottom() { if (messagesArea.value) messagesArea.value.scrollTop = messagesArea.value.scrollHeight }
 function unread(id) { return unreadCounts[id] || 0 }
-function isOnline(uid) { return allUsers.value.find(u => u.id === uid)?.online || false }
+function isOnline(uid) { return onlineUserIds.value.has(uid) }
 function getMemberName(uid) { return allUsers.value.find(u => u.id === uid)?.name || 'Unbekannt' }
 function getUserById(uid) { return allUsers.value.find(u => u.id === uid) || null }
 function getDmPartnerId(chat) { if (!chat || chat.type !== 'dm') return null; return chat.members.find(id => id !== currentUser.value?.id) }
@@ -702,8 +727,9 @@ onMounted(async () => {
   })
 })
 onBeforeUnmount(async () => {
-  clearInterval(pollInterval.value)
+  clearInterval(pollInterval.value); clearInterval(userHbInterval)
   if (currentUser.value) {
+    navigator.sendBeacon('/api/online', JSON.stringify({ userId: currentUser.value.id, userLeave: true }))
     const u = await api.getUsers(); const i = u.findIndex(x=>x.id===currentUser.value.id)
     if(i!==-1){u[i].online=false;await api.saveUsers(u)}
   }

@@ -50,6 +50,7 @@ export const useAuth = () => {
       const users = await api.getUsers()
       const i = users.findIndex((x: any) => x.id === user.value.id)
       if (i !== -1) { users[i].online = false; await api.saveUsers(users) }
+      navigator.sendBeacon('/api/online', JSON.stringify({ userId: user.value.id, userLeave: true }))
     }
     sessionStorage.removeItem(SK+'session')
     sessionStorage.removeItem(SK+'activeChat')

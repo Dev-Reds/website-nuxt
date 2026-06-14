@@ -1,51 +1,33 @@
-import { resolve } from 'path'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { createClient } from '@vercel/kv'
 
-const DATA_DIR = resolve(process.cwd(), '.data')
-const DB_FILE = resolve(DATA_DIR, 'db.json')
+const kv = process.env.KV_REST_API_URL
+  ? createClient({ url: process.env.KV_REST_API_URL!, token: process.env.KV_REST_API_TOKEN! })
+  : null
 
-interface StoredData {
-  users: User[]
-  chats: Chat[]
-  messages: Record<string, Message[]>
-  friendRequests: FriendRequest[]
+const local: Record<string, any> = {
+  users: [], chats: [], messages: {}, friendRequests: [],
 }
 
-function loadData(): StoredData {
-  if (!existsSync(DB_FILE)) return { users: [], chats: [], messages: {}, friendRequests: [] }
-  try {
-    return JSON.parse(readFileSync(DB_FILE, 'utf-8'))
-  } catch {
-    return { users: [], chats: [], messages: {}, friendRequests: [] }
+async function get<T>(key: string): Promise<T> {
+  if (kv) {
+    const val = await kv.get(key)
+    return (val ?? (key.endsWith('s') || key.startsWith('msg:') ? [] : {})) as T
   }
+  return (local[key] ?? (key.endsWith('s') || key.startsWith('msg:') ? [] : {})) as T
 }
 
-function saveData(data: StoredData) {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true })
-  writeFileSync(DB_FILE, JSON.stringify(data), 'utf-8')
+async function set(key: string, val: any) {
+  if (kv) await kv.set(key, val)
+  else local[key] = val
 }
-
-let stored = loadData()
 
 export const db = {
-  getUsers: () => stored.users,
-  setUsers: (data: User[]) => {
-    stored.users = data
-    saveData(stored)
-  },
-  getChats: () => stored.chats,
-  setChats: (data: Chat[]) => {
-    stored.chats = data
-    saveData(stored)
-  },
-  getMessages: (chatId: string) => stored.messages[chatId] || [],
-  setMessages: (chatId: string, data: Message[]) => {
-    stored.messages[chatId] = data
-    saveData(stored)
-  },
-  getFriendRequests: () => stored.friendRequests,
-  setFriendRequests: (data: FriendRequest[]) => {
-    stored.friendRequests = data
-    saveData(stored)
-  },
+  getUsers:           ()            => get<any[]>('users'),
+  setUsers:           (u: any)      => set('users', u),
+  getChats:           ()            => get<any[]>('chats'),
+  setChats:           (c: any)      => set('chats', c),
+  getMessages:        (id: string)  => get<any[]>(`msg:${id}`),
+  setMessages:        (id: string, m: any[]) => set(`msg:${id}`, m),
+  getFriendRequests:  ()            => get<any[]>('friendRequests'),
+  setFriendRequests:  (r: any)      => set('friendRequests', r),
 }
