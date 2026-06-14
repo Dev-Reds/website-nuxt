@@ -375,14 +375,11 @@
 </template>
 
 <script setup>
-useHead({ title: 'Chat' })
-const prevBodyBg = ref('')
-onMounted(() => {
-  prevBodyBg.value = document.body.style.background
-  document.body.style.background = '#1a0a0a'
-})
-onBeforeUnmount(() => {
-  document.body.style.background = prevBodyBg.value
+useHead({
+  title: 'Chat',
+  style: [
+    { children: 'body { background: #1a0a0a !important; }' }
+  ]
 })
 
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
