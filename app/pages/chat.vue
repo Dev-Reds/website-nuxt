@@ -754,10 +754,10 @@ onBeforeUnmount(async () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-.app-root{font-family:'DM Sans',sans-serif;position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:stretch;color:#e9edef}
+.app-root{font-family:'DM Sans',sans-serif;position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:stretch;color:#e9edef;background:#1a0a0a}
 
 /* ONE FREE LINE on top */
-.app-spacer{height:45px;flex-shrink:0}
+.app-spacer{height:45px;flex-shrink:0;background:#1a0a0a}
 
 /* MAIN CONTAINER — 90% tall, 100% wide */
 .app-container{width:100%;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
