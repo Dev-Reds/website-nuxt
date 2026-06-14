@@ -1,3 +1,3 @@
-export default defineEventHandler(() => {
-  return { count: getOnlineCount() }
+export default defineEventHandler(async () => {
+  return { count: await getOnlineCount() }
 })

@@ -1,31 +1,32 @@
-// Anonymous sessions (in-memory, acceptable loss)
-const sessions = new Map<string, number>()
-const SESSION_TIMEOUT = 30000
+const TIMEOUT = 30000
 
-setInterval(() => {
+// Anonymous sessions (persistent via db/KV)
+export async function heartbeat(id: string) {
   const now = Date.now()
-  for (const [id, ts] of sessions) {
-    if (now - ts > SESSION_TIMEOUT) sessions.delete(id)
-  }
-}, 10000)
+  const s = await db.getSessions()
+  s[id] = now
+  await db.setSessions(s)
+}
 
-export function heartbeat(id: string) {
-  sessions.set(id, Date.now())
+export async function removeSession(id: string) {
+  const s = await db.getSessions()
+  delete s[id]
+  await db.setSessions(s)
 }
-export function removeSession(id: string) {
-  sessions.delete(id)
-}
-export function getOnlineCount(): number {
+
+export async function getOnlineCount(): Promise<number> {
+  const s = await db.getSessions()
   const now = Date.now()
-  for (const [id, ts] of sessions) {
-    if (now - ts > SESSION_TIMEOUT) sessions.delete(id)
+  let count = 0
+  for (const id of Object.keys(s)) {
+    if (now - s[id] > TIMEOUT) delete s[id]
+    else count++
   }
-  return sessions.size
+  if (Object.keys(s).length > 0) await db.setSessions(s)
+  return count
 }
 
 // User heartbeats (persistent via db/KV)
-const TIMEOUT = 30000
-
 export async function userHeartbeat(id: string) {
   const now = Date.now()
   const hb = await db.getHeartbeats()
@@ -57,7 +58,7 @@ export async function getOnlineUserIds(): Promise<string[]> {
     if (now - hb[id] > TIMEOUT) delete hb[id]
     else online.push(id)
   }
-  await db.setHeartbeats(hb)
+  if (online.length > 0 || Object.keys(hb).length > 0) await db.setHeartbeats(hb)
   return online
 }
 

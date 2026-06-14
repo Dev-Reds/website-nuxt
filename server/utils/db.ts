@@ -3,7 +3,7 @@ const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST
 const useRedis = !!(KV_URL && KV_TOKEN)
 
 const local: Record<string, any> = {
-  users: [], chats: [], messages: {}, friendRequests: [], heartbeats: {}, lastSeen: {},
+  users: [], chats: [], messages: {}, friendRequests: [], heartbeats: {}, lastSeen: {}, sessions: {},
 }
 
 async function redisGet(key: string): Promise<string | null> {
@@ -42,7 +42,7 @@ async function get<T>(key: string): Promise<T> {
 }
 
 function isObj(key: string) {
-  return key === 'heartbeats' || key === 'lastSeen'
+  return key === 'heartbeats' || key === 'lastSeen' || key === 'sessions'
 }
 
 async function set(key: string, val: any) {
@@ -63,4 +63,6 @@ export const db = {
   setHeartbeats:      (h: Record<string,number>) => set('heartbeats', h),
   getLastSeen:        ()            => get<Record<string,number>>('lastSeen'),
   setLastSeen:        (l: Record<string,number>) => set('lastSeen', l),
+  getSessions:        ()            => get<Record<string,number>>('sessions'),
+  setSessions:        (s: Record<string,number>) => set('sessions', s),
 }
