@@ -1,3 +1,8 @@
+<script setup>
+const { restore } = useAuth()
+onMounted(() => restore())
+</script>
+
 <template>
   <div>
     <NavBar/>

@@ -388,7 +388,7 @@ const authMode     = ref('login')
 const loginEmail   = ref(''); const loginPassword = ref('')
 const regName      = ref(''); const regEmail = ref(''); const regPassword = ref('')
 const authError    = ref('')
-const { currentUser } = useAuth()
+const { currentUser, login, register, logout: authLogout, restore } = useAuth()
 
 // ── CHAT ───────────────────────────────────────────────────────────────
 const allUsers       = ref([])
@@ -460,27 +460,27 @@ const api = {
 async function handleLogin() {
   authError.value = ''
   if (!loginEmail.value || !loginPassword.value) { authError.value = 'Bitte alle Felder ausfüllen.'; return }
-  const users = await api.getUsers()
-  const u = users.find(u => u.email === loginEmail.value && u.password === loginPassword.value)
-  if (!u) { authError.value = 'E-Mail oder Passwort falsch.'; return }
-  await loginUser(u)
+  try {
+    await login(loginEmail.value, loginPassword.value)
+    setupChat()
+  } catch (e) { authError.value = e.message }
 }
 async function handleRegister() {
   authError.value = ''
   if (!regName.value || !regEmail.value || !regPassword.value) { authError.value = 'Bitte alle Felder ausfüllen.'; return }
   if (regPassword.value.length < 6) { authError.value = 'Passwort muss mindestens 6 Zeichen haben.'; return }
-  const users = await api.getUsers()
-  if (users.find(u => u.email === regEmail.value)) { authError.value = 'E-Mail bereits registriert.'; return }
-  const nu = { id: 'u_'+Date.now()+'_'+Math.random().toString(36).slice(2), name: regName.value, email: regEmail.value, password: regPassword.value, online: true, avatar: null }
-  users.push(nu); await api.saveUsers(users); await loginUser(nu)
+  try {
+    await register(regName.value, regEmail.value, regPassword.value)
+    setupChat()
+  } catch (e) { authError.value = e.message }
 }
-async function loginUser(u) {
-  const users = await api.getUsers(); const i = users.findIndex(x => x.id === u.id)
-  if (i !== -1) { users[i].online = true; await api.saveUsers(users); u = { ...u, ...users[i] } }
-  u.online = true; currentUser.value = u
+async function setupChat() {
+  const u = currentUser.value
+  if (!u) return
   profileName.value = u.name
-  sessionStorage.setItem(SK+'session', u.id)
   await loadData(); startPoll(); startUserHeartbeat()
+  const aid = sessionStorage.getItem(SK+'activeChat')
+  if (aid) { activeChatId.value = aid; setTimeout(scrollBottom, 200) }
 }
 let userHbInterval = null
 function startUserHeartbeat() {
@@ -500,14 +500,8 @@ function startUserHeartbeat() {
 }
 async function logout() {
   clearInterval(pollInterval.value); clearInterval(userHbInterval)
-  const users = await api.getUsers(); const i = users.findIndex(x => x.id === currentUser.value?.id)
-  if (i !== -1) { users[i].online = false; await api.saveUsers(users) }
-  if (currentUser.value) {
-    navigator.sendBeacon('/api/online', JSON.stringify({ userId: currentUser.value.id, userLeave: true }))
-  }
-  sessionStorage.removeItem(SK+'session')
-  sessionStorage.removeItem(SK+'activeChat')
-  currentUser.value = null; activeChatId.value = null
+  await authLogout()
+  activeChatId.value = null
   chats.value = []; Object.keys(messages).forEach(k => delete messages[k])
 }
 
@@ -729,16 +723,8 @@ function showDivider(i) {
 function addEmoji(e) { newMsg.value += e; showEmoji.value = false; nextTick(()=>msgInput.value?.focus()) }
 
 onMounted(async () => {
-  try {
-    const sid = sessionStorage.getItem(SK+'session')
-    if (sid) {
-      const users = await api.getUsers()
-      const u = users.find(x => x.id === sid)
-      if (u) await loginUser(u)
-      const aid = sessionStorage.getItem(SK+'activeChat')
-      if (aid) { activeChatId.value = aid; setTimeout(scrollBottom, 200) }
-    }
-  } catch {}
+  await restore()
+  if (currentUser.value) await setupChat()
   document.addEventListener('click', e => {
     if (!e.target.closest('.emoji-btn') && !e.target.closest('.emoji-picker')) showEmoji.value = false
   })
