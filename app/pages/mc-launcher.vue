@@ -12,8 +12,8 @@ useHead({ title: 'MC Launcher' })
  
     <div class="download-box">
 
-        <NuxtLink to="https://www.youtube.com/@Sams2525" target="_blank">
-            📁 Ordner herunterladen (.zip)</NuxtLink>
+        <a href="/launcher.zip" class="download-btn" download>
+            📁 Ordner herunterladen (.zip)</a>
             
     </div>
 
