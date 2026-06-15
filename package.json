@@ -14,8 +14,5 @@
     "nuxt": "^4.4.6",
     "vue": "^3.5.34",
     "vue-router": "^5.0.7"
-  },
-  "devDependencies": {
-    "@types/leaflet": "^1.9.21"
   }
 }

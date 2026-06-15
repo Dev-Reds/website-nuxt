@@ -13,8 +13,8 @@
       <div v-if="mapReady" class="target-name">{{ target.nameDe }}</div>
       <div ref="mapContainer" class="map-container">
         <div v-if="!mapReady" class="map-placeholder">Karte wird geladen...</div>
+        <div v-if="evaluated" class="eval-overlay distance-text">Entfernung: {{ distanceText }}</div>
       </div>
-      <div v-if="evaluated" class="eval-overlay distance-text">Entfernung: {{ distanceText }}</div>
       <div v-if="!evaluated && hasMarker" class="eval-row">
         <button @click="evaluate" class="action-btn">Auswerten</button>
       </div>
@@ -126,7 +126,7 @@ onMounted(async () => {
   const shared = route.query.country
   if (shared) {
     const match = countries.find((c) => c.nameEn === shared || c.nameDe === shared)
-    if (match) target.value = match as Country
+    if (match) target.value = match
   }
   fetchTargetData()
 })
@@ -160,7 +160,8 @@ async function evaluate() {
   if (evaluating || !marker) return
   evaluating = true
 
-  await fetchTargetData()
+  if (!targetGeoCache) await fetchTargetData()
+  showTargetCountry()
 
   let correct = false
   try {
@@ -182,8 +183,6 @@ async function evaluate() {
     marker.setStyle({ fillColor: '#9e9e9e' })
   }
 
-  showTargetCountry()
-
   if (targetGeoCache) {
     const userLatLng = L.latLng(marker.lat, marker.lng)
     const targetLatLng = L.latLng(targetCacheLat, targetCacheLng)
@@ -197,8 +196,6 @@ async function evaluate() {
         color: '#ff9800', weight: 3, opacity: 0.9, dashArray: '8 12',
       }).addTo(map!)
     }
-  } else {
-    distanceText.value = '— km'
   }
 
   evaluated.value = true
@@ -235,7 +232,7 @@ const TARGET_CACHE: Record<string, any> = {}
 
 async function fetchTargetData() {
   const en = target.value.nameEn
-  if (TARGET_CACHE[en]) { targetGeoCache = TARGET_CACHE[en]; targetCacheLat = parseFloat(targetGeoCache.lat); targetCacheLng = parseFloat(targetGeoCache.lon); return }
+  if (TARGET_CACHE[en]) { targetGeoCache = TARGET_CACHE[en]; targetCacheLat = targetGeoCache.lat; targetCacheLng = targetGeoCache.lon; return }
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(en)}&limit=1&polygon_geojson=1`,
@@ -268,7 +265,7 @@ function showTargetCountry() {
 
 function nextRound() {
   cleanup()
-  target.value = countries[Math.floor(Math.random() * countries.length)] as Country
+  target.value = countries[Math.floor(Math.random() * countries.length)]
   fetchTargetData()
 }
 
@@ -280,7 +277,7 @@ function selectCountry() {
   if (!match) return
   customTarget.value = ''
   cleanup()
-  target.value = match as Country
+  target.value = match
   fetchTargetData()
 }
 
@@ -349,8 +346,12 @@ function cleanup() {
 }
 
 .eval-overlay {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
   text-align: center;
-  padding: 6px 0 2px;
 }
 
 .eval-overlay.distance-text {
