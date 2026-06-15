@@ -141,8 +141,8 @@ function initMap() {
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
     attribution: '&copy; Esri, DeLorme, HERE, USGS, Intermap, increment P Corp., NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), MapmyIndia, NGCC, &copy; OpenStreetMap contributors',
     noWrap: true,
-  }).addTo(map)
-  map.on('click', onMapClick)
+  }).addTo(map!)
+  map!.on('click', onMapClick)
 }
 
 function onMapClick(e: LeafletMouseEvent) {
@@ -226,7 +226,7 @@ function nearestBorder(point: any, geojson: any) {
   return nearest
 }
 
-const target = ref<Country>(countries[Math.floor(Math.random() * countries.length)])
+const target = ref<Country>(countries[Math.floor(Math.random() * countries.length)] as Country)
 let targetGeoCache: any = null
 let targetCacheLat = 0
 let targetCacheLng = 0
