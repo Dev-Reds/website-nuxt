@@ -12,7 +12,7 @@ useHead({ title: 'MC Launcher' })
  
     <div class="download-box">
 
-        <a href="/launcher.zip" class="download-btn" download>
+        <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/launcher.zip" class="download-btn">
             📁 Ordner herunterladen (.zip)</a>
             
     </div>

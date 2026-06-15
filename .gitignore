@@ -22,4 +22,5 @@ logs
 .env
 .env.*
 !.env.example
+public/launcher.zip
 public/MC*
