@@ -32,32 +32,39 @@ export function useCall() {
     processedCallIds.clear()
   }
 
+  async function fetchCallStatus() {
+    if (!_currentUserId || !callState.value.callId) return
+    try {
+      const res = await fetch(`/api/calls?userId=${_currentUserId}`)
+      const data = await res.json()
+      for (const call of data.calls) {
+        if (call.id !== callState.value.callId) continue
+        if ((call.status === 'connected') && callState.value.mode === 'outgoing' && call.answer && pc) {
+          try { await pc.setRemoteDescription(JSON.parse(call.answer)).catch(() => {}) } catch {}
+          callState.value.mode = 'active'
+          await addCallMessage('📞 Anruf angenommen')
+        }
+        if (callState.value.mode !== 'idle') {
+          const otherCandidates = _currentUserId === call.fromUserId ? (call.toCandidates || []) : (call.fromCandidates || [])
+          for (const c of otherCandidates) {
+            try { if (pc) await pc.addIceCandidate(JSON.parse(c)) } catch {}
+          }
+        }
+        if (call.status === 'ended') { endCall(); return }
+      }
+    } catch {}
+  }
+
   function ensureCallPolling() {
     if (callStatusInterval) return
+    // immediate first check, then poll every 300ms
+    fetchCallStatus()
     callStatusInterval = setInterval(async () => {
       if (!_currentUserId || !callState.value.callId || callState.value.mode === 'idle' || callState.value.mode === 'ended') {
         clearInterval(callStatusInterval); callStatusInterval = null; return
       }
-      try {
-        const res = await fetch(`/api/calls?userId=${_currentUserId}`)
-        const data = await res.json()
-        for (const call of data.calls) {
-          if (call.id !== callState.value.callId) continue
-          if ((call.status === 'connected') && callState.value.mode === 'outgoing' && call.answer && pc) {
-            try { await pc.setRemoteDescription(JSON.parse(call.answer)).catch(() => {}) } catch {}
-            callState.value.mode = 'active'
-            await addCallMessage('📞 Anruf angenommen')
-          }
-          if (callState.value.mode !== 'idle') {
-            const otherCandidates = _currentUserId === call.fromUserId ? (call.toCandidates || []) : (call.fromCandidates || [])
-            for (const c of otherCandidates) {
-              try { if (pc) await pc.addIceCandidate(JSON.parse(c)) } catch {}
-            }
-          }
-          if (call.status === 'ended') { endCall(); return }
-        }
-      } catch {}
-    }, 1000)
+      await fetchCallStatus()
+    }, 200)
   }
 
   async function startCall(partnerId, partnerName, chatId, userId) {
