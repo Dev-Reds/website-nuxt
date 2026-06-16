@@ -16,7 +16,7 @@
 <style scoped>
 h1 {
   color: rgb(188, 0, 0);
-  font-size: 30px;
+  font-size: clamp(20px, 6vw, 30px);
   text-align: center;
 }
 

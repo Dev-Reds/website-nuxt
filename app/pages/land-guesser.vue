@@ -317,7 +317,7 @@ function cleanup() {
 
 .target-name {
   color: rgb(188, 0, 0);
-  font-size: 28px;
+  font-size: clamp(20px, 6vw, 28px);
   margin: 16px 0 4px;
 }
 
@@ -373,7 +373,7 @@ function cleanup() {
 
 .action-btn {
   padding: 10px 30px;
-  font-size: 18px;
+  font-size: clamp(14px, 4vw, 18px);
   background: rgb(188, 0, 0);
   color: white;
   border: none;
@@ -410,6 +410,13 @@ function cleanup() {
 @media (max-width: 500px) {
   .country-input {
     width: 100%;
+  }
+  .ok-btn, .share-btn {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  .top-bar {
+    gap: 6px;
   }
 }
 

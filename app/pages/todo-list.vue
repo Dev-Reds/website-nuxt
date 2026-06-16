@@ -76,13 +76,14 @@ const removeTodo = (index: number) => {
 .todo-page {
   max-width: 520px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 24px 16px;
   font-family: system-ui, sans-serif;
+  box-sizing: border-box;
 }
 
 h1 {
   color: rgb(188, 0, 0);
-  font-size: 32px;
+  font-size: clamp(22px, 6vw, 32px);
   text-align: center;
   margin-bottom: 24px;
 }

@@ -5,6 +5,11 @@ export default defineEventHandler(async (event) => {
   const { action, fromUserId, toUserId, callId, sdp, candidate } = body
 
   if (action === 'create') {
+    const existing = calls.find((c: any) =>
+      c.status !== 'ended' &&
+      ((c.fromUserId === fromUserId && c.toUserId === toUserId) || (c.fromUserId === toUserId && c.toUserId === fromUserId))
+    )
+    if (existing) return { call: existing }
     const id = 'call_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)
     const call = { id, fromUserId, toUserId, status: 'ringing', offer: sdp || null, answer: null, fromCandidates: [], toCandidates: [], ts: Date.now() }
     calls.push(call)

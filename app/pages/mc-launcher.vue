@@ -33,7 +33,7 @@ useHead({ title: 'MC Launcher' })
 <style scoped>
 h1 {
   color: rgb(188, 0, 0);
-  font-size: 30px;
+  font-size: clamp(20px, 5vw, 30px);
   text-align: center;
 }
 
@@ -74,6 +74,8 @@ h1 {
             justify-content: center;
             flex-wrap: wrap;
             margin-top: 20px;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 </style>
 

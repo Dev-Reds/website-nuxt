@@ -100,7 +100,8 @@ const copyCode = () => {
 
         @media (max-width: 600px) {
           .code-body {
-            display: none;
+            font-size: 11px;
+            padding: 10px;
           }
         }
 </style>

@@ -91,29 +91,34 @@ watch(
     align-items: center;
     margin-top: 50px;
     padding-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    box-sizing: border-box;
   }
 
     p {
     color: darkred;
-    font-size: 20px;
+    font-size: clamp(16px, 4vw, 20px);
     margin-top: 20px;
+    text-align: center;
   }
 
   h1 {
     color: darkred;
-    font-size: 24px;
+    font-size: clamp(18px, 5vw, 24px);
     margin-bottom: 10px;
+    text-align: center;
   }
 
   label {
     color: darkred;
-    font-size: 18px;
+    font-size: clamp(14px, 4vw, 18px);
     margin-right: 10px;
   }
 
   input {
     padding: 8px;
-    font-size: 16px;
+    font-size: clamp(14px, 4vw, 16px);
     color: rgb(157, 157, 157);
     background: rgb(48, 48, 48);
     border: 1px solid #000000;
@@ -126,7 +131,7 @@ watch(
   button {
     margin: 5px;
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: clamp(14px, 4vw, 16px);
     color: rgb(157, 157, 157);
     background-color: rgb(48, 48, 48);
     border: none;

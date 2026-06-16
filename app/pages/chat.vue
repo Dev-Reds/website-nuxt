@@ -218,7 +218,7 @@
             <span v-else>{{ callPartner?.name?.[0]?.toUpperCase() ?? '?' }}</span>
           </div>
         </div>
-        <div v-if="callState.mode === 'active' && localStream" class="local-video-wrap">
+        <div v-if="callState.mode === 'active' && localStream && callState.videoEnabled" class="local-video-wrap">
           <video ref="localVideo" autoplay muted playsinline class="local-video"/>
         </div>
         <div class="call-info">
@@ -239,8 +239,11 @@
             <button class="call-btn reject" @click="endCall">Auflegen</button>
           </template>
           <template v-else-if="callState.mode === 'active'">
-            <button :class="['call-btn', 'v-btn', { active: !callState.audioMuted }]" @click="toggleAudio">
+            <button :class="['call-btn', 'v-btn', { active: callState.audioEnabled }]" @click="toggleAudio">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <button :class="['call-btn', 'v-btn', { active: callState.videoEnabled }]" @click="toggleVideo">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
             </button>
             <button class="call-btn reject end" @click="endCall">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
@@ -458,12 +461,13 @@ const emojis = ['😀','😂','😍','🥰','😊','👍','❤️','🔥','🎉'
 const friendRequests = ref([])
 
 // ── CALL ────────────────────────────────────────────────────────────────
-const callState = ref({ mode: 'idle', callId: null, partnerId: null, audioMuted: false, showInfo: false })
+const callState = ref({ mode: 'idle', callId: null, partnerId: null, audioEnabled: true, videoEnabled: false, showInfo: false })
 const localVideo = ref(null)
 const remoteVideo = ref(null)
 let pc = null
 let localStream = null
 const remoteStream = ref(null)
+const processedCallIds = ref(new Set())
 
 // ── MODALS ─────────────────────────────────────────────────────────────
 const showNewChat      = ref(false)
@@ -745,7 +749,7 @@ async function startCall() {
   const pid = getDmPartnerId(activeChat.value)
   if (!pid || !currentUser.value) return
   if (callState.value.mode !== 'idle') return
-  callState.value = { mode: 'outgoing', callId: null, partnerId: pid, audioMuted: false, showInfo: false }
+  callState.value = { mode: 'outgoing', callId: null, partnerId: pid, audioEnabled: true, videoEnabled: false, showInfo: false }
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     if (localVideo.value) localVideo.value.srcObject = localStream
@@ -838,7 +842,7 @@ async function endCall() {
       })
     } catch {}
   }
-  callState.value = { mode: 'ended', callId: null, partnerId: callState.value.partnerId, audioMuted: false, showInfo: false }
+  callState.value = { mode: 'ended', callId: null, partnerId: callState.value.partnerId, audioEnabled: true, videoEnabled: false, showInfo: false }
 }
 
 function closeCallOverlay() {
@@ -849,7 +853,7 @@ function cleanupCall() {
   if (pc) { pc.getTransceivers().forEach(t => { if (t.stop) t.stop() }); pc.close(); pc = null }
   if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null }
   remoteStream.value = null
-  callState.value = { mode: 'idle', callId: null, partnerId: null, audioMuted: false, showInfo: false }
+  callState.value = { mode: 'idle', callId: null, partnerId: null, audioEnabled: true, videoEnabled: false, showInfo: false }
 }
 
 function toggleAudio() {
@@ -857,19 +861,51 @@ function toggleAudio() {
   const audioTrack = localStream.getAudioTracks()[0]
   if (audioTrack) {
     audioTrack.enabled = !audioTrack.enabled
-    callState.value.audioMuted = !audioTrack.enabled
+    callState.value.audioEnabled = audioTrack.enabled
   }
 }
 
+let videoStream = null
+
+function toggleVideo() {
+  if (!pc || !localStream) return
+  const videoTrack = localStream.getVideoTracks()[0]
+  if (videoTrack) {
+    videoTrack.enabled = !videoTrack.enabled
+    callState.value.videoEnabled = videoTrack.enabled
+    return
+  }
+  // no video track yet — request camera access
+  navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((vs) => {
+    videoStream = vs
+    const newTrack = vs.getVideoTracks()[0]
+    localStream.addTrack(newTrack)
+    pc.addTrack(newTrack, localStream)
+    callState.value.videoEnabled = true
+    if (localVideo.value) localVideo.value.srcObject = localStream
+    // renegotiate
+    pc.createOffer().then((offer) => {
+      pc.setLocalDescription(offer)
+      fetch('/api/calls', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'candidate', callId: callState.value.callId, fromUserId: currentUser.value.id, sdp: JSON.stringify(offer) })
+      })
+    })
+  }).catch(() => {})
+}
+
 async function pollCalls() {
-  if (!currentUser.value || callState.value.mode === 'active') return
+  if (!currentUser.value) return
   try {
     const res = await fetch(`/api/calls?userId=${currentUser.value.id}`)
     const data = await res.json()
     for (const call of data.calls) {
-      if (call.status === 'ringing' && call.toUserId === currentUser.value.id && callState.value.mode === 'idle') {
-        callState.value = { mode: 'incoming', callId: call.id, partnerId: call.fromUserId, audioMuted: false, showInfo: false }
+      // incoming ringing — only trigger once per callId
+      if (call.status === 'ringing' && call.toUserId === currentUser.value.id && callState.value.mode === 'idle' && !processedCallIds.value.has(call.id)) {
+        processedCallIds.value.add(call.id)
+        callState.value = { mode: 'incoming', callId: call.id, partnerId: call.fromUserId, audioEnabled: true, videoEnabled: false, showInfo: false }
       }
+      // answered — callee transition to active
       if (call.status === 'connected' && callState.value.mode === 'outgoing' && callState.value.callId === call.id) {
         if (call.answer && pc && !pc.currentRemoteDescription) {
           try {
@@ -887,6 +923,7 @@ async function pollCalls() {
           }
         }
       }
+      // ended — remote hung up
       if (call.status === 'ended' && callState.value.callId === call.id && callState.value.mode !== 'idle' && callState.value.mode !== 'ended') {
         endCall()
       }
@@ -1168,6 +1205,13 @@ onBeforeUnmount(async () => {
   .sidebar.sidebar-open{transform:translateX(0)}
   .chat-window{position:fixed;top:0;left:0;width:100%;height:100dvh;padding-top:56px;box-sizing:border-box;z-index:40;display:flex;flex-direction:column}
   .mobile-back{display:flex}
+  .call-overlay{padding:10px}
+  .call-container{padding:16px 12px;gap:12px}
+  .call-partner-name{font-size:17px}
+  .call-btn{width:44px;height:44px}
+  .call-btn.accept,.call-btn.reject.end{width:52px;height:52px}
+  .av.xl{width:80px;height:80px;font-size:32px}
+  .local-video-wrap{width:90px;top:6px;right:6px}
 }
 
 

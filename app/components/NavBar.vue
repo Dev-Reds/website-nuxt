@@ -71,16 +71,17 @@ const isOpen = ref(false)
   position: fixed;
   left: 0;
   top: 0;
-  height: 100vh;
-  width: 200px;
+  height: 100dvh;
+  width: min(200px, 80vw);
   background: rgba(0, 0, 0, 0) url('/background.png') center/cover;
   border-right: 2px solid rgb(188, 0, 0);
-  padding: 20px;
+  padding: 16px;
   padding-top: 80px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   z-index: 9999;
+  box-sizing: border-box;
 }
 
 .nav-item {
@@ -89,14 +90,16 @@ const isOpen = ref(false)
 
 a {
   color: rgb(188, 0, 0);
-  font-size: 18px;
+  font-size: clamp(14px, 3vw, 18px);
   border: 2px solid rgb(188, 0, 0);
   border-radius: 10px;
   padding: 8px 12px;
   text-decoration: none;
   display: block;
   text-align: center;
-  white-space: nowrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
   background: none;
 }
 
