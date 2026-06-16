@@ -7,7 +7,7 @@
             <input type="text" id="activity" v-model="activity" placeholder="z.B. Laufen, Schwimmen, etc.">
             <label for="time">Zeit pro Tag:</label>
             <input type="number" id="time" v-model="time" placeholder="z.B. in min 30, 60, etc.">
-            <label for="lifetime">Lebenserwartung:</label>
+            <label for="lifetime">Länge in Jahren:</label>
             <input type="number" id="lifetime" v-model="lifetime" placeholder="z.B. 100 Jahre">
             <label for="timetype">Zeit Art:</label>
             <button @click="timetype = 'min'">Minuten</button>
