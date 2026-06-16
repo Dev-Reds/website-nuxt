@@ -11,6 +11,22 @@ const api = {
 export const useAuth = () => {
   const user = useState<any>('auth-user', () => null)
 
+  function cacheUser(u: any) {
+    if (!process.client) return
+    try { sessionStorage.setItem(SK+'user', JSON.stringify(u)) } catch {}
+  }
+
+  function getCachedUser(): any {
+    try {
+      const raw = sessionStorage.getItem(SK+'user')
+      return raw ? JSON.parse(raw) : null
+    } catch { return null }
+  }
+
+  function clearCachedUser() {
+    try { sessionStorage.removeItem(SK+'user') } catch {}
+  }
+
   async function restore() {
     if (!process.client) return
     try {
@@ -18,7 +34,11 @@ export const useAuth = () => {
       if (sid && !user.value) {
         const users = await api.getUsers()
         const found = users.find((x: any) => x.id === sid)
-        if (found) user.value = found
+        if (found) { user.value = found; cacheUser(found) }
+        else {
+          const cached = getCachedUser()
+          if (cached && cached.id === sid) user.value = cached
+        }
       }
     } catch {}
   }
@@ -31,6 +51,7 @@ export const useAuth = () => {
     if (i !== -1) { users[i].online = true; await api.saveUsers(users) }
     user.value = { ...found, online: true }
     sessionStorage.setItem(SK+'session', found.id)
+    cacheUser(user.value)
     return user.value
   }
 
@@ -42,6 +63,7 @@ export const useAuth = () => {
     users.push(nu); await api.saveUsers(users)
     user.value = nu
     sessionStorage.setItem(SK+'session', nu.id)
+    cacheUser(user.value)
     return user.value
   }
 
@@ -54,6 +76,7 @@ export const useAuth = () => {
     }
     sessionStorage.removeItem(SK+'session')
     sessionStorage.removeItem(SK+'activeChat')
+    clearCachedUser()
     user.value = null
   }
 
