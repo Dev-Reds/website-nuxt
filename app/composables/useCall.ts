@@ -13,6 +13,8 @@ let videoStream = null
 let addCallMessageFn = null
 let _currentUserId = null
 let callStatusInterval = null
+let processedRenegotiateAnswer = false
+let processedRenegotiateOffer = false
 
 export function setCallMessageCallback(fn) { addCallMessageFn = fn }
 
@@ -39,18 +41,45 @@ export function useCall() {
       const data = await res.json()
       for (const call of data.calls) {
         if (call.id !== callState.value.callId) continue
+        // answer received (outgoing → active)
         if ((call.status === 'connected') && callState.value.mode === 'outgoing' && call.answer && pc) {
           try { await pc.setRemoteDescription(JSON.parse(call.answer)).catch(() => {}) } catch {}
           callState.value.mode = 'active'
           await addCallMessage('📞 Anruf angenommen')
         }
+        // renegotiation — remote sent a new offer (we are the receiver)
+        if (call.renegotiateOffer && pc && _currentUserId !== call.fromUserId && callState.value.mode === 'active' && !processedRenegotiateOffer) {
+          processedRenegotiateOffer = true
+          processedRenegotiateAnswer = false
+          try {
+            await pc.setRemoteDescription(JSON.parse(call.renegotiateOffer))
+            const answer = await pc.createAnswer()
+            await pc.setLocalDescription(answer)
+            await fetch('/api/calls', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'renegotiate-answer', callId: callState.value.callId, fromUserId: _currentUserId, sdp: JSON.stringify(answer) })
+            })
+          } catch {}
+        }
+        // renegotiation — answer received (we sent the offer)
+        if (call.renegotiateAnswer && pc && _currentUserId === call.fromUserId && callState.value.mode === 'active' && !processedRenegotiateAnswer) {
+          processedRenegotiateAnswer = true
+          try {
+            await pc.setRemoteDescription(JSON.parse(call.renegotiateAnswer)).catch(() => {})
+          } catch {}
+        }
+        // ICE candidates
         if (callState.value.mode !== 'idle') {
           const otherCandidates = _currentUserId === call.fromUserId ? (call.toCandidates || []) : (call.fromCandidates || [])
           for (const c of otherCandidates) {
             try { if (pc) await pc.addIceCandidate(JSON.parse(c)) } catch {}
           }
         }
-        if (call.status === 'ended') { endCall(); return }
+        // remote ended
+        if (call.status === 'ended' && callState.value.mode !== 'idle' && callState.value.mode !== 'ended') {
+          endCall(true)
+          return
+        }
       }
     } catch {}
   }
@@ -167,7 +196,7 @@ export function useCall() {
     cleanupCall()
   }
 
-  async function endCall() {
+  async function endCall(fromRemote = false) {
     if (pc) {
       pc.getTransceivers().forEach(t => { if (t.stop) t.stop() })
       pc.close(); pc = null
@@ -175,7 +204,8 @@ export function useCall() {
     if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null }
     if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null }
     remoteStream.value = null
-    if (callState.value.callId) {
+    // only notify server if we initiated the end (not already ended on server)
+    if (!fromRemote && callState.value.callId) {
       try {
         await fetch('/api/calls', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -199,7 +229,12 @@ export function useCall() {
   function toggleVideo() {
     if (!pc || !localStream) return
     const videoTrack = localStream.getVideoTracks()[0]
-    if (videoTrack) { videoTrack.enabled = !videoTrack.enabled; callState.value.videoEnabled = videoTrack.enabled; return }
+    if (videoTrack) {
+      videoTrack.enabled = !videoTrack.enabled
+      callState.value.videoEnabled = videoTrack.enabled
+      return
+    }
+    processedRenegotiateAnswer = false
     navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((vs) => {
       videoStream = vs
       const newTrack = vs.getVideoTracks()[0]
@@ -210,7 +245,7 @@ export function useCall() {
         pc.setLocalDescription(offer)
         fetch('/api/calls', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'candidate', callId: callState.value.callId, fromUserId: _currentUserId, sdp: JSON.stringify(offer) })
+          body: JSON.stringify({ action: 'renegotiate-offer', callId: callState.value.callId, fromUserId: _currentUserId, sdp: JSON.stringify(offer) })
         })
       })
     }).catch(() => {})
@@ -249,7 +284,7 @@ export function useCall() {
           }
         }
         if (call.status === 'ended' && callState.value.callId === call.id && callState.value.mode !== 'idle' && callState.value.mode !== 'ended') {
-          endCall()
+          endCall(true)
         }
       }
     } catch {}

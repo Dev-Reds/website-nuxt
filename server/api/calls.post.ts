@@ -34,6 +34,24 @@ export default defineEventHandler(async (event) => {
     return { call }
   }
 
+  if (action === 'renegotiate-offer') {
+    const call = calls.find((c: any) => c.id === callId)
+    if (!call) return { error: 'not found' }
+    call.renegotiateOffer = sdp || null
+    call.renegotiateAnswer = null
+    call.ts = Date.now()
+    return { call }
+  }
+
+  if (action === 'renegotiate-answer') {
+    const call = calls.find((c: any) => c.id === callId)
+    if (!call) return { error: 'not found' }
+    call.renegotiateAnswer = sdp || null
+    call.renegotiateOffer = null
+    call.ts = Date.now()
+    return { call }
+  }
+
   if (action === 'end' || action === 'reject') {
     const call = calls.find((c: any) => c.id === callId)
     if (!call) return { error: 'not found' }
