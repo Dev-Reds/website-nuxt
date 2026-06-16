@@ -238,15 +238,16 @@ async function fetchTargetData() {
   if (TARGET_CACHE[en]) { targetGeoCache = TARGET_CACHE[en]; targetCacheLat = targetGeoCache.lat; targetCacheLng = targetGeoCache.lon; return }
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(en)}&limit=1&polygon_geojson=1`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(en)}&limit=10&polygon_geojson=1`,
       { headers: { 'User-Agent': 'GeoReferat/1.0' } }
     )
     const data = await res.json()
-    if (data[0]) {
-      targetGeoCache = data[0]
-      targetCacheLat = parseFloat(data[0].lat)
-      targetCacheLng = parseFloat(data[0].lon)
-      TARGET_CACHE[en] = data[0]
+    const countryResult = data.find((r: any) => r.type === 'country') || data[0]
+    if (countryResult) {
+      targetGeoCache = countryResult
+      targetCacheLat = parseFloat(countryResult.lat)
+      targetCacheLng = parseFloat(countryResult.lon)
+      TARGET_CACHE[en] = countryResult
     }
   } catch {}
 }

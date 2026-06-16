@@ -63,7 +63,15 @@ async function set(key: string, val: any) {
 }
 
 export async function hgetall(key: string) {
-  if (useRedis) return (await redisCmd('HGETALL', key)) as Record<string, string> | null
+  if (useRedis) {
+    const arr = (await redisCmd('HGETALL', key)) as string[] | null
+    if (!arr) return null
+    const obj: Record<string, string> = {}
+    for (let i = 0; i < arr.length; i += 2) {
+      if (i + 1 < arr.length) obj[arr[i]] = arr[i + 1]
+    }
+    return obj
+  }
   return local[key] ?? null
 }
 
