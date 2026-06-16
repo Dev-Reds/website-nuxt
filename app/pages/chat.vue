@@ -931,25 +931,26 @@ async function pollCalls() {
         const caller = allUsers.value.find(u => u.id === call.fromUserId)
         addCallMessage('📞 Eingehender Anruf von ' + (caller?.name || 'Unbekannt'))
       }
-      // answer received — caller transitions to active
-      if (call.status === 'answered' || call.status === 'connected') {
-        if (callState.value.mode === 'outgoing' && callState.value.callId === call.id) {
-          if (call.answer && pc && !pc.currentRemoteDescription) {
-            try {
-              const answer = JSON.parse(call.answer)
-              await pc.setRemoteDescription(answer)
-              callState.value.mode = 'active'
-            } catch {}
-          }
+      // answer received — caller transitions to active (via poll)
+      if ((call.status === 'answered' || call.status === 'connected') && callState.value.callId === call.id) {
+        if (callState.value.mode === 'outgoing' && call.answer && pc) {
+          try {
+            const desc = JSON.parse(call.answer)
+            if (pc.signalingState === 'have-local-offer') {
+              await pc.setRemoteDescription(desc)
+            }
+            callState.value.mode = 'active'
+            addCallMessage('📞 Anruf angenommen')
+          } catch {}
         }
-        // always process candidates for active/outgoing calls
-        if (callState.value.callId === call.id && (callState.value.mode === 'outgoing' || callState.value.mode === 'active')) {
+        // process ICE candidates in any non-idle state
+        if (callState.value.mode !== 'idle') {
           for (const c of (call.toCandidates || [])) {
             try { if (pc) await pc.addIceCandidate(JSON.parse(c)) } catch {}
           }
         }
       }
-      // ended — remote hung up
+      // ended — remote hung up or rejected
       if (call.status === 'ended' && callState.value.callId === call.id && callState.value.mode !== 'idle' && callState.value.mode !== 'ended') {
         endCall()
       }
