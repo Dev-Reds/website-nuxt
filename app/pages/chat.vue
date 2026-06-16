@@ -166,7 +166,11 @@
               </div>
               <template v-for="(msg,i) in activeMessages" :key="msg.id">
                 <div v-if="showDivider(i)" class="date-divider"><span>{{ fmtDate(msg.ts) }}</span></div>
-                <div :class="['msg-row', msg.senderId===currentUser.id ? 'own':'other']">
+                <div v-if="msg.senderId==='__call__'" class="call-msg">
+                  <span class="call-msg-text">{{ msg.text }}</span>
+                  <span class="call-msg-time">{{ fmtTime(msg.ts) }}</span>
+                </div>
+                <div v-else :class="['msg-row', msg.senderId===currentUser.id ? 'own':'other']">
                   <div v-if="activeChat?.type==='group' && msg.senderId!==currentUser.id"
                     class="msg-av" :style="avatarStyle(getUserById(msg.senderId))">
                     <img v-if="getUserById(msg.senderId)?.avatar" :src="getUserById(msg.senderId).avatar" class="av-img"/>
@@ -743,6 +747,7 @@ async function cancelRequest(reqId) {
 
 // ── CALL ────────────────────────────────────────────────────────────────
 const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+let pendingCandidates = []
 
 async function startCall() {
   if (!activeChat.value || activeChat.value.type !== 'dm') return
@@ -750,6 +755,7 @@ async function startCall() {
   if (!pid || !currentUser.value) return
   if (callState.value.mode !== 'idle') return
   callState.value = { mode: 'outgoing', callId: null, partnerId: pid, audioEnabled: true, videoEnabled: false, showInfo: false }
+  pendingCandidates = []
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     if (localVideo.value) localVideo.value.srcObject = localStream
@@ -757,14 +763,18 @@ async function startCall() {
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream))
     pc.ontrack = (e) => { remoteStream.value = e.streams[0] }
     pc.oniceconnectionstatechange = () => {
-      if (pc?.iceConnectionState === 'disconnected' || pc?.iceConnectionState === 'failed') endCall()
+      if (pc?.iceConnectionState === 'failed') endCall()
     }
     pc.onicecandidate = (e) => {
-      if (!e.candidate || !callState.value.callId) return
-      fetch('/api/calls', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'candidate', callId: callState.value.callId, fromUserId: currentUser.value.id, candidate: JSON.stringify(e.candidate) })
-      }).catch(() => {})
+      if (!e.candidate) return
+      if (callState.value.callId) {
+        fetch('/api/calls', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'candidate', callId: callState.value.callId, fromUserId: currentUser.value.id, candidate: JSON.stringify(e.candidate) })
+        }).catch(() => {})
+      } else {
+        pendingCandidates.push(e.candidate)
+      }
     }
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
@@ -773,7 +783,18 @@ async function startCall() {
       body: JSON.stringify({ action: 'create', fromUserId: currentUser.value.id, toUserId: pid, sdp: JSON.stringify(pc.localDescription) })
     })
     const data = await res.json()
-    if (data.call) callState.value.callId = data.call.id
+    if (data.call) {
+      callState.value.callId = data.call.id
+      for (const c of pendingCandidates) {
+        fetch('/api/calls', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'candidate', callId: callState.value.callId, fromUserId: currentUser.value.id, candidate: JSON.stringify(c) })
+        }).catch(() => {})
+      }
+      pendingCandidates = []
+    }
+    const partner = allUsers.value.find(u => u.id === pid)
+    addCallMessage('🔴 Du rufst ' + (partner?.name || 'Unbekannt') + ' an...')
   } catch (e) {
     cleanupCall()
   }
@@ -788,7 +809,7 @@ async function answerCall() {
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream))
     pc.ontrack = (e) => { remoteStream.value = e.streams[0] }
     pc.oniceconnectionstatechange = () => {
-      if (pc?.iceConnectionState === 'disconnected' || pc?.iceConnectionState === 'failed') endCall()
+      if (pc?.iceConnectionState === 'failed') endCall()
     }
     pc.onicecandidate = (e) => {
       if (!e.candidate || !callState.value.callId) return
@@ -811,6 +832,7 @@ async function answerCall() {
       })
       callState.value.mode = 'active'
     }
+    addCallMessage('📞 Anruf angenommen')
   } catch (e) {
     cleanupCall()
   }
@@ -824,6 +846,7 @@ async function rejectCall() {
       body: JSON.stringify({ action: 'end', callId: callState.value.callId, fromUserId: currentUser.value.id })
     })
   } catch {}
+  addCallMessage('❌ Anruf abgelehnt')
   cleanupCall()
 }
 
@@ -842,6 +865,7 @@ async function endCall() {
       })
     } catch {}
   }
+  addCallMessage('🔴 Anruf beendet')
   callState.value = { mode: 'ended', callId: null, partnerId: callState.value.partnerId, audioEnabled: true, videoEnabled: false, showInfo: false }
 }
 
@@ -904,22 +928,24 @@ async function pollCalls() {
       if (call.status === 'ringing' && call.toUserId === currentUser.value.id && callState.value.mode === 'idle' && !processedCallIds.value.has(call.id)) {
         processedCallIds.value.add(call.id)
         callState.value = { mode: 'incoming', callId: call.id, partnerId: call.fromUserId, audioEnabled: true, videoEnabled: false, showInfo: false }
+        const caller = allUsers.value.find(u => u.id === call.fromUserId)
+        addCallMessage('📞 Eingehender Anruf von ' + (caller?.name || 'Unbekannt'))
       }
-      // answered — callee transition to active
-      if (call.status === 'connected' && callState.value.mode === 'outgoing' && callState.value.callId === call.id) {
-        if (call.answer && pc && !pc.currentRemoteDescription) {
-          try {
-            const answer = JSON.parse(call.answer)
-            await pc.setRemoteDescription(answer)
-            for (const c of (call.toCandidates || [])) {
-              try { await pc.addIceCandidate(JSON.parse(c)) } catch {}
-            }
-            callState.value.mode = 'active'
-          } catch {}
+      // answer received — caller transitions to active
+      if (call.status === 'answered' || call.status === 'connected') {
+        if (callState.value.mode === 'outgoing' && callState.value.callId === call.id) {
+          if (call.answer && pc && !pc.currentRemoteDescription) {
+            try {
+              const answer = JSON.parse(call.answer)
+              await pc.setRemoteDescription(answer)
+              callState.value.mode = 'active'
+            } catch {}
+          }
         }
-        if (call.answer && pc && pc.currentRemoteDescription) {
+        // always process candidates for active/outgoing calls
+        if (callState.value.callId === call.id && (callState.value.mode === 'outgoing' || callState.value.mode === 'active')) {
           for (const c of (call.toCandidates || [])) {
-            try { await pc.addIceCandidate(JSON.parse(c)) } catch {}
+            try { if (pc) await pc.addIceCandidate(JSON.parse(c)) } catch {}
           }
         }
       }
@@ -978,6 +1004,15 @@ function showDivider(i) {
   return new Date(activeMessages.value[i].ts).toDateString() !== new Date(activeMessages.value[i-1].ts).toDateString()
 }
 function addEmoji(e) { newMsg.value += e; showEmoji.value = false; nextTick(()=>msgInput.value?.focus()) }
+
+async function addCallMessage(text) {
+  if (!activeChatId.value || !currentUser.value) return
+  const msg = { id: 'call_'+Date.now()+'_'+Math.random().toString(36).slice(2), senderId: '__call__', senderName: '', text, ts: Date.now(), read: true }
+  const stored = await api.getMsgs(activeChatId.value); stored.push(msg); await api.saveMsgs(activeChatId.value, stored)
+  if (!messages[activeChatId.value]) messages[activeChatId.value] = []
+  messages[activeChatId.value].push(msg)
+  nextTick(scrollBottom)
+}
 
 onMounted(async () => {
   await restore()
@@ -1115,6 +1150,11 @@ onBeforeUnmount(async () => {
 .send-btn:hover{background:#c62828;transform:scale(1.05)}
 .send-btn:disabled{background:#3d1a1a;cursor:not-allowed;transform:none}
 .mobile-back{display:none}
+
+/* CALL SYSTEM MESSAGES */
+.call-msg{text-align:center;padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.call-msg-text{font-size:12px;color:#8696a0;background:rgba(134,150,160,.08);padding:5px 14px;border-radius:12px;display:inline-block}
+.call-msg-time{font-size:10px;color:#4a5568}
 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
