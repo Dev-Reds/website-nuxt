@@ -14,6 +14,8 @@ let addCallMessageFn = null
 let _currentUserId = null
 let callStatusInterval = null
 let awaitingRenegotiateAnswer = false
+let callStartTime = 0
+const CALL_TIMEOUT = 30000
 
 export function setCallMessageCallback(fn) { addCallMessageFn = fn }
 
@@ -36,11 +38,13 @@ export function useCall() {
 
   async function fetchCallStatus() {
     if (!_currentUserId || !callState.value.callId) return
+    let found = false
     try {
       const res = await fetch(`/api/calls?userId=${_currentUserId}`)
       const data = await res.json()
       for (const call of data.calls) {
         if (call.id !== callState.value.callId) continue
+        found = true
         // answer received (outgoing → active)
         if ((call.status === 'connected') && callState.value.mode === 'outgoing' && call.answer && pc) {
           try { await pc.setRemoteDescription(JSON.parse(call.answer)).catch(() => {}) } catch {}
@@ -79,16 +83,26 @@ export function useCall() {
           return
         }
       }
+      if (!found && callState.value.mode !== 'idle' && callState.value.mode !== 'ended') {
+        await addCallMessage('⚠️ Verbindung zum Server verloren')
+        endCall()
+      }
     } catch {}
   }
 
   function ensureCallPolling() {
     if (callStatusInterval) return
-    // immediate first check, then poll every 300ms
+    callStartTime = Date.now()
     fetchCallStatus()
     callStatusInterval = setInterval(async () => {
       if (!_currentUserId || !callState.value.callId || callState.value.mode === 'idle' || callState.value.mode === 'ended') {
         clearInterval(callStatusInterval); callStatusInterval = null; return
+      }
+      // timeout if no answer for 30s in outgoing mode
+      if (callState.value.mode === 'outgoing' && Date.now() - callStartTime > CALL_TIMEOUT) {
+        await addCallMessage('⏱ Keine Antwort – Anruf beendet')
+        endCall()
+        return
       }
       await fetchCallStatus()
     }, 200)
@@ -168,10 +182,12 @@ export function useCall() {
         await pc.setRemoteDescription(offer)
         const answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)
-        await fetch('/api/calls', {
+        const ansRes = await fetch('/api/calls', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'answer', callId: callState.value.callId, fromUserId: _currentUserId, sdp: JSON.stringify(pc.localDescription) })
         })
+        const ansData = await ansRes.json()
+        if (ansData.error) throw new Error('Server: ' + ansData.error)
         callState.value.mode = 'active'
       }
       ensureCallPolling()
