@@ -13,8 +13,7 @@ let videoStream = null
 let addCallMessageFn = null
 let _currentUserId = null
 let callStatusInterval = null
-let processedRenegotiateAnswer = false
-let processedRenegotiateOffer = false
+let awaitingRenegotiateAnswer = false
 
 export function setCallMessageCallback(fn) { addCallMessageFn = fn }
 
@@ -32,6 +31,7 @@ export function useCall() {
     if (callStatusInterval) { clearInterval(callStatusInterval); callStatusInterval = null }
     callState.value = { mode: 'idle', callId: null, partnerId: null, partnerName: '', chatId: null, audioEnabled: true, videoEnabled: false, showInfo: false }
     processedCallIds.clear()
+    awaitingRenegotiateAnswer = false
   }
 
   async function fetchCallStatus() {
@@ -47,10 +47,8 @@ export function useCall() {
           callState.value.mode = 'active'
           await addCallMessage('📞 Anruf angenommen')
         }
-        // renegotiation — remote sent a new offer (we are the receiver)
-        if (call.renegotiateOffer && pc && _currentUserId !== call.fromUserId && callState.value.mode === 'active' && !processedRenegotiateOffer) {
-          processedRenegotiateOffer = true
-          processedRenegotiateAnswer = false
+        // renegotiation — we received a new offer (someone else toggled video)
+        if (call.renegotiateOffer && pc && !awaitingRenegotiateAnswer && callState.value.mode === 'active') {
           try {
             await pc.setRemoteDescription(JSON.parse(call.renegotiateOffer))
             const answer = await pc.createAnswer()
@@ -62,8 +60,8 @@ export function useCall() {
           } catch {}
         }
         // renegotiation — answer received (we sent the offer)
-        if (call.renegotiateAnswer && pc && _currentUserId === call.fromUserId && callState.value.mode === 'active' && !processedRenegotiateAnswer) {
-          processedRenegotiateAnswer = true
+        if (call.renegotiateAnswer && pc && awaitingRenegotiateAnswer && callState.value.mode === 'active') {
+          awaitingRenegotiateAnswer = false
           try {
             await pc.setRemoteDescription(JSON.parse(call.renegotiateAnswer)).catch(() => {})
           } catch {}
@@ -215,6 +213,7 @@ export function useCall() {
     }
     await addCallMessage('🔴 Anruf beendet')
     if (callStatusInterval) { clearInterval(callStatusInterval); callStatusInterval = null }
+    awaitingRenegotiateAnswer = false
     callState.value = { ...callState.value, mode: 'ended', callId: null, audioEnabled: true, videoEnabled: false, showInfo: false }
   }
 
@@ -234,7 +233,7 @@ export function useCall() {
       callState.value.videoEnabled = videoTrack.enabled
       return
     }
-    processedRenegotiateAnswer = false
+    awaitingRenegotiateAnswer = true
     navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((vs) => {
       videoStream = vs
       const newTrack = vs.getVideoTracks()[0]
