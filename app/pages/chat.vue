@@ -150,6 +150,9 @@
                 <template v-else>{{ isOnline(getDmPartnerId(activeChat)) ? 'Online' : lastSeenText(getDmPartnerId(activeChat)) }}</template>
               </span>
             </div>
+            <button v-if="activeChat?.type==='dm'" class="icon-btn" @click="startCall" title="Anrufen">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            </button>
             <button v-if="activeChat?.type==='group'" class="icon-btn" @click="showGroupInfo=true">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </button>
@@ -200,6 +203,53 @@
             </button>
           </div>
         </template>
+      </div>
+    </div>
+
+    <!-- ═══ CALL OVERLAY ═══ -->
+    <div v-if="callState.mode !== 'idle'" class="call-overlay" @click.self="callState.showInfo = !callState.showInfo">
+      <div class="call-container">
+        <div v-if="callState.mode === 'active' && remoteStream" class="remote-video-wrap">
+          <video ref="remoteVideo" autoplay playsinline class="remote-video"/>
+        </div>
+        <div v-else class="call-avatar-area">
+          <div class="av xl" :style="avatarStyle(callPartner)">
+            <img v-if="callPartner?.avatar" :src="callPartner.avatar" class="av-img"/>
+            <span v-else>{{ callPartner?.name?.[0]?.toUpperCase() ?? '?' }}</span>
+          </div>
+        </div>
+        <div v-if="callState.mode === 'active' && localStream" class="local-video-wrap">
+          <video ref="localVideo" autoplay muted playsinline class="local-video"/>
+        </div>
+        <div class="call-info">
+          <div class="call-partner-name">{{ callPartner?.name || 'Unbekannt' }}</div>
+          <div class="call-status-text">
+            <template v-if="callState.mode === 'outgoing'">Wird verbunden…</template>
+            <template v-else-if="callState.mode === 'incoming'">Eingehender Anruf</template>
+            <template v-else-if="callState.mode === 'active'">Verbunden</template>
+            <template v-else-if="callState.mode === 'ended'">Anruf beendet</template>
+          </div>
+        </div>
+        <div class="call-actions">
+          <template v-if="callState.mode === 'incoming'">
+            <button class="call-btn accept" @click="answerCall">Annehmen</button>
+            <button class="call-btn reject" @click="rejectCall">Ablehnen</button>
+          </template>
+          <template v-else-if="callState.mode === 'outgoing'">
+            <button class="call-btn reject" @click="endCall">Auflegen</button>
+          </template>
+          <template v-else-if="callState.mode === 'active'">
+            <button :class="['call-btn', 'v-btn', { active: !callState.audioMuted }]" @click="toggleAudio">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <button class="call-btn reject end" @click="endCall">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            </button>
+          </template>
+          <template v-else-if="callState.mode === 'ended'">
+            <button class="call-btn" @click="closeCallOverlay">Schließen</button>
+          </template>
+        </div>
       </div>
     </div>
 
@@ -407,6 +457,14 @@ const pollInterval  = ref(null)
 const emojis = ['😀','😂','😍','🥰','😊','👍','❤️','🔥','🎉','😎','🤔','😅','👋','✨','💯','🙏','😭','🥳','👀','💪']
 const friendRequests = ref([])
 
+// ── CALL ────────────────────────────────────────────────────────────────
+const callState = ref({ mode: 'idle', callId: null, partnerId: null, audioMuted: false, showInfo: false })
+const localVideo = ref(null)
+const remoteVideo = ref(null)
+let pc = null
+let localStream = null
+const remoteStream = ref(null)
+
 // ── MODALS ─────────────────────────────────────────────────────────────
 const showNewChat      = ref(false)
 const newChatMode      = ref('dm')
@@ -441,6 +499,10 @@ const chatList = computed(() =>
 )
 const activeChat     = computed(() => chatList.value.find(c => c.id === activeChatId.value) || null)
 const activeMessages = computed(() => messages[activeChatId.value] || [])
+const callPartner    = computed(() => {
+  if (!callState.value.partnerId) return null
+  return allUsers.value.find(u => u.id === callState.value.partnerId) || null
+})
 
 // ── API ────────────────────────────────────────────────────────────────
 async function apiGet(path) { const r = await fetch(path); return r.json() }
@@ -567,6 +629,7 @@ function startPoll() {
       if (activeChatId.value) { await markRead(activeChatId.value); unreadCounts[activeChatId.value] = 0; nextTick(scrollBottom) }
       friendRequests.value = await api.getRequests()
       await fetchOnlineUsers()
+      await pollCalls()
     } catch {}
   }, 1000)
 }
@@ -672,6 +735,163 @@ async function cancelRequest(reqId) {
   const all = await api.getRequests()
   const idx = all.findIndex(r => r.id === reqId)
   if (idx !== -1) { all.splice(idx, 1); await api.saveRequests(all); friendRequests.value = all }
+}
+
+// ── CALL ────────────────────────────────────────────────────────────────
+const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+
+async function startCall() {
+  if (!activeChat.value || activeChat.value.type !== 'dm') return
+  const pid = getDmPartnerId(activeChat.value)
+  if (!pid || !currentUser.value) return
+  if (callState.value.mode !== 'idle') return
+  callState.value = { mode: 'outgoing', callId: null, partnerId: pid, audioMuted: false, showInfo: false }
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    if (localVideo.value) localVideo.value.srcObject = localStream
+    pc = new RTCPeerConnection(rtcConfig)
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream))
+    pc.ontrack = (e) => { remoteStream.value = e.streams[0] }
+    pc.oniceconnectionstatechange = () => {
+      if (pc?.iceConnectionState === 'disconnected' || pc?.iceConnectionState === 'failed') endCall()
+    }
+    pc.onicecandidate = (e) => {
+      if (!e.candidate || !callState.value.callId) return
+      fetch('/api/calls', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'candidate', callId: callState.value.callId, fromUserId: currentUser.value.id, candidate: JSON.stringify(e.candidate) })
+      }).catch(() => {})
+    }
+    const offer = await pc.createOffer()
+    await pc.setLocalDescription(offer)
+    const res = await fetch('/api/calls', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', fromUserId: currentUser.value.id, toUserId: pid, sdp: JSON.stringify(pc.localDescription) })
+    })
+    const data = await res.json()
+    if (data.call) callState.value.callId = data.call.id
+  } catch (e) {
+    cleanupCall()
+  }
+}
+
+async function answerCall() {
+  if (callState.value.mode !== 'incoming' || !currentUser.value) return
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    if (localVideo.value) localVideo.value.srcObject = localStream
+    pc = new RTCPeerConnection(rtcConfig)
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream))
+    pc.ontrack = (e) => { remoteStream.value = e.streams[0] }
+    pc.oniceconnectionstatechange = () => {
+      if (pc?.iceConnectionState === 'disconnected' || pc?.iceConnectionState === 'failed') endCall()
+    }
+    pc.onicecandidate = (e) => {
+      if (!e.candidate || !callState.value.callId) return
+      fetch('/api/calls', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'candidate', callId: callState.value.callId, fromUserId: currentUser.value.id, candidate: JSON.stringify(e.candidate) })
+      }).catch(() => {})
+    }
+    const res = await fetch(`/api/calls?userId=${currentUser.value.id}`)
+    const data = await res.json()
+    const call = data.calls.find((c: any) => c.id === callState.value.callId)
+    if (call?.offer) {
+      const offer = JSON.parse(call.offer)
+      await pc.setRemoteDescription(offer)
+      const answer = await pc.createAnswer()
+      await pc.setLocalDescription(answer)
+      await fetch('/api/calls', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'answer', callId: callState.value.callId, fromUserId: currentUser.value.id, sdp: JSON.stringify(pc.localDescription) })
+      })
+      callState.value.mode = 'active'
+    }
+  } catch (e) {
+    cleanupCall()
+  }
+}
+
+async function rejectCall() {
+  if (!callState.value.callId) { cleanupCall(); return }
+  try {
+    await fetch('/api/calls', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'end', callId: callState.value.callId, fromUserId: currentUser.value.id })
+    })
+  } catch {}
+  cleanupCall()
+}
+
+async function endCall() {
+  if (pc) {
+    pc.getTransceivers().forEach(t => { if (t.stop) t.stop() })
+    pc.close(); pc = null
+  }
+  if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null }
+  remoteStream.value = null
+  if (callState.value.callId) {
+    try {
+      await fetch('/api/calls', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'end', callId: callState.value.callId, fromUserId: currentUser.value.id })
+      })
+    } catch {}
+  }
+  callState.value = { mode: 'ended', callId: null, partnerId: callState.value.partnerId, audioMuted: false, showInfo: false }
+}
+
+function closeCallOverlay() {
+  cleanupCall()
+}
+
+function cleanupCall() {
+  if (pc) { pc.getTransceivers().forEach(t => { if (t.stop) t.stop() }); pc.close(); pc = null }
+  if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null }
+  remoteStream.value = null
+  callState.value = { mode: 'idle', callId: null, partnerId: null, audioMuted: false, showInfo: false }
+}
+
+function toggleAudio() {
+  if (!localStream) return
+  const audioTrack = localStream.getAudioTracks()[0]
+  if (audioTrack) {
+    audioTrack.enabled = !audioTrack.enabled
+    callState.value.audioMuted = !audioTrack.enabled
+  }
+}
+
+async function pollCalls() {
+  if (!currentUser.value || callState.value.mode === 'active') return
+  try {
+    const res = await fetch(`/api/calls?userId=${currentUser.value.id}`)
+    const data = await res.json()
+    for (const call of data.calls) {
+      if (call.status === 'ringing' && call.toUserId === currentUser.value.id && callState.value.mode === 'idle') {
+        callState.value = { mode: 'incoming', callId: call.id, partnerId: call.fromUserId, audioMuted: false, showInfo: false }
+      }
+      if (call.status === 'connected' && callState.value.mode === 'outgoing' && callState.value.callId === call.id) {
+        if (call.answer && pc && !pc.currentRemoteDescription) {
+          try {
+            const answer = JSON.parse(call.answer)
+            await pc.setRemoteDescription(answer)
+            for (const c of (call.toCandidates || [])) {
+              try { await pc.addIceCandidate(JSON.parse(c)) } catch {}
+            }
+            callState.value.mode = 'active'
+          } catch {}
+        }
+        if (call.answer && pc && pc.currentRemoteDescription) {
+          for (const c of (call.toCandidates || [])) {
+            try { await pc.addIceCandidate(JSON.parse(c)) } catch {}
+          }
+        }
+      }
+      if (call.status === 'ended' && callState.value.callId === call.id && callState.value.mode !== 'idle' && callState.value.mode !== 'ended') {
+        endCall()
+      }
+    }
+  } catch {}
 }
 
 // ── HELPERS ────────────────────────────────────────────────────────────
@@ -816,7 +1036,7 @@ onBeforeUnmount(async () => {
 .badge{background:#e53935;color:white;font-size:11px;font-weight:700;border-radius:50px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 
 /* CHAT WINDOW */
-.chat-window{flex:1;display:flex;flex-direction:column;height:100%;min-width:0;background:#1a0a0a}
+.chat-window{flex:1;display:flex;flex-direction:column;height:100%;min-width:0;background:#1a0a0a;position:relative}
 .no-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#8696a0;text-align:center}
 .no-chat h2{font-size:22px;font-weight:500;color:#e9edef}
 .no-chat p{font-size:14px;line-height:1.9}
@@ -919,6 +1139,29 @@ onBeforeUnmount(async () => {
 .req-sent{font-size:11px;color:#8696a0;white-space:nowrap}
 .req-recv{font-size:11px;color:#4ecdc4;white-space:nowrap}
 .modal-user-item:hover .req-sent{color:#e9edef}
+
+/* CALL OVERLAY */
+.call-overlay{position:absolute;inset:0;z-index:200;background:rgba(10,5,5,.92);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.call-container{display:flex;flex-direction:column;align-items:center;gap:16px;padding:30px;width:100%;max-width:400px;position:relative}
+.call-avatar-area{display:flex;align-items:center;justify-content:center}
+.av.xl{width:100px;height:100px;font-size:40px;border:3px solid #e53935;box-shadow:0 0 40px rgba(229,57,53,.3)}
+.remote-video-wrap{width:100%;max-width:360px;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:#000;border:2px solid #3d1a1a}
+.remote-video{width:100%;height:100%;object-fit:cover}
+.local-video-wrap{position:absolute;top:10px;right:10px;width:120px;aspect-ratio:4/3;border-radius:10px;overflow:hidden;border:2px solid #3d1a1a;background:#000;z-index:5}
+.local-video{width:100%;height:100%;object-fit:cover}
+.call-info{text-align:center}
+.call-partner-name{font-size:20px;font-weight:600;color:#e9edef}
+.call-status-text{font-size:13px;color:#8696a0;margin-top:4px}
+.call-actions{display:flex;gap:14px;align-items:center;justify-content:center}
+.call-btn{width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;font-family:inherit;font-size:13px;font-weight:600;background:#3d1a1a;color:#e9edef}
+.call-btn:hover{transform:scale(1.05)}
+.call-btn.accept{background:#e53935;color:white;width:60px;height:60px}
+.call-btn.accept:hover{background:#c62828}
+.call-btn.reject{background:#5a2020;color:#ff6b6b}
+.call-btn.reject:hover{background:#7b1c1c}
+.call-btn.reject.end{width:60px;height:60px}
+.call-btn.v-btn{background:#3d1a1a;color:#8696a0}
+.call-btn.v-btn.active{background:#e53935;color:white}
 
 @media(max-width:768px){
   .sidebar{position:fixed;top:0;left:0;width:100%;min-width:unset;height:100dvh;padding-top:56px;box-sizing:border-box;z-index:50;transform:translateX(-100%);transition:transform .3s ease}
