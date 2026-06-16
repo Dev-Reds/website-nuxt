@@ -795,7 +795,7 @@ async function answerCall() {
     }
     const res = await fetch(`/api/calls?userId=${currentUser.value.id}`)
     const data = await res.json()
-    const call = data.calls.find((c: any) => c.id === callState.value.callId)
+      const call = data.calls.find((c) => c.id === callState.value.callId)
     if (call?.offer) {
       const offer = JSON.parse(call.offer)
       await pc.setRemoteDescription(offer)
