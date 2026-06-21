@@ -2,7 +2,7 @@ const calls: any[] = globalThis.__calls__ || (globalThis.__calls__ = [])
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { action, fromUserId, toUserId, callId, sdp, candidate } = body
+  const { action, fromUserId, toUserId, callId, sdp, candidate, chatId } = body
 
   if (action === 'create') {
     const existing = calls.find((c: any) =>
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     )
     if (existing) return { call: existing }
     const id = 'call_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)
-    const call = { id, fromUserId, toUserId, status: 'ringing', offer: sdp || null, answer: null, fromCandidates: [], toCandidates: [], ts: Date.now() }
+    const call = { id, fromUserId, toUserId, chatId: chatId || null, status: 'ringing', offer: sdp || null, answer: null, fromCandidates: [], toCandidates: [], ts: Date.now() }
     calls.push(call)
     return { call }
   }

@@ -311,11 +311,11 @@
               <svg v-if="isMemberSelected(user)" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div v-else class="dm-status">
-              <template v-if="chats.find(c=>c.type==='dm'&&c.members.includes(user.id)&&c.members.includes(currentUser.value?.id))">
+              <template v-if="chats.find(c=>c.type==='dm'&&c.members.includes(user.id)&&c.members.includes(currentUser?.id))">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
               </template>
               <template v-else-if="getRequestStatus(user.id)">
-                <template v-if="getRequestStatus(user.id)?.fromUserId===currentUser.value?.id">
+                  <template v-if="getRequestStatus(user.id)?.fromUserId===currentUser?.id">
                   <span class="req-sent">Anfrage gesendet</span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2" style="cursor:pointer;flex-shrink:0" @click.stop="cancelRequest(getRequestStatus(user.id).id)" title="Abbrechen"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </template>

@@ -4,17 +4,21 @@ const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
 
 const callState = ref({ mode: 'idle', callId: null, partnerId: null, partnerName: '', chatId: null, audioEnabled: true, videoEnabled: false, showInfo: false })
 const remoteStream = ref(null)
+const localStreamRef = ref(null)
 
 let pc = null
 let localStream = null
 const processedCallIds = new Set()
 let pendingCandidates = []
+let processedIceCandidates = new Set()
+let bufferedIceCandidates = []
 let videoStream = null
 let addCallMessageFn = null
 let _currentUserId = null
 let callStatusInterval = null
 let awaitingRenegotiateAnswer = false
 let callStartTime = 0
+let callDurationInterval = null
 const CALL_TIMEOUT = 30000
 
 export function setCallMessageCallback(fn) { addCallMessageFn = fn }
@@ -27,13 +31,47 @@ export function useCall() {
 
   function cleanupCall() {
     if (pc) { pc.getTransceivers().forEach(t => { if (t.stop) t.stop() }); pc.close(); pc = null }
-    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null }
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; localStreamRef.value = null }
     if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null }
     remoteStream.value = null
     if (callStatusInterval) { clearInterval(callStatusInterval); callStatusInterval = null }
+    if (callDurationInterval) { clearInterval(callDurationInterval); callDurationInterval = null }
     callState.value = { mode: 'idle', callId: null, partnerId: null, partnerName: '', chatId: null, audioEnabled: true, videoEnabled: false, showInfo: false }
     processedCallIds.clear()
+    processedIceCandidates.clear()
+    bufferedIceCandidates = []
     awaitingRenegotiateAnswer = false
+  }
+
+  async function processIceCandidates() {
+    if (!pc || !callState.value.callId || callState.value.mode === 'idle') return
+    try {
+      const res = await fetch(`/api/calls?userId=${_currentUserId}`)
+      const data = await res.json()
+      const call = data.calls.find(c => c.id === callState.value.callId)
+      if (!call) return
+      const otherCandidates = _currentUserId === call.fromUserId ? (call.toCandidates || []) : (call.fromCandidates || [])
+      for (const c of otherCandidates) {
+        if (processedIceCandidates.has(c)) continue
+        processedIceCandidates.add(c)
+        try {
+          if (pc.remoteDescription && pc.remoteDescription.type) {
+            await pc.addIceCandidate(JSON.parse(c))
+          } else {
+            bufferedIceCandidates.push(c)
+          }
+        } catch {}
+      }
+    } catch {}
+  }
+
+  async function flushBufferedCandidates() {
+    if (!pc || !pc.remoteDescription || !pc.remoteDescription.type || bufferedIceCandidates.length === 0) return
+    const toFlush = [...bufferedIceCandidates]
+    bufferedIceCandidates = []
+    for (const c of toFlush) {
+      try { await pc.addIceCandidate(JSON.parse(c)) } catch {}
+    }
   }
 
   async function fetchCallStatus() {
@@ -47,9 +85,14 @@ export function useCall() {
         found = true
         // answer received (outgoing → active)
         if ((call.status === 'connected') && callState.value.mode === 'outgoing' && call.answer && pc) {
-          try { await pc.setRemoteDescription(JSON.parse(call.answer)).catch(() => {}) } catch {}
-          callState.value.mode = 'active'
-          await addCallMessage('📞 Anruf angenommen')
+          try {
+            await pc.setRemoteDescription(JSON.parse(call.answer))
+            callState.value.mode = 'active'
+            startCallDurationTimer()
+            await flushBufferedCandidates()
+            await processIceCandidates()
+            await addCallMessage('📞 Anruf angenommen')
+          } catch {}
         }
         // renegotiation — we received a new offer (someone else toggled video)
         if (call.renegotiateOffer && pc && !awaitingRenegotiateAnswer && callState.value.mode === 'active') {
@@ -67,15 +110,12 @@ export function useCall() {
         if (call.renegotiateAnswer && pc && awaitingRenegotiateAnswer && callState.value.mode === 'active') {
           awaitingRenegotiateAnswer = false
           try {
-            await pc.setRemoteDescription(JSON.parse(call.renegotiateAnswer)).catch(() => {})
+            await pc.setRemoteDescription(JSON.parse(call.renegotiateAnswer))
           } catch {}
         }
         // ICE candidates
         if (callState.value.mode !== 'idle') {
-          const otherCandidates = _currentUserId === call.fromUserId ? (call.toCandidates || []) : (call.fromCandidates || [])
-          for (const c of otherCandidates) {
-            try { if (pc) await pc.addIceCandidate(JSON.parse(c)) } catch {}
-          }
+          await processIceCandidates()
         }
         // remote ended
         if (call.status === 'ended' && callState.value.mode !== 'idle' && callState.value.mode !== 'ended') {
@@ -83,11 +123,27 @@ export function useCall() {
           return
         }
       }
-      if (!found && callState.value.mode !== 'idle' && callState.value.mode !== 'ended') {
+      if (!found && callState.value.mode === 'active' && callState.value.callId) {
         await addCallMessage('⚠️ Verbindung zum Server verloren')
         endCall()
       }
     } catch {}
+  }
+
+  function startCallDurationTimer() {
+    if (callDurationInterval) clearInterval(callDurationInterval)
+    callStartTime = Date.now()
+    callDurationInterval = setInterval(() => {
+      if (callState.value.mode !== 'active') {
+        clearInterval(callDurationInterval)
+        callDurationInterval = null
+        return
+      }
+      const elapsed = Date.now() - callStartTime
+      const mins = Math.floor(elapsed / 60000)
+      const secs = Math.floor((elapsed % 60000) / 1000)
+      callState.value.showInfo = true
+    }, 1000)
   }
 
   function ensureCallPolling() {
@@ -113,13 +169,21 @@ export function useCall() {
     _currentUserId = userId
     callState.value = { mode: 'outgoing', callId: null, partnerId, partnerName, chatId, audioEnabled: true, videoEnabled: false, showInfo: false }
     pendingCandidates = []
+    bufferedIceCandidates = []
+    processedIceCandidates.clear()
     try {
       localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      localStreamRef.value = localStream
       pc = new RTCPeerConnection(rtcConfig)
       localStream.getTracks().forEach(t => pc.addTrack(t, localStream))
       pc.ontrack = (e) => { remoteStream.value = e.streams[0] }
       pc.oniceconnectionstatechange = () => {
-        if (pc?.iceConnectionState === 'failed') endCall()
+        if (pc?.iceConnectionState === 'failed' || pc?.iceConnectionState === 'disconnected') {
+          if (callState.value.mode === 'active') {
+            addCallMessage('⚠️ Verbindung getrennt')
+            endCall()
+          }
+        }
       }
       pc.onicecandidate = (e) => {
         if (!e.candidate) return
@@ -132,11 +196,19 @@ export function useCall() {
           pendingCandidates.push(e.candidate)
         }
       }
+      pc.onconnectionstatechange = () => {
+        if (pc?.connectionState === 'failed' || pc?.connectionState === 'disconnected') {
+          if (callState.value.mode === 'active') {
+            addCallMessage('⚠️ Verbindung getrennt')
+            endCall()
+          }
+        }
+      }
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
       const res = await fetch('/api/calls', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'create', fromUserId: _currentUserId, toUserId: partnerId, sdp: JSON.stringify(pc.localDescription) })
+        body: JSON.stringify({ action: 'create', fromUserId: _currentUserId, toUserId: partnerId, chatId: chatId, sdp: JSON.stringify(pc.localDescription) })
       })
       const data = await res.json()
       if (data.call) {
@@ -161,11 +233,25 @@ export function useCall() {
     _currentUserId = userId
     try {
       localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      localStreamRef.value = localStream
       pc = new RTCPeerConnection(rtcConfig)
       localStream.getTracks().forEach(t => pc.addTrack(t, localStream))
       pc.ontrack = (e) => { remoteStream.value = e.streams[0] }
       pc.oniceconnectionstatechange = () => {
-        if (pc?.iceConnectionState === 'failed') endCall()
+        if (pc?.iceConnectionState === 'failed' || pc?.iceConnectionState === 'disconnected') {
+          if (callState.value.mode === 'active') {
+            addCallMessage('⚠️ Verbindung getrennt')
+            endCall()
+          }
+        }
+      }
+      pc.onconnectionstatechange = () => {
+        if (pc?.connectionState === 'failed' || pc?.connectionState === 'disconnected') {
+          if (callState.value.mode === 'active') {
+            addCallMessage('⚠️ Verbindung getrennt')
+            endCall()
+          }
+        }
       }
       pc.onicecandidate = (e) => {
         if (!e.candidate || !callState.value.callId) return
@@ -180,6 +266,8 @@ export function useCall() {
       if (call?.offer) {
         const offer = JSON.parse(call.offer)
         await pc.setRemoteDescription(offer)
+        // Process any ICE candidates that arrived before remote description
+        await processIceCandidates()
         const answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)
         const ansRes = await fetch('/api/calls', {
@@ -189,6 +277,8 @@ export function useCall() {
         const ansData = await ansRes.json()
         if (ansData.error) throw new Error('Server: ' + ansData.error)
         callState.value.mode = 'active'
+        startCallDurationTimer()
+        await flushBufferedCandidates()
       }
       ensureCallPolling()
       await addCallMessage('📞 Anruf angenommen')
@@ -215,9 +305,10 @@ export function useCall() {
       pc.getTransceivers().forEach(t => { if (t.stop) t.stop() })
       pc.close(); pc = null
     }
-    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null }
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; localStreamRef.value = null }
     if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null }
     remoteStream.value = null
+    if (callDurationInterval) { clearInterval(callDurationInterval); callDurationInterval = null }
     // only notify server if we initiated the end (not already ended on server)
     if (!fromRemote && callState.value.callId) {
       try {
@@ -227,10 +318,14 @@ export function useCall() {
         })
       } catch {}
     }
-    await addCallMessage('🔴 Anruf beendet')
+    if (!fromRemote) {
+      await addCallMessage('🔴 Anruf beendet')
+    }
     if (callStatusInterval) { clearInterval(callStatusInterval); callStatusInterval = null }
     awaitingRenegotiateAnswer = false
     callState.value = { ...callState.value, mode: 'ended', callId: null, audioEnabled: true, videoEnabled: false, showInfo: false }
+    processedIceCandidates.clear()
+    bufferedIceCandidates = []
   }
 
   function closeCallOverlay() { cleanupCall() }
@@ -276,7 +371,7 @@ export function useCall() {
         if (call.status === 'ringing' && call.toUserId === _currentUserId && callState.value.mode === 'idle' && !processedCallIds.has(call.id)) {
           processedCallIds.add(call.id)
           const caller = allUsers?.find(u => u.id === call.fromUserId)
-          callState.value = { mode: 'incoming', callId: call.id, partnerId: call.fromUserId, partnerName: caller?.name || 'Unbekannt', chatId: null, audioEnabled: true, videoEnabled: false, showInfo: false }
+          callState.value = { mode: 'incoming', callId: call.id, partnerId: call.fromUserId, partnerName: caller?.name || 'Unbekannt', chatId: call.chatId || null, audioEnabled: true, videoEnabled: false, showInfo: false }
           ensureCallPolling()
           await addCallMessage('📞 Eingehender Anruf von ' + (caller?.name || 'Unbekannt'))
         }
@@ -286,16 +381,16 @@ export function useCall() {
           if (callState.value.mode === 'outgoing' && call.answer && pc) {
             try {
               const desc = JSON.parse(call.answer)
-              await pc.setRemoteDescription(desc).catch(() => {})
+              await pc.setRemoteDescription(desc)
+              callState.value.mode = 'active'
+              startCallDurationTimer()
+              await flushBufferedCandidates()
+              await processIceCandidates()
+              await addCallMessage('📞 Anruf angenommen')
             } catch {}
-            callState.value.mode = 'active'
-            await addCallMessage('📞 Anruf angenommen')
           }
           if (callState.value.mode !== 'idle') {
-            const otherCandidates = _currentUserId === call.fromUserId ? (call.toCandidates || []) : (call.fromCandidates || [])
-            for (const c of otherCandidates) {
-              try { if (pc) await pc.addIceCandidate(JSON.parse(c)) } catch {}
-            }
+            await processIceCandidates()
           }
         }
         if (call.status === 'ended' && callState.value.callId === call.id && callState.value.mode !== 'idle' && callState.value.mode !== 'ended') {
