@@ -10,26 +10,51 @@
           <span class="streak-label">Serie</span>
         </div>
       </div>
-      <div v-if="mapReady" class="top-bar">
-        <input v-model="customTarget" list="country-list" @keyup.enter="selectCountry" placeholder="Land eingeben..." class="country-input">
-        <datalist id="country-list">
-          <option v-for="c in countries" :key="c.nameDe" :value="c.nameDe"/>
-        </datalist>
-        <button @click="selectCountry" class="ok-btn">Übernehmen</button>
-        <button @click="shareCountry" class="share-btn">Teilen</button>
-        <span v-if="copied" class="copied-msg">Link kopiert!</span>
-      </div>
-      <div v-if="mapReady" class="target-area">
-        <img v-if="gameMode === 'flags'" :src="`https://flagcdn.com/w160/${target.code.toLowerCase()}.png`" :alt="target.nameDe" class="flag-img">
-        <div v-if="gameMode !== 'flags'" class="target-name">{{ target.nameDe }}</div>
-      </div>
-      <div ref="mapContainer" class="map-container">
-        <div v-if="!mapReady" class="map-placeholder">Karte wird geladen...</div>
-      </div>
-      <div v-if="evaluated" class="eval-overlay distance-text">Entfernung: {{ distanceText }}</div>
-      <div v-if="!evaluated && hasMarker" class="eval-row">
-        <button @click="evaluate" class="action-btn">Auswerten</button>
-      </div>
+      <!-- Landscape mode: top bar + name + map -->
+      <template v-if="gameMode === 'landscape'">
+        <div v-if="mapReady" class="top-bar">
+          <input v-model="customTarget" list="country-list" @keyup.enter="selectCountry" placeholder="Land eingeben..." class="country-input">
+          <datalist id="country-list">
+            <option v-for="c in countries" :key="c.nameDe" :value="c.nameDe"/>
+          </datalist>
+          <button @click="selectCountry" class="ok-btn">Übernehmen</button>
+          <button @click="shareCountry" class="share-btn">Teilen</button>
+          <span v-if="copied" class="copied-msg">Link kopiert!</span>
+        </div>
+        <div v-if="mapReady" class="target-name">{{ target.nameDe }}</div>
+        <div ref="mapContainer" class="map-container">
+          <div v-if="!mapReady" class="map-placeholder">Karte wird geladen...</div>
+        </div>
+        <div v-if="evaluated" class="eval-overlay distance-text">Entfernung: {{ distanceText }}</div>
+        <div v-if="!evaluated && hasMarker" class="eval-row">
+          <button @click="evaluate" class="action-btn">Auswerten</button>
+        </div>
+      </template>
+
+      <!-- Flag mode: flag + input + buttons + map result -->
+      <template v-if="gameMode === 'flags'">
+        <div v-if="mapReady" class="target-area">
+          <img :src="`https://flagcdn.com/w160/${target.code.toLowerCase()}.png`" :alt="target.nameDe" class="flag-img">
+        </div>
+        <div v-if="!evaluated" class="flag-guess-area">
+          <div class="flag-input-row">
+            <input v-model="flagGuess" @keyup.enter="submitFlagGuess(flagGuess)" placeholder="Land eingeben..." class="country-input">
+            <button @click="submitFlagGuess(flagGuess)" class="ok-btn">Raten</button>
+          </div>
+          <div class="flag-buttons">
+            <button
+              v-for="c in countries" :key="c.code"
+              class="flag-btn"
+              @click="submitFlagGuess(c.nameDe)"
+            >{{ c.nameDe }}</button>
+          </div>
+        </div>
+        <div v-if="evaluated || showFlagMap" ref="mapContainer" class="map-container">
+          <div v-if="!mapReady" class="map-placeholder">Karte wird geladen...</div>
+        </div>
+        <div v-if="evaluated" class="eval-overlay distance-text">Entfernung: {{ distanceText }}</div>
+      </template>
+
       <div class="skip-bar">
         <button @click="nextRound" class="action-btn">{{ evaluated ? 'Nächstes Land' : 'Überspringen' }}</button>
       </div>
@@ -60,6 +85,8 @@ const customTarget = ref('')
 const copied = ref(false)
 const gameMode = ref(typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('geo_mode') || 'landscape') : 'landscape')
 const streak = ref(0)
+const flagGuess = ref('')
+const showFlagMap = ref(false)
 
 if (typeof sessionStorage !== 'undefined') {
   streak.value = parseInt(sessionStorage.getItem('geo_streak') || '0', 10)
@@ -293,6 +320,30 @@ function showTargetCountry() {
   targetMarker.bindTooltip(target.value.nameDe, { permanent: true, direction: 'top', className: 'geo-tooltip' })
 }
 
+function submitFlagGuess(name: string) {
+  if (evaluated.value) return
+  flagGuess.value = ''
+  const isCorrect = name.toLowerCase() === target.value.nameDe.toLowerCase()
+  if (isCorrect) { streak.value++; if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_streak', String(streak.value)) }
+  else { streak.value = 0; if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_streak', '0') }
+  showFlagMap.value = true
+  evaluated.value = true
+  distanceText.value = isCorrect ? 'Richtig! ✓' : 'Falsch – ' + target.value.nameDe
+  if (map) {
+    fetchTargetData().then(() => {
+      if (targetGeoCache) {
+        if (targetMarker) { map?.removeLayer(targetMarker) }
+        if (targetGeoCache.geojson) {
+          targetMarker = L.geoJSON(targetGeoCache.geojson, {
+            style: { color: isCorrect ? '#4caf50' : '#f44336', weight: 2, fillColor: isCorrect ? '#4caf50' : '#f44336', fillOpacity: 0.2 },
+          }).addTo(map)
+        }
+        if (targetGeoCache.lat) map?.setView([targetCacheLat, targetCacheLng], 4)
+      }
+    })
+  }
+}
+
 function nextRound() {
   cleanup()
   target.value = countries[Math.floor(Math.random() * countries.length)] as Country
@@ -326,6 +377,8 @@ function cleanup() {
   hasMarker.value = false
   evaluated.value = false
   distanceText.value = ''
+  flagGuess.value = ''
+  showFlagMap.value = false
 }
 </script>
 
@@ -409,6 +462,50 @@ function cleanup() {
 
 .action-btn:hover {
   background: rgb(155, 0, 0);
+}
+
+.flag-guess-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+  flex: 1;
+  min-height: 0;
+}
+
+.flag-input-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.flag-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 4px 0;
+  max-height: 260px;
+}
+
+.flag-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  background: transparent;
+  color: #ccc;
+  border: 1px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .1s;
+  white-space: nowrap;
+}
+
+.flag-btn:hover {
+  background: rgb(188, 0, 0);
+  color: #fff;
+  border-color: rgb(188, 0, 0);
 }
 
 .top-bar {
