@@ -21,7 +21,7 @@
       </div>
       <div v-if="mapReady" class="target-area">
         <img v-if="gameMode === 'flags'" :src="`https://flagcdn.com/w160/${target.code.toLowerCase()}.png`" :alt="target.nameDe" class="flag-img">
-        <div class="target-name">{{ target.nameDe }}</div>
+        <div v-if="gameMode !== 'flags'" class="target-name">{{ target.nameDe }}</div>
       </div>
       <div ref="mapContainer" class="map-container">
         <div v-if="!mapReady" class="map-placeholder">Karte wird geladen...</div>
