@@ -4,13 +4,8 @@
       <div v-if="mapReady" class="mode-bar">
         <button :class="['mode-btn', { active: gameMode === 'landscape' }]" @click="gameMode = 'landscape'">Länder</button>
         <button :class="['mode-btn', { active: gameMode === 'flags' }]" @click="gameMode = 'flags'">Flaggen</button>
-        <div class="streak-display">
-          <span v-if="streak > 0" class="streak-fire">🔥</span>
-          <span class="streak-num">{{ streak }}</span>
-          <span class="streak-label">erzielt</span>
-        </div>
       </div>
-      <!-- Landscape mode: top bar + name + map -->
+      <!-- Landscape mode: top bar + name + streak + map -->
       <template v-if="gameMode === 'landscape'">
         <div v-if="mapReady" class="top-bar">
           <input v-model="customTarget" list="country-list" @keyup.enter="selectCountry" placeholder="Land eingeben..." class="country-input">
@@ -22,6 +17,11 @@
           <span v-if="copied" class="copied-msg">Link kopiert!</span>
         </div>
         <div v-if="mapReady" class="target-name">{{ target.nameDe }}</div>
+        <div v-if="mapReady" class="streak-display">
+          <span v-if="streak > 0" class="streak-fire">🔥</span>
+          <span class="streak-num">{{ streak }}</span>
+          <span class="streak-label">erzielt</span>
+        </div>
         <div ref="mapContainer" class="map-container">
           <div v-if="!mapReady" class="map-placeholder">Karte wird geladen...</div>
         </div>
