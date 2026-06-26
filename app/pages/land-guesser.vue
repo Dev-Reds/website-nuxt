@@ -509,8 +509,9 @@ function cleanup() {
 
 .flag-btn {
   white-space: nowrap;
-  padding: 8px 14px;
+  padding: 10px 14px;
   font-size: 14px;
+  width: 80%;
 }
 
 .top-bar {
@@ -594,7 +595,7 @@ function cleanup() {
 }
 
 .flag-img {
-  width: 80px;
+  width: max(80px, 20vw);
   height: auto;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,.4);
