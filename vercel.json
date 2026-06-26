@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "namibiareferatgeo.vercel.app"
+        }
+      ],
+      "destination": "/land-guesser",
+      "permanent": false
+    }
+  ]
+}
