@@ -2,32 +2,32 @@
   <div class="geo-page">
     <ClientOnly>
       <div v-if="mapReady" class="mode-bar">
-        <button :class="['mode-btn', { active: gameMode === 'landscape' }]" @click="gameMode = 'landscape'">Länder</button>
-        <button :class="['mode-btn', { active: gameMode === 'flags' }]" @click="gameMode = 'flags'">Flaggen</button>
+        <button :class="['mode-btn', { active: gameMode === 'landscape' }]" @click="gameMode = 'landscape'">{{ t('lg.mode.landscape') }}</button>
+        <button :class="['mode-btn', { active: gameMode === 'flags' }]" @click="gameMode = 'flags'">{{ t('lg.mode.flags') }}</button>
       </div>
       <!-- Landscape mode: top bar + name + streak + map -->
       <template v-if="gameMode === 'landscape'">
         <div v-if="mapReady" class="top-bar">
-          <input v-model="customTarget" list="country-list" @keyup.enter="selectCountry" placeholder="Land eingeben..." class="country-input">
+          <input v-model="customTarget" list="country-list" @keyup.enter="selectCountry" :placeholder="t('lg.placeholder')" class="country-input">
           <datalist id="country-list">
             <option v-for="c in countries" :key="c.nameDe" :value="c.nameDe"/>
           </datalist>
-          <button @click="selectCountry" class="ok-btn">Übernehmen</button>
-          <button @click="shareCountry" class="share-btn">Teilen</button>
-          <span v-if="copied" class="copied-msg">Link kopiert!</span>
+          <button @click="selectCountry" class="ok-btn">{{ t('lg.submit') }}</button>
+          <button @click="shareCountry" class="share-btn">{{ t('lg.share') }}</button>
+          <span v-if="copied" class="copied-msg">{{ t('lg.copied') }}</span>
         </div>
         <div v-if="mapReady" class="target-name">{{ target.nameDe }}</div>
         <div v-if="mapReady" class="streak-display">
           <span v-if="streak > 0" class="streak-fire">🔥</span>
           <span class="streak-num">{{ streak }}</span>
-          <span class="streak-label">erzielt</span>
+          <span class="streak-label">{{ t('lg.streakLabel') }}</span>
         </div>
         <div ref="mapContainer" class="map-container">
-          <div v-if="!mapReady" class="map-placeholder">Karte wird geladen...</div>
+          <div v-if="!mapReady" class="map-placeholder">{{ t('lg.loading') }}</div>
         </div>
-        <div v-if="evaluated" class="eval-overlay distance-text">Entfernung: {{ distanceText }}</div>
+        <div v-if="evaluated" class="eval-overlay distance-text">{{ t('lg.distance', { text: distanceText }) }}</div>
         <div v-if="!evaluated && hasMarker" class="eval-row">
-          <button @click="evaluate" class="action-btn">Auswerten</button>
+          <button @click="evaluate" class="action-btn">{{ t('lg.evaluate') }}</button>
         </div>
       </template>
 
@@ -38,8 +38,8 @@
         </div>
         <div v-if="!evaluated" class="flag-guess-area">
           <div class="flag-input-row">
-            <input v-model="flagGuess" @keyup.enter="submitFlagGuess(flagGuess)" placeholder="Land eingeben..." class="country-input">
-            <button @click="submitFlagGuess(flagGuess)" class="ok-btn">Raten</button>
+            <input v-model="flagGuess" @keyup.enter="submitFlagGuess(flagGuess)" :placeholder="t('lg.placeholder')" class="country-input">
+            <button @click="submitFlagGuess(flagGuess)" class="ok-btn">{{ t('lg.guess') }}</button>
           </div>
           <div class="flag-buttons">
             <button
@@ -53,13 +53,14 @@
       </template>
 
       <div class="skip-bar">
-        <button @click="nextRound" class="action-btn">{{ evaluated ? 'Nächstes Land' : 'Überspringen' }}</button>
+        <button @click="nextRound" class="action-btn">{{ evaluated ? t('lg.next') : t('lg.skip') }}</button>
       </div>
     </ClientOnly>
   </div>
 </template>
 
 <script setup lang="ts">
+const { t } = useLanguage()
 useHead({ title: 'Land-Guesser' })
 
 import { ref, watch, onMounted, nextTick } from 'vue'
@@ -208,7 +209,7 @@ function onMapClick(e: LeafletMouseEvent) {
   if (marker) { map?.removeLayer(marker) }
   marker = L.circleMarker([e.latlng.lat, e.latlng.lng], {
     radius: 10, fillColor: '#2196f3', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8,
-  }).bindTooltip('Deine Antwort', { permanent: true, direction: 'top', className: 'geo-tooltip' }).addTo(map!)
+  }).bindTooltip(t('lg.yourAnswer'), { permanent: true, direction: 'top', className: 'geo-tooltip' }).addTo(map!)
   marker.lat = e.latlng.lat
   marker.lng = e.latlng.lng
   hasMarker.value = true
@@ -259,7 +260,7 @@ async function evaluate() {
       }).addTo(map!)
     }
   } else {
-    distanceText.value = '— km'
+    distanceText.value = t('lg.distanceFallback')
   }
 
   evaluated.value = true
@@ -335,7 +336,7 @@ async function submitFlagGuess(name: string) {
   if (isCorrect) { streak.value++; if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_streak', String(streak.value)) }
   else { streak.value = 0; if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_streak', '0') }
   evaluated.value = true
-  distanceText.value = isCorrect ? 'Richtig! ✓' : 'Falsch – ' + target.value.nameDe
+  distanceText.value = isCorrect ? t('lg.correct') : t('lg.wrong', { name: target.value.nameDe })
 }
 
 function nextRound() {

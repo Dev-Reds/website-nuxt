@@ -1,11 +1,12 @@
 <script setup>
-useHead({ title: 'YouTube' })
+const { t } = useLanguage()
+useHead({ title: t('youtube.title') })
 </script>
 
 <template>
     <div>
-        <h1>YouTube</h1>
-        <NuxtLink to="https://www.youtube.com/@Sams2525" target="_blank">Mein Youtube (Klick)</NuxtLink>
+        <h1>{{ t('youtube.title') }}</h1>
+        <NuxtLink to="https://www.youtube.com/@Sams2525" target="_blank">{{ t('youtube.link') }}</NuxtLink>
         <img src="/channels4_profile.png" alt="YouTube Profile Image" />
     </div>
 </template>

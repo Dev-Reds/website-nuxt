@@ -1,6 +1,8 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 
+const { t } = useLanguage()
+
 const { restore, currentUser } = useAuth()
 const isNamibiaDomain = ref(false)
 const { callState, remoteStream, answerCall, rejectCall, endCall, closeCallOverlay, toggleAudio, toggleVideo, onLocalVideoMount, onRemoteVideoMount } = useCall()
@@ -131,14 +133,14 @@ function startTimer() {
       <div class="incoming-content">
         <div class="incoming-avatar">{{ callState.partnerName[0]?.toUpperCase() || '?' }}</div>
         <div class="incoming-info">
-          <span class="incoming-name">{{ callState.partnerName || 'Unbekannt' }}</span>
-          <span class="incoming-status">Eingehender Anruf</span>
+          <span class="incoming-name">{{ callState.partnerName || t('call.unknown') }}</span>
+          <span class="incoming-status">{{ t('call.incoming') }}</span>
         </div>
         <div class="incoming-actions">
-          <button class="incoming-btn accept" @click="handleAnswer" title="Annehmen">
+          <button class="incoming-btn accept" @click="handleAnswer" :title="t('call.accept')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
           </button>
-          <button class="incoming-btn reject" @click="handleReject" title="Ablehnen">
+          <button class="incoming-btn reject" @click="handleReject" :title="t('call.reject')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
@@ -162,35 +164,35 @@ function startTimer() {
       <div class="bar-main">
         <div class="bar-avatar">{{ callState.partnerName[0]?.toUpperCase() || '?' }}</div>
         <div class="bar-info">
-          <span class="bar-name">{{ callState.partnerName || 'Unbekannt' }}</span>
+          <span class="bar-name">{{ callState.partnerName || t('call.unknown') }}</span>
           <span class="bar-status">
-            <template v-if="callState.mode === 'outgoing'">Wird verbunden…</template>
+            <template v-if="callState.mode === 'outgoing'">{{ t('call.connecting') }}</template>
             <template v-else-if="callState.mode === 'active'">{{ callTimer }}</template>
-            <template v-else-if="callState.mode === 'ended'">Anruf beendet</template>
+            <template v-else-if="callState.mode === 'ended'">{{ t('call.ended') }}</template>
           </span>
         </div>
         <div class="bar-actions">
           <template v-if="callState.mode === 'active'">
-            <button :class="['bar-btn', { active: callState.audioEnabled }]" @click="toggleAudio" title="Stumm">
+            <button :class="['bar-btn', { active: callState.audioEnabled }]" @click="toggleAudio" :title="t('call.mute')">
               <svg v-if="callState.audioEnabled" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
               <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
             </button>
-            <button :class="['bar-btn', { active: callState.videoEnabled }]" @click="toggleVideo" title="Kamera">
+            <button :class="['bar-btn', { active: callState.videoEnabled }]" @click="toggleVideo" :title="t('call.camera')">
               <svg v-if="callState.videoEnabled" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
               <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
             </button>
-            <button class="bar-btn" @click="toggleFullscreen" title="Vollbild">
+            <button class="bar-btn" @click="toggleFullscreen" :title="t('call.fullscreen')">
               <svg v-if="!callFullscreen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
               <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/></svg>
             </button>
           </template>
           <template v-if="callState.mode !== 'ended'">
-            <button class="bar-btn end" @click="endCall" title="Auflegen">
+            <button class="bar-btn end" @click="endCall" :title="t('call.hangup')">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
             </button>
           </template>
           <template v-else>
-            <button class="bar-btn close-bar" @click="closeCallOverlay">Schließen</button>
+            <button class="bar-btn close-bar" @click="closeCallOverlay">{{ t('call.close') }}</button>
           </template>
         </div>
       </div>

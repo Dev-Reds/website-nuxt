@@ -15,25 +15,25 @@
             <path d="M24 8C15.163 8 8 15.163 8 24c0 2.836.745 5.5 2.05 7.813L8 40l8.45-2.013A15.93 15.93 0 0024 40c8.837 0 16-7.163 16-16S32.837 8 24 8z" fill="white" fill-opacity=".9"/>
             <path d="M19 18.5c-.4-1-.8-1.02-1.18-1.04-.31-.01-.66-.01-1.01-.01-.35 0-.92.13-1.4.66-.48.53-1.84 1.8-1.84 4.38s1.88 5.08 2.14 5.43c.26.35 3.65 5.84 8.99 7.96 4.45 1.76 5.34 1.41 6.3 1.32.96-.09 3.1-1.27 3.54-2.49.44-1.22.44-2.27.31-2.49-.13-.22-.48-.35-1.01-.61-.53-.26-3.1-1.53-3.58-1.7-.48-.18-.83-.26-1.18.26-.35.53-1.36 1.7-1.66 2.05-.31.35-.61.4-1.14.13-.53-.26-2.23-.82-4.25-2.62-1.57-1.4-2.63-3.13-2.94-3.66-.31-.53-.03-.81.23-1.07.24-.24.53-.61.79-.92.26-.31.35-.53.53-.88.18-.35.09-.66-.04-.92-.14-.26-1.15-2.87-1.6-3.92z" fill="#e53935"/>
           </svg>
-          <h1>NachrichtenApp</h1>
+          <h1>{{ t('chat.title') }}</h1>
         </div>
-        <p class="auth-sub">Melde dich an oder erstelle ein Konto</p>
+        <p class="auth-sub">{{ t('chat.subtitle') }}</p>
         <div class="auth-tabs">
-          <button :class="['tab',{active:authMode==='login'}]" @click="authMode='login'">Anmelden</button>
-          <button :class="['tab',{active:authMode==='register'}]" @click="authMode='register'">Registrieren</button>
+          <button :class="['tab',{active:authMode==='login'}]" @click="authMode='login'">{{ t('chat.login') }}</button>
+          <button :class="['tab',{active:authMode==='register'}]" @click="authMode='register'">{{ t('chat.register') }}</button>
         </div>
         <div v-if="authMode==='login'">
-          <div class="field"><label>E-Mail</label><input v-model="loginEmail" type="email" placeholder="name@beispiel.de" @keyup.enter="handleLogin"/></div>
-          <div class="field"><label>Passwort</label><input v-model="loginPassword" type="password" placeholder="••••••••" @keyup.enter="handleLogin"/></div>
+          <div class="field"><label>{{ t('chat.email') }}</label><input v-model="loginEmail" type="email" :placeholder="t('chat.emailPlaceholder')" @keyup.enter="handleLogin"/></div>
+          <div class="field"><label>{{ t('chat.password') }}</label><input v-model="loginPassword" type="password" placeholder="••••••••" @keyup.enter="handleLogin"/></div>
           <p v-if="authError" class="auth-error">{{ authError }}</p>
-          <button class="btn-primary" @click="handleLogin">Anmelden</button>
+          <button class="btn-primary" @click="handleLogin">{{ t('chat.login') }}</button>
         </div>
         <div v-else>
-          <div class="field"><label>Name</label><input v-model="regName" type="text" placeholder="Dein Name" @keyup.enter="handleRegister"/></div>
-          <div class="field"><label>E-Mail</label><input v-model="regEmail" type="email" placeholder="name@beispiel.de" @keyup.enter="handleRegister"/></div>
-          <div class="field"><label>Passwort</label><input v-model="regPassword" type="password" placeholder="Mindestens 6 Zeichen" @keyup.enter="handleRegister"/></div>
+          <div class="field"><label>Name</label><input v-model="regName" type="text" :placeholder="t('chat.yourName')" @keyup.enter="handleRegister"/></div>
+          <div class="field"><label>{{ t('chat.email') }}</label><input v-model="regEmail" type="email" :placeholder="t('chat.emailPlaceholder')" @keyup.enter="handleRegister"/></div>
+          <div class="field"><label>{{ t('chat.password') }}</label><input v-model="regPassword" type="password" placeholder="Mindestens 6 Zeichen" @keyup.enter="handleRegister"/></div>
           <p v-if="authError" class="auth-error">{{ authError }}</p>
-          <button class="btn-primary" @click="handleRegister">Konto erstellen</button>
+          <button class="btn-primary" @click="handleRegister">{{ t('chat.createAccount') }}</button>
         </div>
       </div>
     </div>
@@ -51,21 +51,21 @@
           </div>
           <div class="user-info">
             <span class="user-name">{{ currentUser.name }}</span>
-            <span class="user-status">● Online</span>
+            <span class="user-status">{{ t('chat.online') }}</span>
           </div>
-          <button class="icon-btn" @click="openNewChatModal" title="Neuer Chat / Gruppe">
+          <button class="icon-btn" @click="openNewChatModal" :title="t('chat.newChat')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
               <line x1="12" y1="9" x2="12" y2="13"/><line x1="10" y1="11" x2="14" y2="11"/>
             </svg>
           </button>
-          <button class="icon-btn" @click="logout" title="Abmelden">
+          <button class="icon-btn" @click="logout" :title="t('chat.logout')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
           </button>
         </div>
 
         <div v-if="pendingReceived.length>0" class="fr-section">
-          <div class="fr-section-header">Freundschaftsanfragen</div>
+          <div class="fr-section-header">{{ t('chat.friendRequests') }}</div>
           <div v-for="req in pendingReceived" :key="req.id" class="fr-item">
             <div class="av sm" :style="avatarStyle(getUserById(req.fromUserId))">
               <img v-if="getUserById(req.fromUserId)?.avatar" :src="getUserById(req.fromUserId).avatar" class="av-img"/>
@@ -73,12 +73,12 @@
             </div>
             <div class="fr-info">
               <span class="fr-name">{{ req.fromUserName }}</span>
-              <span class="fr-sub">möchte dich kennenlernen</span>
+              <span class="fr-sub">{{ t('chat.wantsToMeet') }}</span>
             </div>
-            <button class="fr-btn accept" @click.stop="acceptRequest(req.id)" title="Annehmen">
+            <button class="fr-btn accept" @click.stop="acceptRequest(req.id)" :title="t('chat.accept')">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
             </button>
-            <button class="fr-btn reject" @click.stop="rejectRequest(req.id)" title="Ablehnen">
+            <button class="fr-btn reject" @click.stop="rejectRequest(req.id)" :title="t('chat.reject')">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
           </div>
@@ -89,8 +89,8 @@
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
               <line x1="12" y1="9" x2="12" y2="13"/><line x1="10" y1="11" x2="14" y2="11"/>
             </svg>
-            <p>Noch keine Chats.</p>
-            <p>Klicke auf <strong>+</strong> um zu starten.</p>
+            <p>{{ t('chat.noChats') }}</p>
+            <p>{{ t('chat.startChat') }}</p>
           </div>
           <div
             v-for="chat in chatList" :key="chat.id"
@@ -110,7 +110,7 @@
                 <span class="chat-name">{{ chat.displayName }}</span>
                 <span class="chat-time">{{ lastMsgTime(chat.id) }}</span>
               </div>
-              <div v-if="chat.type==='group'" class="chat-sub">{{ chat.members.length }} Mitglieder</div>
+              <div v-if="chat.type==='group'" class="chat-sub">{{ chat.members.length }} {{ t('chat.members') }}</div>
               <div class="chat-preview">{{ lastMsg(chat.id) }}</div>
             </div>
             <div v-if="unread(chat.id)>0" class="badge">{{ unread(chat.id) }}</div>
@@ -126,8 +126,8 @@
             <rect width="48" height="48" rx="14" fill="#e53935" fill-opacity=".1"/>
             <path d="M24 8C15.163 8 8 15.163 8 24c0 2.836.745 5.5 2.05 7.813L8 40l8.45-2.013A15.93 15.93 0 0024 40c8.837 0 16-7.163 16-16S32.837 8 24 8z" fill="#e53935" fill-opacity=".35"/>
           </svg>
-          <h2>NachrichtenApp</h2>
-          <p>Klicke auf <strong>+</strong> um einen Chat<br>oder eine Gruppe zu starten.</p>
+          <h2>{{ t('chat.title') }}</h2>
+          <p>{{ t('chat.startChatLong') }}</p>
         </div>
 
         <template v-else>
@@ -146,11 +146,11 @@
             <div class="header-info">
               <span class="header-name">{{ activeChat?.displayName }}</span>
               <span class="header-sub">
-                <template v-if="activeChat?.type==='group'">{{ activeChat.members.length }} Mitglieder</template>
-                <template v-else>{{ isOnline(getDmPartnerId(activeChat)) ? 'Online' : lastSeenText(getDmPartnerId(activeChat)) }}</template>
+                <template v-if="activeChat?.type==='group'">{{ activeChat.members.length }} {{ t('chat.members') }}</template>
+                <template v-else>{{ isOnline(getDmPartnerId(activeChat)) ? t('chat.online') : lastSeenText(getDmPartnerId(activeChat)) }}</template>
               </span>
             </div>
-            <button v-if="activeChat?.type==='dm'" class="icon-btn" @click="startCall" title="Anrufen">
+            <button v-if="activeChat?.type==='dm'" class="icon-btn" @click="startCall" :title="t('chat.call')">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
             </button>
             <button v-if="activeChat?.type==='group'" class="icon-btn" @click="showGroupInfo=true">
@@ -162,7 +162,7 @@
           <div class="messages-area" ref="messagesArea">
             <div class="messages-inner">
               <div v-if="activeMessages.length===0" class="empty-chat">
-                <span>Noch keine Nachrichten. Schreibe etwas!</span>
+                <span>{{ t('chat.noMessages') }}</span>
               </div>
               <template v-for="(msg,i) in activeMessages" :key="msg.id">
                 <div v-if="showDivider(i)" class="date-divider"><span>{{ fmtDate(msg.ts) }}</span></div>
@@ -201,7 +201,7 @@
             <div v-if="showEmoji" class="emoji-picker">
               <span v-for="e in emojis" :key="e" @click="addEmoji(e)">{{ e }}</span>
             </div>
-            <input ref="msgInput" v-model="newMsg" class="msg-input" placeholder="Nachricht eingeben..." @keyup.enter="sendMessage"/>
+            <input ref="msgInput" v-model="newMsg" class="msg-input" :placeholder="t('chat.messagePlaceholder')" @keyup.enter="sendMessage"/>
             <button class="send-btn" :disabled="!newMsg.trim()" @click="sendMessage">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
             </button>
@@ -214,7 +214,7 @@
     <div v-if="showProfile" class="modal-overlay" @click.self="showProfile=false">
       <div class="modal">
         <div class="modal-header">
-          <h3>Mein Profil</h3>
+          <h3>{{ t('chat.myProfile') }}</h3>
           <button class="icon-btn" @click="showProfile=false">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
@@ -228,22 +228,22 @@
           </div>
           <button class="change-av-btn" @click="$refs.avatarInput.click()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            Foto ändern
+            {{ t('chat.changePhoto') }}
           </button>
           <input ref="avatarInput" type="file" accept="image/*" style="display:none" @change="onAvatarChange"/>
-          <button v-if="currentUser.avatar" class="remove-av-btn" @click="removeAvatar">Foto entfernen</button>
+          <button v-if="currentUser.avatar" class="remove-av-btn" @click="removeAvatar">{{ t('chat.removePhoto') }}</button>
         </div>
 
         <div class="field" style="margin-top:4px">
           <label>Name</label>
-          <input v-model="profileName" type="text" placeholder="Dein Name"/>
+          <input v-model="profileName" type="text" :placeholder="t('chat.yourName')"/>
         </div>
         <div class="field">
-          <label>E-Mail</label>
+          <label>{{ t('chat.email') }}</label>
           <input :value="currentUser.email" type="email" disabled style="opacity:.5;cursor:not-allowed"/>
         </div>
         <p v-if="profileMsg" :class="['profile-msg', profileMsgOk ? 'ok':'err']">{{ profileMsg }}</p>
-        <button class="btn-primary" @click="saveProfile" style="margin-top:4px">Speichern</button>
+        <button class="btn-primary" @click="saveProfile" style="margin-top:4px">{{ t('chat.save') }}</button>
       </div>
     </div>
 
@@ -251,7 +251,7 @@
     <div v-if="showNewChat" class="modal-overlay" @click.self="closeNewChat">
       <div class="modal">
         <div class="modal-header">
-          <h3>{{ newChatMode==='dm' ? 'Neuer Chat' : 'Neue Gruppe' }}</h3>
+          <h3>{{ newChatMode==='dm' ? t('chat.newChatHeader') : t('chat.newGroupHeader') }}</h3>
           <button class="icon-btn" @click="closeNewChat">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
@@ -259,17 +259,17 @@
         <div class="modal-tabs">
           <button :class="['tab',{active:newChatMode==='dm'}]" @click="newChatMode='dm';resetModal()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
-            Direktnachricht
+            {{ t('chat.directMessage') }}
           </button>
           <button :class="['tab',{active:newChatMode==='group'}]" @click="newChatMode='group';resetModal()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-            Neue Gruppe
+            {{ t('chat.newGroup') }}
           </button>
         </div>
 
         <div v-if="newChatMode==='group'" class="field">
-          <label>Gruppenname</label>
-          <input v-model="newGroupName" type="text" placeholder="z.B. Familie, Freunde…"/>
+          <label>{{ t('chat.groupName') }}</label>
+          <input v-model="newGroupName" type="text" :placeholder="t('chat.groupPlaceholder')"/>
         </div>
 
         <div v-if="newChatMode==='group' && selectedMembers.length>0" class="selected-members">
@@ -287,12 +287,12 @@
 
         <div class="modal-search">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input v-model="modalSearch" placeholder="Name eingeben…" @input="doModalSearch"/>
+          <input v-model="modalSearch" :placeholder="t('chat.searchPlaceholder')" @input="doModalSearch"/>
         </div>
 
         <div class="modal-user-list">
-          <div v-if="!modalSearch" class="search-hint">Tippe einen Namen ein, um Nutzer zu finden.</div>
-          <div v-else-if="modalUserResults.length===0" class="search-empty">Kein Nutzer gefunden.</div>
+          <div v-if="!modalSearch" class="search-hint">{{ t('chat.searchHint') }}</div>
+          <div v-else-if="modalUserResults.length===0" class="search-empty">{{ t('chat.noUserFound') }}</div>
           <div
             v-for="user in modalUserResults" :key="user.id"
             :class="['modal-user-item',{selected:isMemberSelected(user)}]"
@@ -316,15 +316,15 @@
               </template>
               <template v-else-if="getRequestStatus(user.id)">
                   <template v-if="getRequestStatus(user.id)?.fromUserId===currentUser?.id">
-                  <span class="req-sent">Anfrage gesendet</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2" style="cursor:pointer;flex-shrink:0" @click.stop="cancelRequest(getRequestStatus(user.id).id)" title="Abbrechen"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  <span class="req-sent">{{ t('chat.requestSent') }}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2" style="cursor:pointer;flex-shrink:0" @click.stop="cancelRequest(getRequestStatus(user.id).id)" :title="t('chat.cancel')"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </template>
                 <template v-else>
-                  <span class="req-recv">Anfrage erhalten</span>
-                  <button class="fr-btn accept sm" @click.stop="acceptRequest(getRequestStatus(user.id).id)" title="Annehmen">
+                  <span class="req-recv">{{ t('chat.requestReceived') }}</span>
+                  <button class="fr-btn accept sm" @click.stop="acceptRequest(getRequestStatus(user.id).id)" :title="t('chat.accept')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
                   </button>
-                  <button class="fr-btn reject sm" @click.stop="rejectRequest(getRequestStatus(user.id).id)" title="Ablehnen">
+                  <button class="fr-btn reject sm" @click.stop="rejectRequest(getRequestStatus(user.id).id)" :title="t('chat.reject')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
                   </button>
                 </template>
@@ -337,7 +337,7 @@
         </div>
 
         <button v-if="newChatMode==='group'" class="btn-primary" :disabled="selectedMembers.length===0||!newGroupName.trim()" @click="createGroup" style="margin-top:14px">
-          Gruppe erstellen ({{ selectedMembers.length+1 }} Mitglieder)
+          {{ t('chat.createGroup', { count: selectedMembers.length + 1 }) }}
         </button>
       </div>
     </div>
@@ -352,7 +352,7 @@
             </div>
             <div>
               <h3>{{ activeChat.displayName }}</h3>
-              <p style="font-size:12px;color:#8696a0;margin-top:2px">{{ activeChat.members.length }} Mitglieder</p>
+              <p style="font-size:12px;color:#8696a0;margin-top:2px">{{ activeChat.members.length }} {{ t('chat.members') }}</p>
             </div>
           </div>
           <button class="icon-btn" @click="showGroupInfo=false">
@@ -368,8 +368,8 @@
             </div>
             <div class="modal-user-info">
               <span class="modal-user-name">{{ getMemberName(mid) }}</span>
-              <span v-if="mid===currentUser.id" class="role-tag you">Du</span>
-              <span v-else-if="mid===activeChat.createdBy" class="role-tag admin">Admin</span>
+              <span v-if="mid===currentUser.id" class="role-tag you">{{ t('chat.you') }}</span>
+              <span v-else-if="mid===activeChat.createdBy" class="role-tag admin">{{ t('chat.admin') }}</span>
             </div>
           </div>
         </div>
@@ -396,6 +396,7 @@ const authMode     = ref('login')
 const loginEmail   = ref(''); const loginPassword = ref('')
 const regName      = ref(''); const regEmail = ref(''); const regPassword = ref('')
 const authError    = ref('')
+const { t } = useLanguage()
 const { currentUser, login, register, logout: authLogout, restore } = useAuth()
 
 // ── CHAT ───────────────────────────────────────────────────────────────
@@ -467,7 +468,7 @@ const api = {
 // ── AUTH ───────────────────────────────────────────────────────────────
 async function handleLogin() {
   authError.value = ''
-  if (!loginEmail.value || !loginPassword.value) { authError.value = 'Bitte alle Felder ausfüllen.'; return }
+  if (!loginEmail.value || !loginPassword.value) { authError.value = t('chat.allRequired'); return }
   try {
     await login(loginEmail.value, loginPassword.value)
     setupChat()
@@ -475,8 +476,8 @@ async function handleLogin() {
 }
 async function handleRegister() {
   authError.value = ''
-  if (!regName.value || !regEmail.value || !regPassword.value) { authError.value = 'Bitte alle Felder ausfüllen.'; return }
-  if (regPassword.value.length < 6) { authError.value = 'Passwort muss mindestens 6 Zeichen haben.'; return }
+  if (!regName.value || !regEmail.value || !regPassword.value) { authError.value = t('chat.allRequired'); return }
+  if (regPassword.value.length < 6) { authError.value = t('chat.passwordLength'); return }
   try {
     await register(regName.value, regEmail.value, regPassword.value)
     setupChat()
@@ -517,7 +518,7 @@ async function logout() {
 // ── PROFILE ────────────────────────────────────────────────────────────
 async function onAvatarChange(e) {
   const file = e.target.files[0]; if (!file) return
-  if (file.size > 2 * 1024 * 1024) { profileMsg.value = 'Bild zu groß (max. 2 MB).'; profileMsgOk.value = false; return }
+  if (file.size > 2 * 1024 * 1024) { profileMsg.value = t('chat.photoTooLarge'); profileMsgOk.value = false; return }
   const reader = new FileReader()
   reader.onload = async (ev) => {
     const dataUrl = ev.target.result
@@ -534,11 +535,11 @@ async function removeAvatar() {
 }
 async function saveProfile() {
   profileMsg.value = ''
-  if (!profileName.value.trim()) { profileMsg.value = 'Name darf nicht leer sein.'; profileMsgOk.value = false; return }
+  if (!profileName.value.trim()) { profileMsg.value = t('chat.nameRequired'); profileMsgOk.value = false; return }
   const users = await api.getUsers(); const i = users.findIndex(x => x.id === currentUser.value.id)
   if (i !== -1) { users[i].name = profileName.value.trim(); await api.saveUsers(users) }
   currentUser.value = { ...currentUser.value, name: profileName.value.trim() }
-  profileMsg.value = 'Gespeichert ✓'; profileMsgOk.value = true
+  profileMsg.value = t('chat.saved'); profileMsgOk.value = true
   setTimeout(() => { profileMsg.value = '' }, 2000)
 }
 
@@ -699,13 +700,13 @@ function unread(id) { return unreadCounts[id] || 0 }
 function isOnline(uid) { return onlineUserIds.value.has(uid) }
 function lastSeenText(uid) {
   const ts = lastSeenMap.value[uid]
-  if (!ts) return 'Zuletzt online kürzlich'
+  if (!ts) return t('chat.lastSeenRecently')
   const diff = Date.now() - ts
-  if (diff < 60000) return 'Zuletzt online vor 1 Minute'
-  if (diff < 3600000) return `Zuletzt online vor ${Math.floor(diff/60000)} Minuten`
-  if (diff < 7200000) return 'Zuletzt online vor 1 Stunde'
-  if (diff < 86400000) return `Zuletzt online vor ${Math.floor(diff/3600000)} Stunden`
-  return `Zuletzt online am ${new Date(ts).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})}`
+  if (diff < 60000) return t('chat.lastSeenMin')
+  if (diff < 3600000) return t('chat.lastSeenMins', { n: Math.floor(diff/60000) })
+  if (diff < 7200000) return t('chat.lastSeenHour')
+  if (diff < 86400000) return t('chat.lastSeenHours', { n: Math.floor(diff/3600000) })
+  return t('chat.lastSeenDate', { date: new Date(ts).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) })
 }
 function getMemberName(uid) { return allUsers.value.find(u => u.id === uid)?.name || 'Unbekannt' }
 function getUserById(uid) { return allUsers.value.find(u => u.id === uid) || null }
@@ -723,16 +724,16 @@ function color(name) {
   return cols[Math.abs(h) % cols.length]
 }
 function lastMsg(id) {
-  const msgs = messages[id] || []; if (!msgs.length) return 'Noch keine Nachrichten'
+  const msgs = messages[id] || [];   if (!msgs.length) return t('chat.noMessagesPreview')
   const l = msgs[msgs.length-1]
-  return (l.senderId === currentUser.value?.id ? 'Du: ' : '') + (l.text.length > 35 ? l.text.slice(0,35)+'…' : l.text)
+  return (l.senderId === currentUser.value?.id ? t('chat.youPrefix') : '') + (l.text.length > 35 ? l.text.slice(0,35)+'…' : l.text)
 }
 function lastMsgTime(id) { const m = (messages[id]||[]).at(-1); return m ? fmtTime(m.ts) : '' }
 function fmtTime(ts)  { return new Date(ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) }
 function fmtDate(ts)  {
   const d = new Date(ts), t = new Date(), y = new Date(t); y.setDate(t.getDate()-1)
-  if (d.toDateString()===t.toDateString()) return 'Heute'
-  if (d.toDateString()===y.toDateString()) return 'Gestern'
+  if (d.toDateString()===t.toDateString()) return t('chat.today')
+  if (d.toDateString()===y.toDateString()) return t('chat.yesterday')
   return d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'})
 }
 function showDivider(i) {

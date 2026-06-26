@@ -1,19 +1,20 @@
 <script setup>
-useHead({ title: 'MC Launcher' })
+const { t } = useLanguage()
+useHead({ title: t('index.launcher') })
 </script>
 
 <template>
   <div>
 
 <h1>
-    MC Launcher (still in development)
+    {{ t('index.launcherTitle') }}
 </h1>
 
  
     <div class="download-box">
 
         <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/launcher.zip" class="download-btn">
-            📁 Ordner herunterladen (.zip)</a>
+            {{ t('launcher.download') }}</a>
             
     </div>
 

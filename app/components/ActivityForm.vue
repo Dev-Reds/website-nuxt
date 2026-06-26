@@ -1,18 +1,18 @@
 <template>
   <div>
-    <h1>Activity Calculator</h1>
+    <h1>{{ t('activity.heading') }}</h1>
 
     <div>
-            <label for="activity">Aktivität:</label>
-            <input type="text" id="activity" v-model="activity" placeholder="z.B. Laufen, Schwimmen, etc.">
-            <label for="time">Zeit pro Tag:</label>
-            <input type="number" id="time" v-model="time" placeholder="z.B. in min 30, 60, etc.">
-            <label for="lifetime">Länge in Jahren:</label>
-            <input type="number" id="lifetime" v-model="lifetime" placeholder="z.B. 100 Jahre">
-            <label for="timetype">Zeit Art:</label>
-            <button @click="timetype = 'min'">Minuten</button>
-            <button @click="timetype = 'h'">Stunden</button>
-            <p>{{ time }} {{ timetype }} {{ activity }}, das sind {{ percentage }}% deines Lebens und {{ years }} Jahre.</p>
+            <label for="activity">{{ t('activity.label') }}</label>
+            <input type="text" id="activity" v-model="activity" :placeholder="t('activity.placeholder')">
+            <label for="time">{{ t('activity.timePerDay') }}</label>
+            <input type="number" id="time" v-model="time" :placeholder="t('activity.timePlaceholder')">
+            <label for="lifetime">{{ t('activity.years') }}</label>
+            <input type="number" id="lifetime" v-model="lifetime" :placeholder="t('activity.yearsPlaceholder')">
+            <label for="timetype">{{ t('activity.timeType') }}</label>
+            <button @click="timetype = 'min'">{{ t('activity.minutes') }}</button>
+            <button @click="timetype = 'h'">{{ t('activity.hours') }}</button>
+            <p>{{ t('activity.result', { time, timetype: timetype === 'h' ? t('activity.hours') : t('activity.minutes'), activity, percentage, years }) }}</p>
             <GridLiveWeek :weeksused="timetakenweeks" :lifetime="lifetime"/>
     </div>
 
@@ -20,6 +20,7 @@
 </template>
 
 <script setup>
+const { t } = useLanguage()
 import { ref, computed, onMounted, watch } from 'vue'
 const activity = ref('')
 const STORAGE_KEY = 'nuxt-activity-data'

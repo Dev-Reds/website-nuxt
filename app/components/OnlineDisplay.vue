@@ -1,11 +1,12 @@
 <template>
   <div class="online-display" v-if="count > 0">
     <div class="online-dot"></div>
-    <span class="online-count">Online: {{ count }}</span>
+    <span class="online-count">{{ t('online.label', { count }) }}</span>
   </div>
 </template>
 
 <script setup>
+const { t } = useLanguage()
 const SK = 'ol_'
 const count = ref(0)
 const sessionId = ref('')

@@ -1,5 +1,6 @@
 <script setup>
-useHead({ title: 'Zeitrechner' })
+const { t } = useLanguage()
+useHead({ title: t('timecalc.title') })
 </script>
 
 <template>

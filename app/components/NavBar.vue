@@ -1,13 +1,18 @@
+<script setup>
+const isOpen = ref(false)
+const { t } = useLanguage()
+</script>
+
 <template>
   <div class="nav-wrapper" :class="{ open: isOpen }">
     <div class="nav-backdrop" v-if="isOpen" @click="isOpen = false"></div>
     <nav class="nav-panel" v-if="isOpen">
-      <div class="nav-item"><NuxtLink to="/" @click="isOpen = false">Projecte</NuxtLink></div>
-      <div class="nav-item"><NuxtLink to="/youtube" @click="isOpen = false">YouTube</NuxtLink></div>
-      <div class="nav-item"><NuxtLink to="/todo-list" @click="isOpen = false">ToDo List</NuxtLink></div>
-      <div class="nav-item"><NuxtLink to="/time-calc" @click="isOpen = false">Zeitrechner</NuxtLink></div>
-      <div class="nav-item"><NuxtLink to="/land-guesser" @click="isOpen = false">Land-Guesser</NuxtLink></div>
-      <div class="nav-item"><NuxtLink to="/chat" @click="isOpen = false">Chat</NuxtLink></div>
+      <div class="nav-item"><NuxtLink to="/" @click="isOpen = false">{{ t('nav.projects') }}</NuxtLink></div>
+      <div class="nav-item"><NuxtLink to="/youtube" @click="isOpen = false">{{ t('nav.youtube') }}</NuxtLink></div>
+      <div class="nav-item"><NuxtLink to="/todo-list" @click="isOpen = false">{{ t('nav.todo') }}</NuxtLink></div>
+      <div class="nav-item"><NuxtLink to="/time-calc" @click="isOpen = false">{{ t('nav.timecalc') }}</NuxtLink></div>
+      <div class="nav-item"><NuxtLink to="/land-guesser" @click="isOpen = false">{{ t('nav.landguesser') }}</NuxtLink></div>
+      <div class="nav-item"><NuxtLink to="/chat" @click="isOpen = false">{{ t('nav.chat') }}</NuxtLink></div>
     </nav>
     <button class="hamburger" @click="isOpen = !isOpen">
       <span></span>
@@ -16,10 +21,6 @@
     </button>
   </div>
 </template>
-
-<script setup>
-const isOpen = ref(false)
-</script>
 
 <style scoped>
 .nav-wrapper {

@@ -1,3 +1,18 @@
+import { de, en } from '~/utils/translations'
+
+const isGerman = ref(typeof window !== 'undefined' ? window.location.hostname === 'namibiareferatgeo.vercel.app' : false)
+
+function t(key: string, params?: Record<string, string | number>): string {
+  const dict = isGerman.value ? de : en
+  let text = dict[key] || key
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      text = text.replace(`{${k}}`, String(v))
+    }
+  }
+  return text
+}
+
 const SK = 'napp_'
 
 async function apiGet(path: string) { const r = await fetch(path); return r.json() }
@@ -46,7 +61,7 @@ export const useAuth = () => {
   async function login(email: string, password: string) {
     const users = await api.getUsers()
     const found = users.find((u: any) => u.email === email && u.password === password)
-    if (!found) throw new Error('E-Mail oder Passwort falsch.')
+    if (!found) throw new Error(t('account.wrongCredentials'))
     const i = users.findIndex((x: any) => x.id === found.id)
     if (i !== -1) { users[i].online = true; await api.saveUsers(users) }
     user.value = { ...found, online: true }
@@ -58,7 +73,7 @@ export const useAuth = () => {
   async function register(name: string, email: string, password: string) {
     if (!process.client) return
     const users = await api.getUsers()
-    if (users.find((u: any) => u.email === email)) throw new Error('E-Mail bereits registriert.')
+    if (users.find((u: any) => u.email === email)) throw new Error(t('account.emailTaken'))
     const nu = { id: 'u_'+Date.now()+'_'+Math.random().toString(36).slice(2), name, email, password, online: true, avatar: null }
     users.push(nu); await api.saveUsers(users)
     user.value = nu

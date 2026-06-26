@@ -1,4 +1,18 @@
 import { ref } from 'vue'
+import { de, en } from '~/utils/translations'
+
+const isGerman = ref(typeof window !== 'undefined' ? window.location.hostname === 'namibiareferatgeo.vercel.app' : false)
+
+function t(key: string, params?: Record<string, string | number>): string {
+  const dict = isGerman.value ? de : en
+  let text = dict[key] || key
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      text = text.replace(`{${k}}`, String(v))
+    }
+  }
+  return text
+}
 
 const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
 
@@ -91,7 +105,7 @@ export function useCall() {
             startCallDurationTimer()
             await flushBufferedCandidates()
             await processIceCandidates()
-            await addCallMessage('📞 Anruf angenommen')
+            await addCallMessage(t('call.accepted'))
           } catch {}
         }
         // renegotiation — we received a new offer (someone else toggled video)
@@ -124,7 +138,7 @@ export function useCall() {
         }
       }
       if (!found && callState.value.mode === 'active' && callState.value.callId) {
-        await addCallMessage('⚠️ Verbindung zum Server verloren')
+        await addCallMessage(t('call.lostConnection'))
         endCall()
       }
     } catch {}
@@ -156,7 +170,7 @@ export function useCall() {
       }
       // timeout if no answer for 30s in outgoing mode
       if (callState.value.mode === 'outgoing' && Date.now() - callStartTime > CALL_TIMEOUT) {
-        await addCallMessage('⏱ Keine Antwort – Anruf beendet')
+        await addCallMessage(t('call.noAnswer'))
         endCall()
         return
       }
@@ -180,7 +194,7 @@ export function useCall() {
       pc.oniceconnectionstatechange = () => {
         if (pc?.iceConnectionState === 'failed' || pc?.iceConnectionState === 'disconnected') {
           if (callState.value.mode === 'active') {
-            addCallMessage('⚠️ Verbindung getrennt')
+            addCallMessage(t('call.disconnected'))
             endCall()
           }
         }
@@ -199,7 +213,7 @@ export function useCall() {
       pc.onconnectionstatechange = () => {
         if (pc?.connectionState === 'failed' || pc?.connectionState === 'disconnected') {
           if (callState.value.mode === 'active') {
-            addCallMessage('⚠️ Verbindung getrennt')
+            addCallMessage(t('call.disconnected'))
             endCall()
           }
         }
@@ -222,7 +236,7 @@ export function useCall() {
         pendingCandidates = []
       }
       ensureCallPolling()
-      await addCallMessage('🔴 Du rufst ' + partnerName + ' an...')
+      await addCallMessage(t('call.calling', { name: partnerName }))
     } catch (e) {
       cleanupCall()
     }
@@ -240,7 +254,7 @@ export function useCall() {
       pc.oniceconnectionstatechange = () => {
         if (pc?.iceConnectionState === 'failed' || pc?.iceConnectionState === 'disconnected') {
           if (callState.value.mode === 'active') {
-            addCallMessage('⚠️ Verbindung getrennt')
+            addCallMessage(t('call.disconnected'))
             endCall()
           }
         }
@@ -248,7 +262,7 @@ export function useCall() {
       pc.onconnectionstatechange = () => {
         if (pc?.connectionState === 'failed' || pc?.connectionState === 'disconnected') {
           if (callState.value.mode === 'active') {
-            addCallMessage('⚠️ Verbindung getrennt')
+            addCallMessage(t('call.disconnected'))
             endCall()
           }
         }
@@ -281,7 +295,7 @@ export function useCall() {
         await flushBufferedCandidates()
       }
       ensureCallPolling()
-      await addCallMessage('📞 Anruf angenommen')
+      await addCallMessage(t('call.accepted'))
     } catch (e) {
       cleanupCall()
     }
@@ -296,7 +310,7 @@ export function useCall() {
         })
       } catch {}
     }
-    await addCallMessage('❌ Anruf abgelehnt')
+    await addCallMessage(t('call.rejected'))
     cleanupCall()
   }
 
@@ -319,7 +333,7 @@ export function useCall() {
       } catch {}
     }
     if (!fromRemote) {
-      await addCallMessage('🔴 Anruf beendet')
+      await addCallMessage(t('call.endedCall'))
     }
     if (callStatusInterval) { clearInterval(callStatusInterval); callStatusInterval = null }
     awaitingRenegotiateAnswer = false
@@ -371,9 +385,9 @@ export function useCall() {
         if (call.status === 'ringing' && call.toUserId === _currentUserId && callState.value.mode === 'idle' && !processedCallIds.has(call.id)) {
           processedCallIds.add(call.id)
           const caller = allUsers?.find(u => u.id === call.fromUserId)
-          callState.value = { mode: 'incoming', callId: call.id, partnerId: call.fromUserId, partnerName: caller?.name || 'Unbekannt', chatId: call.chatId || null, audioEnabled: true, videoEnabled: false, showInfo: false }
+          callState.value = { mode: 'incoming', callId: call.id, partnerId: call.fromUserId, partnerName: caller?.name || t('call.unknown'), chatId: call.chatId || null, audioEnabled: true, videoEnabled: false, showInfo: false }
           ensureCallPolling()
-          await addCallMessage('📞 Eingehender Anruf von ' + (caller?.name || 'Unbekannt'))
+          await addCallMessage(t('call.incomingFrom', { name: caller?.name || t('call.unknown') }))
         }
         // if ensureCallPolling is active, it handles answer/ICE/end — skip to avoid duplicates
         if (callStatusInterval) continue
@@ -386,7 +400,7 @@ export function useCall() {
               startCallDurationTimer()
               await flushBufferedCandidates()
               await processIceCandidates()
-              await addCallMessage('📞 Anruf angenommen')
+              await addCallMessage(t('call.accepted'))
             } catch {}
           }
           if (callState.value.mode !== 'idle') {

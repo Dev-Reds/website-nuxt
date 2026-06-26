@@ -1,11 +1,12 @@
 <script setup>
-useHead({ title: 'Projecte' })
+const { t } = useLanguage()
+useHead({ title: t('index.title') })
 </script>
 
 <template>
   <div class="index-page">
-    <h1>Meine Projekte</h1>
-    <h2>Scratch</h2>
+    <h1>{{ t('index.title') }}</h1>
+    <h2>{{ t('index.scratch') }}</h2>
 
     <div class="iframe-wrap">
       <div class="iframe-crop">
@@ -14,7 +15,7 @@ useHead({ title: 'Projecte' })
     </div>
     <nav>
       <ul>
-        <li><NuxtLink to="scratch/cube-leveler/">Cube Leveler</NuxtLink></li>
+        <li><NuxtLink to="scratch/cube-leveler/">{{ t('index.cubeLeveler') }}</NuxtLink></li>
       </ul>
     </nav>
 
@@ -25,7 +26,7 @@ useHead({ title: 'Projecte' })
     </div>
     <nav>
       <ul>
-        <li><NuxtLink to="scratch/project-presentation/">Project Präsentation</NuxtLink></li>
+        <li><NuxtLink to="scratch/project-presentation/">{{ t('index.presentation') }}</NuxtLink></li>
       </ul>
     </nav>
 
@@ -36,7 +37,7 @@ useHead({ title: 'Projecte' })
     </div>
     <nav>
       <ul>
-        <li><NuxtLink to="scratch/baloons-tower-defence/">Baloons Tower Defence</NuxtLink></li>
+        <li><NuxtLink to="scratch/baloons-tower-defence/">{{ t('index.balloons') }}</NuxtLink></li>
       </ul>
     </nav>
 
@@ -47,14 +48,14 @@ useHead({ title: 'Projecte' })
     </div>
     <nav>
       <ul>
-        <li><NuxtLink to="scratch/minecraft-3d/">Minecraft 3D</NuxtLink></li>
+        <li><NuxtLink to="scratch/minecraft-3d/">{{ t('index.minecraft') }}</NuxtLink></li>
       </ul>
     </nav>
 
-    <h3>MC Launcher (still in development)</h3>
+    <h3>{{ t('index.launcherTitle') }}</h3>
     <nav>
       <ul>
-        <li><NuxtLink to="mc-launcher/">MC Launcher</NuxtLink></li>
+        <li><NuxtLink to="mc-launcher/">{{ t('index.launcher') }}</NuxtLink></li>
       </ul>
     </nav>
   </div>

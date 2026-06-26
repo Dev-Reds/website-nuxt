@@ -1,18 +1,5 @@
-<template>
-<div class="code-container">
-        <div class="code-header">
-            <span>{{ title }}</span>
-            <button class="copy-btn" @click="copyCode">Code kopieren</button>
-        </div>
-        <pre class="code-body"><code id="html-code">
-
-{{ code }}
-            
-</code></pre>
-    </div>
-</template>
-
 <script setup>
+const { t } = useLanguage()
 
 defineProps({
     title: {
@@ -32,6 +19,20 @@ const copyCode = () => {
 };
 
 </script>
+
+<template>
+<div class="code-container">
+        <div class="code-header">
+            <span>{{ title }}</span>
+            <button class="copy-btn" @click="copyCode">{{ t('code.copy') }}</button>
+        </div>
+        <pre class="code-body"><code id="html-code">
+
+{{ code }}
+            
+</code></pre>
+    </div>
+</template>
 
 <style scoped>
 

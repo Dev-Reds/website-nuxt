@@ -17,31 +17,31 @@
           <input ref="avatarInput" type="file" accept="image/*" style="display:none" @change="onAvatarChange"/>
           <button v-if="currentUser.avatar" class="remove-av-btn" @click.stop="removeAvatar">×</button>
         </div>
-        <input v-model="profileName" class="profile-name-input" placeholder="Dein Name" @keyup.enter="saveProfile"/>
+        <input v-model="profileName" class="profile-name-input" :placeholder="t('account.yourName')" @keyup.enter="saveProfile"/>
         <p v-if="profileMsg" :class="['profile-msg', profileMsgOk ? 'ok' : 'err']">{{ profileMsg }}</p>
-        <button class="save-btn" @click.stop="saveProfile">Speichern</button>
+        <button class="save-btn" @click.stop="saveProfile">{{ t('account.save') }}</button>
       </div>
       <div class="menu-divider"></div>
-      <div class="menu-item" @click.stop="handleLogout">Abmelden</div>
+      <div class="menu-item" @click.stop="handleLogout">{{ t('account.logout') }}</div>
     </div>
   </div>
   <div v-else class="account-button" @click="showLogin = !showLogin">
-    <div class="account-av guest">?</div>
+    <div class="account-av guest">{{ t('account.guest') }}</div>
     <div v-if="showLogin" class="account-menu login-menu" @click.stop>
       <div class="login-tabs">
-        <button :class="['tab', { active: loginMode === 'login' }]" @click.stop="loginMode = 'login'">Anmelden</button>
-        <button :class="['tab', { active: loginMode === 'register' }]" @click.stop="loginMode = 'register'">Registrieren</button>
+        <button :class="['tab', { active: loginMode === 'login' }]" @click.stop="loginMode = 'login'">{{ t('account.login') }}</button>
+        <button :class="['tab', { active: loginMode === 'register' }]" @click.stop="loginMode = 'register'">{{ t('account.register') }}</button>
       </div>
       <div v-if="loginMode === 'login'" class="login-form">
-        <input v-model="loginEmail" type="email" placeholder="E-Mail" @keyup.enter="doLogin">
-        <input v-model="loginPassword" type="password" placeholder="Passwort" @keyup.enter="doLogin">
-        <button @click.stop="doLogin" class="login-btn">Anmelden</button>
+        <input v-model="loginEmail" type="email" :placeholder="t('account.email')" @keyup.enter="doLogin">
+        <input v-model="loginPassword" type="password" :placeholder="t('account.password')" @keyup.enter="doLogin">
+        <button @click.stop="doLogin" class="login-btn">{{ t('account.login') }}</button>
       </div>
       <div v-else class="login-form">
-        <input v-model="regName" placeholder="Name" @keyup.enter="doRegister">
-        <input v-model="regEmail" type="email" placeholder="E-Mail" @keyup.enter="doRegister">
-        <input v-model="regPassword" type="password" placeholder="Passwort" @keyup.enter="doRegister">
-        <button @click.stop="doRegister" class="login-btn">Registrieren</button>
+        <input v-model="regName" :placeholder="t('account.name')" @keyup.enter="doRegister">
+        <input v-model="regEmail" type="email" :placeholder="t('account.email')" @keyup.enter="doRegister">
+        <input v-model="regPassword" type="password" :placeholder="t('account.password')" @keyup.enter="doRegister">
+        <button @click.stop="doRegister" class="login-btn">{{ t('account.register') }}</button>
       </div>
       <div v-if="error" class="login-error">{{ error }}</div>
     </div>
@@ -50,6 +50,7 @@
 
 <script setup>
 const { currentUser, login, register, logout, restore } = useAuth()
+const { t } = useLanguage()
 
 const showMenu = ref(false)
 const showLogin = ref(false)
@@ -75,7 +76,7 @@ function closeAll() { showMenu.value = false; showLogin.value = false; error.val
 
 async function doLogin() {
   error.value = ''
-  if (!loginEmail.value || !loginPassword.value) { error.value = 'Bitte alle Felder ausfüllen.'; return }
+  if (!loginEmail.value || !loginPassword.value) { error.value = t('account.allRequired'); return }
   try {
     await login(loginEmail.value, loginPassword.value)
     closeAll()
@@ -84,8 +85,8 @@ async function doLogin() {
 
 async function doRegister() {
   error.value = ''
-  if (!regName.value || !regEmail.value || !regPassword.value) { error.value = 'Bitte alle Felder ausfüllen.'; return }
-  if (regPassword.value.length < 6) { error.value = 'Passwort muss mindestens 6 Zeichen haben.'; return }
+  if (!regName.value || !regEmail.value || !regPassword.value) { error.value = t('account.allRequired'); return }
+  if (regPassword.value.length < 6) { error.value = t('account.passwordLength'); return }
   try {
     await register(regName.value, regEmail.value, regPassword.value)
     closeAll()
@@ -120,12 +121,12 @@ async function removeAvatar() {
 
 async function saveProfile() {
   profileMsg.value = ''
-  if (!profileName.value.trim()) { profileMsg.value = 'Name darf nicht leer sein.'; profileMsgOk.value = false; return }
+  if (!profileName.value.trim()) { profileMsg.value = t('account.nameRequired'); profileMsgOk.value = false; return }
   const r = await fetch('/api/users'); const users = await r.json()
   const i = users.findIndex(x => x.id === currentUser.value.id)
   if (i !== -1) { users[i].name = profileName.value.trim(); await fetch('/api/users', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(users) }) }
   currentUser.value = { ...currentUser.value, name: profileName.value.trim() }
-  profileMsg.value = 'Gespeichert ✓'; profileMsgOk.value = true
+  profileMsg.value = t('account.saved'); profileMsgOk.value = true
   setTimeout(() => { profileMsg.value = '' }, 2000)
 }
 

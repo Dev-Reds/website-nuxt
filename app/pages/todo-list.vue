@@ -1,15 +1,15 @@
 <template>
   <div class="todo-page">
-    <h1>ToDo Liste</h1>
+    <h1>{{ t('todo.title') }}</h1>
 
     <section class="todo-input">
       <input
         v-model="newTodo"
         @keyup.enter="addTodo"
-        placeholder="Neue Aufgabe eingeben..."
+        :placeholder="t('todo.placeholder')"
         aria-label="Neue Aufgabe"
       />
-      <button type="button" @click="addTodo">Hinzufügen</button>
+      <button type="button" @click="addTodo">{{ t('todo.add') }}</button>
     </section>
 
     <section class="todo-list" v-if="todos.length">
@@ -19,17 +19,18 @@
             <input type="checkbox" v-model="todo.completed" aria-label="Erledigt" />
             <span :class="{ completed: todo.completed }">{{ todo.text }}</span>
           </label>
-          <button type="button" @click="removeTodo(index)">Löschen</button>
+          <button type="button" @click="removeTodo(index)">{{ t('todo.delete') }}</button>
         </li>
       </ul>
     </section>
 
-    <p class="empty" v-else>Hier sind noch keine Aufgaben. Füge eine hinzu!</p>
+    <p class="empty" v-else>{{ t('todo.empty') }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
-useHead({ title: 'ToDo List' })
+const { t } = useLanguage()
+useHead({ title: t('todo.title') })
 
 import { ref, onMounted, watch } from 'vue'
 
