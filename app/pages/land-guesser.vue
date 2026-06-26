@@ -65,7 +65,7 @@
 <script setup lang="ts">
 useHead({ title: 'Land-Guesser' })
 
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import type { Map as LeafletMap, LeafletMouseEvent } from 'leaflet'
 
 const route = useRoute()
@@ -92,8 +92,16 @@ if (typeof sessionStorage !== 'undefined') {
   streak.value = parseInt(sessionStorage.getItem('geo_streak') || '0', 10)
 }
 
-watch(gameMode, () => {
-  if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_mode', gameMode.value)
+watch(gameMode, async (newMode) => {
+  if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_mode', newMode)
+  cleanup()
+  if (map) { map.remove(); map = null }
+  target.value = countries[Math.floor(Math.random() * countries.length)] as Country
+  fetchTargetData()
+  if (newMode === 'landscape') {
+    await nextTick()
+    if (mapContainer.value) initMap()
+  }
 })
 
 let map: LeafletMap | null = null
@@ -320,7 +328,7 @@ function showTargetCountry() {
   targetMarker.bindTooltip(target.value.nameDe, { permanent: true, direction: 'top', className: 'geo-tooltip' })
 }
 
-function submitFlagGuess(name: string) {
+async function submitFlagGuess(name: string) {
   if (evaluated.value) return
   flagGuess.value = ''
   const isCorrect = name.toLowerCase() === target.value.nameDe.toLowerCase()
@@ -329,6 +337,10 @@ function submitFlagGuess(name: string) {
   showFlagMap.value = true
   evaluated.value = true
   distanceText.value = isCorrect ? 'Richtig! ✓' : 'Falsch – ' + target.value.nameDe
+  if (!map) {
+    await nextTick()
+    if (mapContainer.value) initMap()
+  }
   if (map) {
     fetchTargetData().then(() => {
       if (targetGeoCache) {
@@ -490,15 +502,15 @@ function cleanup() {
   flex-wrap: wrap;
   gap: 4px;
   justify-content: center;
-  overflow-y: auto;
+  align-content: center;
   padding: 4px 0;
-  max-height: 260px;
+  flex: 1;
 }
 
 .flag-btn {
   white-space: nowrap;
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 8px 14px;
+  font-size: 14px;
 }
 
 .top-bar {
