@@ -544,12 +544,14 @@ function cleanup() {
 .streak-display {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  margin-left: 16px;
   font-size: 15px;
   background: rgba(0,0,0,.4);
   padding: 4px 12px;
   border-radius: 8px;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .streak-fire {
