@@ -31,7 +31,7 @@
         </div>
       </template>
 
-      <!-- Flag mode: flag + input + buttons + map result -->
+      <!-- Flag mode: flag + input + buttons -->
       <template v-if="gameMode === 'flags'">
         <div v-if="mapReady" class="target-area">
           <img :src="`https://flagcdn.com/w160/${target.code.toLowerCase()}.png`" :alt="target.nameDe" class="flag-img">
@@ -49,10 +49,7 @@
             >{{ c.nameDe }}</button>
           </div>
         </div>
-        <div v-if="evaluated || showFlagMap" ref="mapContainer" class="map-container">
-          <div v-if="!mapReady" class="map-placeholder">Karte wird geladen...</div>
-        </div>
-        <div v-if="evaluated" class="eval-overlay distance-text">Entfernung: {{ distanceText }}</div>
+        <div v-if="evaluated" class="flag-result">{{ distanceText }}</div>
       </template>
 
       <div class="skip-bar">
@@ -334,26 +331,8 @@ async function submitFlagGuess(name: string) {
   const isCorrect = name.toLowerCase() === target.value.nameDe.toLowerCase()
   if (isCorrect) { streak.value++; if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_streak', String(streak.value)) }
   else { streak.value = 0; if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_streak', '0') }
-  showFlagMap.value = true
   evaluated.value = true
   distanceText.value = isCorrect ? 'Richtig! ✓' : 'Falsch – ' + target.value.nameDe
-  if (!map) {
-    await nextTick()
-    if (mapContainer.value) initMap()
-  }
-  if (map) {
-    fetchTargetData().then(() => {
-      if (targetGeoCache) {
-        if (targetMarker) { map?.removeLayer(targetMarker) }
-        if (targetGeoCache.geojson) {
-          targetMarker = L.geoJSON(targetGeoCache.geojson, {
-            style: { color: isCorrect ? '#4caf50' : '#f44336', weight: 2, fillColor: isCorrect ? '#4caf50' : '#f44336', fillOpacity: 0.2 },
-          }).addTo(map)
-        }
-        if (targetGeoCache.lat) map?.setView([targetCacheLat, targetCacheLng], 4)
-      }
-    })
-  }
 }
 
 function nextRound() {
@@ -600,6 +579,13 @@ function cleanup() {
   height: auto;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+.flag-result {
+  color: #ff9800;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 10px 0;
 }
 
 .country-input:focus {
