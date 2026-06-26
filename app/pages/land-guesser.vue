@@ -601,6 +601,18 @@ function cleanup() {
   font-size: 14px;
 }
 
+.share-btn {
+  background: transparent;
+  border: 1px solid #888;
+  color: #ccc;
+}
+
+.share-btn:hover {
+  background: transparent;
+  border-color: #ccc;
+  color: #fff;
+}
+
 .mode-btn {
   padding: 8px 18px;
   font-size: 14px;
