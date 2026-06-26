@@ -2,6 +2,7 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 
 const { restore, currentUser } = useAuth()
+const isNamibiaDomain = ref(false)
 const { callState, remoteStream, answerCall, rejectCall, endCall, closeCallOverlay, toggleAudio, toggleVideo, onLocalVideoMount, onRemoteVideoMount } = useCall()
 
 const callFullscreen = ref(false)
@@ -72,7 +73,7 @@ let timerInterval = null
 const showIncoming = ref(false)
 const incomingTimeout = ref(null)
 
-onMounted(() => { restore(); document.addEventListener('keydown', onKeyDown) })
+onMounted(() => { restore(); isNamibiaDomain.value = window.location.hostname === 'namibiareferatgeo.vercel.app'; document.addEventListener('keydown', onKeyDown) })
 
 onBeforeUnmount(() => {
   if (timerInterval) clearInterval(timerInterval)
@@ -118,9 +119,9 @@ function startTimer() {
 
 <template>
   <div>
-    <NavBar/>
-    <OnlineDisplay/>
-    <AccountButton/>
+    <NavBar v-if="!isNamibiaDomain"/>
+    <OnlineDisplay v-if="!isNamibiaDomain"/>
+    <AccountButton v-if="!isNamibiaDomain"/>
     <div class="page-wrap">
       <NuxtPage/>
     </div>

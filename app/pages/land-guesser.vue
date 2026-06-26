@@ -5,9 +5,9 @@
         <button :class="['mode-btn', { active: gameMode === 'landscape' }]" @click="gameMode = 'landscape'">Länder</button>
         <button :class="['mode-btn', { active: gameMode === 'flags' }]" @click="gameMode = 'flags'">Flaggen</button>
         <div class="streak-display">
-          <span v-if="streak > 0" class="streak-fire">{{ '🔥'.repeat(Math.min(streak, 5)) }}</span>
+          <span v-if="streak > 0" class="streak-fire">🔥</span>
           <span class="streak-num">{{ streak }}</span>
-          <span class="streak-label">Serie</span>
+          <span class="streak-label">erzielt</span>
         </div>
       </div>
       <!-- Landscape mode: top bar + name + map -->
@@ -450,18 +450,24 @@ function cleanup() {
   text-align: center;
 }
 
-.action-btn {
-  padding: 10px 30px;
-  font-size: clamp(14px, 4vw, 18px);
+.action-btn, .ok-btn, .share-btn, .mode-btn, .flag-btn {
+  padding: 10px 20px;
+  font-size: clamp(14px, 4vw, 16px);
   background: rgb(188, 0, 0);
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
 }
 
-.action-btn:hover {
+.action-btn:hover, .ok-btn:hover, .share-btn:hover, .mode-btn:hover, .flag-btn:hover {
   background: rgb(155, 0, 0);
+}
+
+.mode-btn.active {
+  background: rgb(140, 0, 0);
 }
 
 .flag-guess-area {
@@ -490,22 +496,9 @@ function cleanup() {
 }
 
 .flag-btn {
-  padding: 4px 10px;
-  font-size: 12px;
-  font-family: inherit;
-  background: transparent;
-  color: #ccc;
-  border: 1px solid #555;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all .1s;
   white-space: nowrap;
-}
-
-.flag-btn:hover {
-  background: rgb(188, 0, 0);
-  color: #fff;
-  border-color: rgb(188, 0, 0);
+  padding: 6px 12px;
+  font-size: 12px;
 }
 
 .top-bar {
@@ -538,6 +531,11 @@ function cleanup() {
     font-size: 13px;
     padding: 8px 12px;
   }
+  .top-bar {
+    gap: 6px;
+  }
+}
+
 .mode-bar {
   display: flex;
   align-items: center;
@@ -546,51 +544,33 @@ function cleanup() {
   padding: 10px 10px 0;
 }
 
-.mode-btn {
-  padding: 6px 18px;
-  font-size: 14px;
-  font-family: inherit;
-  background: transparent;
-  color: #999;
-  border: 1px solid #555;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all .15s;
-}
-
-.mode-btn.active {
-  background: rgb(188, 0, 0);
-  color: #fff;
-  border-color: rgb(188, 0, 0);
-}
-
-.mode-btn:hover {
-  color: #fff;
-  border-color: #888;
-}
-
 .streak-display {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   margin-left: 16px;
-  font-size: 14px;
+  font-size: 15px;
+  background: rgba(0,0,0,.4);
+  padding: 4px 12px;
+  border-radius: 8px;
 }
 
 .streak-fire {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
 }
 
 .streak-num {
-  font-weight: 700;
-  color: #ff9800;
-  font-size: 18px;
+  font-weight: 800;
+  color: #ffcc00;
+  font-size: 20px;
+  text-shadow: 0 0 6px rgba(255,204,0,.4);
 }
 
 .streak-label {
-  color: #999;
-  font-size: 12px;
+  color: #e0e0e0;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .target-area {
@@ -608,57 +588,18 @@ function cleanup() {
   box-shadow: 0 2px 8px rgba(0,0,0,.4);
 }
 
-.top-bar {
-    gap: 6px;
-  }
-}
-
 .country-input:focus {
   border-color: rgb(188, 0, 0);
 }
 
-.skip-btn {
+.ok-btn, .share-btn {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.mode-btn {
   padding: 8px 18px;
   font-size: 14px;
-  background: transparent;
-  color: #999;
-  border: 1px solid #555;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.skip-btn:hover {
-  color: #fff;
-  border-color: #888;
-}
-
-.ok-btn {
-  padding: 8px 14px;
-  font-size: 14px;
-  background: rgb(188, 0, 0);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.ok-btn:hover {
-  background: rgb(155, 0, 0);
-}
-
-.share-btn {
-  padding: 8px 14px;
-  font-size: 14px;
-  background: transparent;
-  color: #ccc;
-  border: 1px solid #555;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.share-btn:hover {
-  color: #fff;
-  border-color: #888;
 }
 
 .copied-msg {
