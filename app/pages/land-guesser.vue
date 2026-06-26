@@ -80,7 +80,10 @@ const evaluated = ref(false)
 const distanceText = ref('')
 const customTarget = ref('')
 const copied = ref(false)
-const gameMode = ref(typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('geo_mode') || 'landscape') : 'landscape')
+const gameMode = ref(
+  route.query.mode === 'landscape' ? 'landscape' :
+  typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('geo_mode') || 'landscape') : 'landscape'
+)
 const streak = ref(0)
 const flagGuess = ref('')
 const showFlagMap = ref(false)
@@ -356,6 +359,7 @@ function selectCountry() {
 function shareCountry() {
   const url = new URL(window.location.href)
   url.searchParams.set('country', target.value.nameEn)
+  url.searchParams.set('mode', 'landscape')
   navigator.clipboard.writeText(url.toString())
   copied.value = true
   setTimeout(() => { copied.value = false }, 2000)
