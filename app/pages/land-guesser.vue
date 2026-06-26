@@ -505,13 +505,14 @@ function cleanup() {
   align-content: center;
   padding: 4px 0;
   flex: 1;
+  width: 80%;
+  margin: 0 auto;
 }
 
 .flag-btn {
   white-space: nowrap;
   padding: 10px 14px;
   font-size: 14px;
-  width: 80%;
 }
 
 .top-bar {
