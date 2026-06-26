@@ -8,7 +8,7 @@
           "value": "namibiareferatgeo.vercel.app"
         }
       ],
-      "destination": "land-guesser?country=Namibia",
+      "destination": "land-guesser-geo?country=Namibia",
       "permanent": false
     }
   ]
