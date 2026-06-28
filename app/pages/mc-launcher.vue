@@ -7,7 +7,7 @@ useHead({ title: t('index.launcher') })
   <div>
 
 <h1>
-    {{ t('index.launcherTitle') }}
+    {{ t('index.launcher') }}
 </h1>
 
  

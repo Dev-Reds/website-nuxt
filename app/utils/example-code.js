@@ -3,7 +3,7 @@ export const HTML_SNIPPET = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crux Client</title>
+<title>Custom Minecraft Launcher</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -13,7 +13,7 @@ body{font-family:Arial,sans-serif;background:#0a0a0a;color:#fff;font-size:2vw;}
 
 
 /* ── Launcher ── */
-.hidden{display:none;}
+.hidden{display:none!important;}
 #launcher-screen{width:100%;height:100vh;flex-direction:column;overflow:hidden;}
 .toolbar{flex-shrink:0;display:flex;align-items:center;gap:.3em;padding:0 .8em;background:rgba(6,6,6,.98);border-bottom:1px solid #1e1e1e;flex-wrap:nowrap;min-height:var(--tb);}
 .toolbar::-webkit-scrollbar{height:3px;}
@@ -58,54 +58,13 @@ body.light .tb-btn:hover{background:#eee;}
 body.light .tb-btn.active{background:var(--acc);color:#fff;border-color:var(--acc);}
 body.light .page{background:#f0f0f0;}
 body.light label{color:#666;}
-body.light select, body.light .btn, body.light input, body.light textarea{background:#fff;color:#111;border-color:#ccc;}
-body.light input::placeholder{color:#777;}
-body.light .skin-change-label{color:#666;}
-body.light .skin-name-display, body.light .skin-version-display{color:#111;}
-body.light #skin-url-input{background:#fff!important;color:#111!important;border-color:#ccc!important;}
-body.light #skin-url-input::placeholder{color:#777!important;}
+body.light select,.light .btn{background:#fff;color:#111;border-color:#ccc;}
 body.light .btn:hover{background:#eee;}
 body.light h1{color:#111;}
 body.light input[type=range]{background:#ccc;}
 body.light .status-text{color:#888;}
 body.light .lp-bg{background:#ddd;border-color:#ccc;}
 body.light .lp-label{color:#888;}
-body.light #stop-bar{background:#e8e8e8!important;border-bottom-color:#ddd!important;}
-body.light #stop-bar span{color:#888!important;}
-body.light .modal{background:#f8f8f8;border-color:#ddd;}
-body.light .modal-header{border-bottom-color:#ddd;}
-body.light .modal-header h2{color:#111;}
-body.light .modal-close{border-color:#ccc;color:#666;}
-body.light .modal-close:hover{color:#111;border-color:#888;}
-body.light .modal-tab-row{border-bottom-color:#ddd;}
-body.light .modal-tab{background:#fff;border-color:#ccc;color:#666;}
-body.light .pack-section h3{color:#888;}
-body.light .pack-tag{background:#eee;border-color:#ccc;color:#333;}
-body.light .pack-tag .rt{color:#888;}
-body.light .pack-tag .rt:hover{color:#f44;}
-body.light .mod-result-desc{color:#888;}
-body.light .mod-icon{background:#ddd;}
-body.light .settings-section h2{color:#888;border-bottom-color:#ddd;}
-body.light .color-btn.sel{border-color:#111;}
-body.light #auto-rp-toggle{background:#ccc!important;border-color:#bbb!important;}
-body.light #auto-rp-knob{background:#666!important;}
-body.light .profile-item:hover{background:#eee;}
-body.light .profile-item.sel{background:#ddeeff;}
-body.light .instance-item:hover{background:#eee;}
-body.light .instance-item.sel{background:#ddeeff;}
-body.light .account-item:hover{background:#eee;}
-body.light .mod-list-empty{color:#888;}
-body.light .mod-toggle{border-color:#ccc;color:#888;}
-body.light .mod-remove{border-color:#ccc;color:#888;}
-body.light #client-rp-input{background:#fff!important;color:#111!important;border-color:#ccc!important;}
-body.light #client-rp-input::placeholder{color:#777!important;}
-body.light #profile-version-select{background:#fff!important;color:#111!important;border-color:#ccc!important;}
-body.light #cape-preview{background:#ddd!important;border-color:#ccc!important;}
-body.light .modal-overlay{background:rgba(200,200,200,.82)!important;}
-body.light #profile-version-display{color:#111!important;}
-body.light label[style*="color:#ccc"]{color:#555!important;}
-body.light strong[style*="color:#ccc"]{color:#555!important;}
-body.light h2[style*="color:#ccc"]{color:#333!important;}
 
 /* ── Launch page ── */
 #launch-page{padding:0;overflow:hidden;}
@@ -117,7 +76,7 @@ body.light .launch-right{background:#e8e8e8;border-left-color:#ddd;}
 body.light .launch-left{background:#f0f0f0;}
 
 /* 3D skin canvas */
-.skin3d-wrap{width:50%;max-width:14vw;aspect-ratio:.7;background:#0a0a0a;border-radius:var(--r);overflow:hidden;position:relative;cursor:grab;margin:0 auto;}
+.skin3d-wrap{width:100%;aspect-ratio:.6;background:#0a0a0a;border-radius:var(--r);overflow:hidden;position:relative;cursor:grab;}
 body.light .skin3d-wrap{background:#e0e0e0;}
 .skin3d-wrap:active{cursor:grabbing;}
 .skin3d-canvas{width:100%;height:100%;display:block;}
@@ -130,13 +89,13 @@ body.light .skin3d-wrap{background:#e0e0e0;}
 .mods-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8em;flex-wrap:wrap;gap:.4em;}
 .mods-header h1{margin:0;}
 .mods-actions{display:flex;gap:.4em;}
-.btn-sm{width:auto;padding:.35em .8em;font-size:.78em;white-space:nowrap;}
-.btn-modrinth{border-color:#1bd96a55;color:#1bd96a;background:#1bd96a0a;}
-.btn-modrinth:hover{background:#1bd96a18;}
-.btn-curseforge{border-color:#f1642255;color:#f16422;background:#f164220a;}
-.btn-curseforge:hover{background:#f1642218;}
-body.light .btn-modrinth{background:#f0fff6;color:#0a6b34;border-color:#1bd96a;}
-body.light .btn-curseforge{background:#fff5f0;color:#a83500;border-color:#f16422;}
+.btn-sm{width:auto!important;padding:.35em .8em!important;font-size:.78em!important;white-space:nowrap;}
+.btn-modrinth{border-color:#1bd96a55!important;color:#1bd96a!important;background:#1bd96a0a!important;}
+.btn-modrinth:hover{background:#1bd96a18!important;}
+.btn-curseforge{border-color:#f1642255!important;color:#f16422!important;background:#f164220a!important;}
+.btn-curseforge:hover{background:#f1642218!important;}
+body.light .btn-modrinth{background:#f0fff6!important;color:#0a6b34!important;border-color:#1bd96a!important;}
+body.light .btn-curseforge{background:#fff5f0!important;color:#a83500!important;border-color:#f16422!important;}
 
 .mod-list{width:100%;border:1px solid #1a1a1a;border-radius:var(--r);background:#0d0d0d;overflow:hidden;}
 .mod-list-empty{padding:2em;text-align:center;color:#444;font-size:.82em;}
@@ -147,14 +106,14 @@ body.light .btn-curseforge{background:#fff5f0;color:#a83500;border-color:#f16422
 .mod-name{font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mod-meta{color:#555;font-size:.76em;margin-top:.1em;}
 .mod-btns{display:flex;gap:.35em;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;}
-.mod-btn{width:auto;padding:.22em .65em;font-size:.7em;border-radius:.35em;background:transparent;}
-.mod-toggle{border-color:#333;color:#777;}
-.mod-toggle:hover{border-color:var(--acc);color:var(--acc);}
-.mod-remove{border-color:#333;color:#666;}
-.mod-remove:hover{border-color:#f44;color:#f44;}
-.mod-dlall{border-color:#222;color:#555;}
-.mod-dlall.on{border-color:#1bd96a66;color:#1bd96a;}
-.mod-dlall:hover{border-color:#1bd96a;color:#1bd96a;}
+.mod-btn{width:auto!important;padding:.22em .65em!important;font-size:.7em;border-radius:.35em;background:transparent!important;}
+.mod-toggle{border-color:#333!important;color:#777!important;}
+.mod-toggle:hover{border-color:var(--acc)!important;color:var(--acc)!important;}
+.mod-remove{border-color:#333!important;color:#666!important;}
+.mod-remove:hover{border-color:#f44!important;color:#f44!important;}
+.mod-dlall{border-color:#222!important;color:#555!important;}
+.mod-dlall.on{border-color:#1bd96a66!important;color:#1bd96a!important;}
+.mod-dlall:hover{border-color:#1bd96a!important;color:#1bd96a!important;}
 body.light .mod-list{background:#fff;border-color:#ddd;}
 body.light .mod-item{border-bottom-color:#eee;color:#111;}
 body.light .mod-meta{color:#888;}
@@ -166,17 +125,17 @@ body.light .mod-meta{color:#888;}
 .modal{background:#111;border:1px solid #2a2a2a;border-radius:.8em;width:min(88vw,660px);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;}
 .modal-header{display:flex;align-items:center;justify-content:space-between;padding:.9em 1.2em;border-bottom:1px solid #1e1e1e;}
 .modal-header h2{font-size:.95em;}
-.modal-close{width:auto;padding:.2em .55em;background:transparent;border:1px solid #333;color:#777;border-radius:.35em;font-size:.85em;cursor:pointer;}
-.modal-close:hover{color:#fff;border-color:#666;}
+.modal-close{width:auto!important;padding:.2em .55em!important;background:transparent!important;border:1px solid #333!important;color:#777!important;border-radius:.35em;font-size:.85em;cursor:pointer;}
+.modal-close:hover{color:#fff!important;border-color:#666!important;}
 .modal-body{padding:.9em 1.2em;overflow-y:auto;flex:1;}
 .modal-tab-row{display:flex;gap:.4em;margin-bottom:.8em;border-bottom:1px solid #1e1e1e;padding-bottom:.6em;}
-.modal-tab{width:auto;padding:.3em .8em;font-size:.78em;border-radius:.35em;background:transparent;border:1px solid #2a2a2a;color:#666;}
-.modal-tab.active{background:var(--acc);border-color:var(--acc);color:#fff;}
+.modal-tab{width:auto!important;padding:.3em .8em!important;font-size:.78em;border-radius:.35em;background:transparent!important;border:1px solid #2a2a2a!important;color:#666!important;}
+.modal-tab.active{background:var(--acc)!important;border-color:var(--acc)!important;color:#fff!important;}
 .modal-search-row{display:flex;gap:.4em;margin-bottom:.8em;}
 .mod-search-input{flex:1;padding:.5em .75em;border-radius:var(--r);border:1px solid #2a2a2a;background:#0d0d0d;color:#fff;font-size:.85em;outline:none;}
 .mod-search-input:focus{border-color:var(--acc);}
 body.light .mod-search-input{background:#fff;color:#111;border-color:#ccc;}
-.mod-search-btn{width:auto;padding:.5em .9em;font-size:.82em;}
+.mod-search-btn{width:auto!important;padding:.5em .9em!important;font-size:.82em;}
 .mod-results{display:flex;flex-direction:column;}
 .mod-result-item{display:flex;align-items:center;gap:.7em;padding:.6em .3em;border-bottom:1px solid #161616;}
 .mod-result-item:last-child{border-bottom:none;}
@@ -189,9 +148,10 @@ body.light .mod-result-item{border-bottom-color:#eee;}
 body.light .mod-result-item:hover{background:#f5f5f5;}
 body.light .mod-result-name{color:#111;}
 .mod-result-actions{display:flex;gap:.35em;align-items:center;flex-shrink:0;}
-
-.mod-install-btn{width:auto;padding:.28em .75em;font-size:.72em;border-radius:.35em;background:linear-gradient(90deg,var(--acc2),var(--acc));border-color:var(--acc);color:#fff;}
-
+.mod-version-select{padding:.28em .5em!important;font-size:.72em!important;width:auto!important;min-width:5em;border-radius:.35em;}
+.mod-install-btn{width:auto!important;padding:.28em .75em!important;font-size:.72em;border-radius:.35em;background:linear-gradient(90deg,var(--acc2),var(--acc))!important;border-color:var(--acc)!important;color:#fff!important;}
+.mod-install-all-btn{width:auto!important;padding:.28em .65em!important;font-size:.7em;border-radius:.35em;background:transparent!important;border-color:#1bd96a44!important;color:#1bd96a!important;white-space:nowrap;}
+.mod-install-all-btn:hover{background:#1bd96a15!important;}
 .modal-loading{text-align:center;color:#555;padding:1.5em;font-size:.82em;}
 
 /* ── Profile page ── */
@@ -202,8 +162,8 @@ body.light .mod-result-name{color:#111;}
 .profile-item.sel{border-left:3px solid var(--acc);padding-left:calc(.9em - 3px);background:#0d1a2e;}
 .profile-name{font-weight:bold;flex:1;}
 .profile-meta{color:#555;font-size:.76em;}
-.profile-edit-btn{width:auto;padding:.22em .65em;font-size:.72em;background:transparent;border-color:#2a2a2a;color:#666;border-radius:.35em;}
-.profile-edit-btn:hover{border-color:var(--acc);color:var(--acc);}
+.profile-edit-btn{width:auto!important;padding:.22em .65em!important;font-size:.72em;background:transparent!important;border-color:#2a2a2a!important;color:#666!important;border-radius:.35em;}
+.profile-edit-btn:hover{border-color:var(--acc)!important;color:var(--acc)!important;}
 body.light .profile-list{background:#fff;border-color:#ddd;}
 body.light .profile-item{border-bottom-color:#eee;color:#111;}
 body.light .profile-meta{color:#888;}
@@ -221,7 +181,7 @@ body.light .profile-meta{color:#888;}
 .pack-input{flex:1;padding:.38em .6em;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:var(--r);color:#fff;font-size:.78em;outline:none;}
 .pack-input:focus{border-color:var(--acc);}
 body.light .pack-input{background:#fff;color:#111;border-color:#ccc;}
-.pack-add-btn{width:auto;padding:.38em .75em;font-size:.78em;}
+.pack-add-btn{width:auto!important;padding:.38em .75em!important;font-size:.78em;}
 
 /* ── Account page ── */
 .account-panel{max-width:30em;}
@@ -233,11 +193,11 @@ body.light .pack-input{background:#fff;color:#111;border-color:#ccc;}
 .account-head-sm{width:2.2em;height:2.2em;border-radius:.2em;image-rendering:pixelated;background:#222;flex-shrink:0;}
 .account-name{flex:1;font-weight:bold;}
 .account-type{font-size:.72em;color:#555;}
-.account-del{width:auto;padding:.2em .55em;font-size:.7em;background:transparent;border-color:#2a2a2a;color:#555;border-radius:.35em;}
-.account-del:hover{border-color:#f44;color:#f44;}
+.account-del{width:auto!important;padding:.2em .55em!important;font-size:.7em;background:transparent!important;border-color:#2a2a2a!important;color:#555!important;border-radius:.35em;}
+.account-del:hover{border-color:#f44!important;color:#f44!important;}
 .account-add-btns{display:flex;gap:.5em;margin-top:.5em;}
-.btn-ms{background:#0078d4;border-color:#0078d4;color:#fff;}
-.btn-mojang{background:#b87333;border-color:#b87333;color:#fff;}
+.btn-ms{background:#0078d4!important;border-color:#0078d4!important;color:#fff!important;}
+.btn-mojang{background:#b87333!important;border-color:#b87333!important;color:#fff!important;}
 body.light .account-list{background:#fff;border-color:#ddd;}
 body.light .account-item{background:#fff;border-bottom-color:#eee;color:#111;}
 body.light .account-type{color:#888;}
@@ -251,9 +211,7 @@ body.light .account-type{color:#888;}
 .color-btn.sel{border-color:#fff;transform:scale(1.08);}
 
 /* ── Logs ── */
-.logs-container{width:100%;flex:1;min-height:0;background:#060606;border:1px solid #1a1a1a;border-radius:var(--r);overflow-y:auto;font-family:monospace;font-size:.72em;padding:.5em .8em;line-height:1.4;}
-#logs-page{display:flex;flex-direction:column;}
-#logs-page h1,#logs-page .log-select-row,#logs-page .lp-wrap{flex-shrink:0;}
+.logs-container{width:100%;height:calc(100% - 4em);background:#060606;border:1px solid #1a1a1a;border-radius:var(--r);overflow-y:auto;font-family:monospace;font-size:.72em;padding:.5em .8em;line-height:1.4;}
 .log-line{white-space:pre-wrap;word-break:break-all;padding:.05em 0;border-bottom:1px solid #0d0d0d;}
 .log-line.err{color:#ff6b6b;}
 .log-line.warn{color:#f5a623;}
@@ -305,11 +263,6 @@ body.light .instance-item{border-bottom-color:#eee;color:#111;}
     </button>
   </div>
 
-  <div id="stop-bar" style="display:flex;gap:.5em;padding:.35em .8em;background:#0d0d0d;border-bottom:1px solid #1a1a1a;align-items:center;min-height:2em">
-    <span style="font-size:.78em;color:#555;margin-right:.4em">Actions:</span>
-    <button class="btn" id="stop-btn" style="width:auto;padding:.35em .7em;font-size:.78em;border-color:#f4444444;color:#f44;display:none;white-space:nowrap" title="Stop selected instance" data-i18n="btn_stop">■ Stop</button>
-    <button class="btn" id="stop-all-btn" style="width:auto;padding:.35em .7em;font-size:.78em;border-color:#f4444444;color:#f44;display:none;white-space:nowrap" title="Stop all running instances">■ Stop All</button>
-  </div>
   <div class="pages">
 
     <!-- ══ LAUNCH ══ -->
@@ -327,7 +280,8 @@ body.light .instance-item{border-bottom-color:#eee;color:#111;}
             </div>
           <div style="display:flex;gap:.5em;max-width:24em">
             <button class="btn btn-primary" id="launch-btn" style="flex:1" data-i18n="btn_launch">▶ Launch Minecraft</button>
-          
+            <button class="btn" id="stop-btn" style="width:auto;padding:.5em .9em;border-color:#f4444444;color:#f44;display:none" title="Stop selected instance" data-i18n="btn_stop">■ Stop</button>
+            <button class="btn" id="stop-all-btn" style="width:auto;padding:.5em .9em;border-color:#f4444444;color:#f44;display:none" title="Stop all running instances">■ Stop All</button>
           </div>
           <div id="status" class="status-text">Ready.</div>
           <div class="lp-wrap" id="lp-wrap">
@@ -365,7 +319,6 @@ body.light .instance-item{border-bottom-color:#eee;color:#111;}
           <button class="btn btn-sm btn-modrinth" id="btn-modrinth-global">Modrinth</button>
           <button class="btn btn-sm btn-curseforge" id="btn-curseforge-global">CurseForge</button>
         </div>
-
       </div>
       <div style="display:flex;gap:.4em;margin-bottom:.6em">
         <button class="btn btn-sm mod-filter-btn active" data-filter="all" id="filter-all">All</button>
@@ -400,8 +353,6 @@ body.light .instance-item{border-bottom-color:#eee;color:#111;}
         <div id="client-rp-list" style="display:flex;flex-wrap:wrap;gap:.35em;min-height:1.5em"></div>
       </div>
     </div>
-
-
 
     <!-- ══ PROFILES ══ -->
     <div id="profiles-page" class="page">
@@ -488,32 +439,9 @@ body.light .instance-item{border-bottom-color:#eee;color:#111;}
         <h2>Launch Mode</h2>
         <label style="display:flex;align-items:center;gap:.6em;cursor:pointer;font-size:.85em;color:#ccc">
           <input type="checkbox" id="use-original-launcher-toggle" style="width:1.1em;height:1.1em;cursor:pointer">
-          Launch via original Minecraft Launcher
+          Launch via original Minecraft Launcher (like CurseForge)
         </label>
-        <p style="color:#555;font-size:.76em;margin-top:.3em">Opens the official Minecraft Launcher (Java Edition) instead of launching directly.</p>
-      </div>
-      <div class="settings-section">
-        <h2>After Launch</h2>
-        <label style="display:flex;align-items:center;gap:.6em;cursor:pointer;font-size:.85em;color:#ccc">
-          <input type="checkbox" id="open-logs-toggle" style="width:1.1em;height:1.1em;cursor:pointer">
-          Open logs after launch
-        </label>
-        <label style="display:flex;align-items:center;gap:.6em;cursor:pointer;font-size:.85em;color:#ccc;margin-top:.4em">
-          <input type="checkbox" id="close-launcher-toggle" style="width:1.1em;height:1.1em;cursor:pointer">
-          Close launcher while playing
-        </label>
-      </div>
-
-      <div class="settings-section">
-        <h2>Reset</h2>
-        <button class="btn" id="reset-all-btn" style="border-color:#f4444444;color:#f44">Reset Launcher</button>
-        <p style="color:#555;font-size:.76em;margin-top:.3em">Deletes all accounts, profiles, settings, and mods. Launcher will restart as if first opened.</p>
-      </div>
-
-      <div class="settings-section" style="border-top:1px solid #333;padding-top:1em">
-        <h2 style="color:#f88">Uninstall</h2>
-        <button class="btn" id="uninstall-btn" style="border-color:#f4444444;color:#f44">Uninstall Crux Client</button>
-        <p style="color:#555;font-size:.76em;margin-top:.3em">Removes the launcher and all its data from your system.</p>
+        <p style="color:#555;font-size:.76em;margin-top:.3em">When enabled, opens the official Minecraft Launcher instead of launching directly.</p>
       </div>
     </div>
 
@@ -720,7 +648,6 @@ body.light .instance-item{border-bottom-color:#eee;color:#111;}
 
 <script>
 const { ipcRenderer } = require('electron');
-const path = require('path');
 
 // ════════════════════════════════════════
 // STATE
@@ -767,18 +694,11 @@ function buildColorGrid(){
 // INIT
 // ════════════════════════════════════════
 window.onload = async()=>{
-  [settings, accounts, profiles, installedMods, launchedVersions] = await Promise.all([
-    ipcRenderer.invoke('load-settings')         .then(r=>r||{}),
-    ipcRenderer.invoke('load-accounts')         .then(r=>r||[]),
-    ipcRenderer.invoke('load-profiles')         .then(r=>r||[]),
-    ipcRenderer.invoke('load-mods')             .then(r=>r||[]),
-    ipcRenderer.invoke('load-launched-versions').then(r=>r||[]),
-  ]);
-
-  if (settings.ram === undefined || settings.ram === null) {
-    const totalGB = await ipcRenderer.invoke('get-total-ram');
-    settings.ram = Math.max(1, Math.min(8, Math.round(totalGB / 2)));
-  }
+  settings        = await ipcRenderer.invoke('load-settings')         || {};
+  accounts        = await ipcRenderer.invoke('load-accounts')         || [];
+  profiles        = await ipcRenderer.invoke('load-profiles')         || [];
+  installedMods   = await ipcRenderer.invoke('load-mods')             || [];
+  launchedVersions= await ipcRenderer.invoke('load-launched-versions')|| [];
 
   if(settings.theme==='light') applyTheme(true);
   if(typeof settings.accentIdx==='number'){currentAccentIdx=settings.accentIdx;}
@@ -789,10 +709,6 @@ window.onload = async()=>{
   bindToolbar();
   bindSettings();
   ensureDefaultMods();
-  // Apply saved toggle states
-  document.getElementById('open-logs-toggle').checked = !!settings.openLogsAfterLaunch;
-  document.getElementById('close-launcher-toggle').checked = !!settings.closeLauncherWhilePlaying;
-  document.getElementById('use-original-launcher-toggle').checked = !!settings.useOriginalLauncher;
   renderModList();
   fetchMissingModIcons(); // fetch icons in background
   renderAccountList();
@@ -804,7 +720,7 @@ window.onload = async()=>{
 
   // Show launcher immediately
   document.getElementById('launcher-screen').style.display='flex';
-  showPage(accounts.length ? 'launch-page' : 'account-page');
+  showPage('launch-page');
 
   document.getElementById('status').textContent='Loading versions...';
   loadVersions();
@@ -814,19 +730,13 @@ window.onload = async()=>{
 // ════════════════════════════════════════
 // SCREEN / NAV
 // ════════════════════════════════════════
-function updateStopButtons(){
-  const hasRunning = Object.values(instances).some(i=>i.status==='running');
-  const runningCount = Object.values(instances).filter(i=>i.status==='running').length;
-  document.getElementById('stop-btn').style.display = hasRunning ? '' : 'none';
-  document.getElementById('stop-all-btn').style.display = runningCount >= 2 ? '' : 'none';
-}
 function showLauncher(){
   document.getElementById('launcher-screen').style.display='flex';
 }
 
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');p.style.display='none';});
-  const pg=document.getElementById(id); pg.classList.add('active'); pg.style.display='';
+  const pg=document.getElementById(id); pg.classList.add('active'); pg.style.display='block';
   document.querySelectorAll('.tb-btn[data-page]').forEach(b=>{
     const on=b.dataset.page===id; b.classList.toggle('active',on);
     if(on){ const col=ACCENTS[currentAccentIdx]; const lightText=[3,4,5,6,15].includes(currentAccentIdx);
@@ -834,9 +744,9 @@ function showPage(id){
       b.style.color=lightText?'#111':'#fff';
     } else { b.style.background=''; b.style.borderColor=''; b.style.color=''; }
   });
-  if(id==='logs-page'){ refreshLogSelect(); updateStopButtons(); }
+  if(id==='logs-page') refreshLogSelect();
   if(id==='instances-page') renderInstanceList();
-  if(id==='launch-page'){ const wrap=document.getElementById('skin3d-wrap'); setTimeout(()=>{ if(wrap.clientWidth>0 && typeof threeRenderer !== 'undefined' && typeof threeCamera !== 'undefined'){ threeRenderer.setSize(wrap.clientWidth, wrap.clientHeight); threeCamera.aspect = wrap.clientWidth / wrap.clientHeight; threeCamera.updateProjectionMatrix(); } },50); updateStopButtons(); }
+  if(id==='launch-page'){ const wrap=document.getElementById('skin3d-wrap'),canvas=document.getElementById('skin3d-canvas'); setTimeout(()=>{ if(wrap.clientWidth>0){canvas.width=wrap.clientWidth;canvas.height=wrap.clientHeight;drawSkin3D();} },50); }
 }
 
 function bindToolbar(){
@@ -861,56 +771,30 @@ function applyTheme(l){
 function bindSettings(){
   // RAM slider + unit toggle
   let ramUnit = settings.ramUnit || 'gb';
-  const slider = document.getElementById('ramSlider');
-  const unitBtn = document.getElementById('ram-unit-btn');
-  const unitLabel = document.getElementById('ramUnitLabel');
-
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const toMb = gb => clamp(Math.round(gb * 1024), 512, 8192);
-  const toGb = mb => clamp(Math.round(mb / 1024), 1, 8);
-  const getSavedRam = () => {
-    const raw = parseInt(settings.ram, 10);
-    if (Number.isNaN(raw)) return ramUnit === 'mb' ? 1024 : 1;
-    if (ramUnit === 'mb') {
-      return raw > 0 && raw <= 8 ? toMb(raw) : clamp(raw, 512, 8192);
-    }
-    return raw > 8 ? toGb(raw) : clamp(raw, 1, 8);
-  };
-
   function updateRamSlider(){
-    const savedRam = getSavedRam();
+    const slider = document.getElementById('ramSlider');
+    const unitBtn = document.getElementById('ram-unit-btn');
+    const unitLabel = document.getElementById('ramUnitLabel');
     if(ramUnit === 'mb'){
-      slider.min = 512; slider.max = 8192; slider.step = 256;
-      slider.value = savedRam;
+      slider.min=512; slider.max=8192; slider.step=256;
+      slider.value=settings.ram||1024;
+      document.getElementById('ramValue').textContent=slider.value;
       unitLabel.textContent='MB'; unitBtn.textContent='Switch to GB';
     } else {
-      slider.min = 1; slider.max = 8; slider.step = 1;
-      slider.value = savedRam;
+      slider.min=1; slider.max=8; slider.step=1;
+      slider.value=settings.ram||1;
+      document.getElementById('ramValue').textContent=slider.value;
       unitLabel.textContent='GB'; unitBtn.textContent='Switch to MB';
     }
-    document.getElementById('ramValue').textContent = slider.value;
-    settings.ram = parseInt(slider.value, 10);
-    settings.ramUnit = ramUnit;
-    saveSettings();
   }
-
   updateRamSlider();
-  slider.addEventListener('input', e => {
-    const value = parseInt(e.target.value, 10) || 0;
-    document.getElementById('ramValue').textContent = value;
-    settings.ram = value;
-    settings.ramUnit = ramUnit;
-    saveSettings();
+  document.getElementById('ramSlider').addEventListener('input',e=>{
+    document.getElementById('ramValue').textContent=e.target.value;
+    settings.ram=e.target.value; settings.ramUnit=ramUnit; saveSettings();
   });
-  unitBtn.addEventListener('click', () => {
-    const oldUnit = ramUnit;
-    const oldValue = parseInt(slider.value, 10) || (oldUnit === 'mb' ? 1024 : 1);
-    ramUnit = oldUnit === 'gb' ? 'mb' : 'gb';
-    const newValue = oldUnit === 'gb' ? toMb(oldValue) : toGb(oldValue);
-    settings.ram = newValue;
-    settings.ramUnit = ramUnit;
-    saveSettings();
-    updateRamSlider();
+  document.getElementById('ram-unit-btn').addEventListener('click',()=>{
+    ramUnit = ramUnit==='gb'?'mb':'gb';
+    settings.ramUnit=ramUnit; saveSettings(); updateRamSlider();
   });
 
   // Java rescan
@@ -938,6 +822,7 @@ function bindSettings(){
     r.readAsDataURL(f);
   });
   if(settings.capeUrl){document.getElementById('cape-url-input').value=settings.capeUrl;renderCapePreview(settings.capeUrl);}
+
 
 }
 
@@ -1074,7 +959,7 @@ function populateJava(javas){
     return; // don't auto-install, just let user proceed
   }
   const sorted=[...javas].sort((a,b)=>{ const va=parseInt(a.version)||0,vb=parseInt(b.version)||0; return Math.abs(vb-21)-Math.abs(va-21); });
-  sorted.forEach(j=>{ const o=document.createElement('option'); o.value=j.path; o.textContent=`Java ${j.version}`; sel.appendChild(o); });
+  sorted.forEach(j=>{ const o=document.createElement('option'); o.value=j.path; o.textContent=\`Java $\{j.version}\`; sel.appendChild(o); });
   settings.javaPath=sorted[0].path; saveSettings();
 }
 async function loadJava(){ try{ populateJava(await ipcRenderer.invoke('get-java-versions')); }catch{} }
@@ -1100,10 +985,9 @@ async function loadVersions(){
     }
     if(others.length){
       const grp=document.createElement('optgroup'); grp.label='Other';
-      others.forEach(v=>{ const o=document.createElement('option'); o.value=v.id; o.textContent=`${v.id} (${v.type})`; grp.appendChild(o); });
+      others.forEach(v=>{ const o=document.createElement('option'); o.value=v.id; o.textContent=\`$\{v.id} ($\{v.type})\`; grp.appendChild(o); });
       ps.appendChild(grp);
     }
-    // jar version select removed
   } catch(e){ document.getElementById('status').textContent='Version load failed: '+e.message; }
 }
 
@@ -1160,7 +1044,8 @@ document.getElementById('launch-btn').addEventListener('click',async()=>{
 
   const lpWrap=document.getElementById('lp-wrap'), lpFill=document.getElementById('lp-fill'), lpLabel=document.getElementById('lp-label');
   lpWrap.classList.add('vis'); lpFill.style.width='1%'; lpLabel.textContent='Starting...';
-  updateStopButtons();
+  document.getElementById('stop-btn').style.display='';
+
   if(!launchedVersions.includes(version)){
     launchedVersions.push(version); ipcRenderer.send('save-launched-versions',launchedVersions);
     autoDownloadForVersion(version);
@@ -1172,7 +1057,7 @@ document.getElementById('launch-btn').addEventListener('click',async()=>{
     profileId: pid,
     profileName: profile?.name||'',
     clientMods: installedMods,
-    clientResourcePacks: clientResourcePacks,
+    clientResourcePacks: autoUseResourcePacks ? clientResourcePacks : [],
     useClientMods: profile?.useClientMods !== false,
     useClientRPs:  profile?.useClientRPs  !== false,
     profileMods: profile?.mods||[],
@@ -1186,8 +1071,8 @@ document.getElementById('launch-btn').addEventListener('click',async()=>{
 
 // No Java found — redirect to settings and auto-scan
 ipcRenderer.on('no-java-found',(_,neededVersion)=>{
-  document.getElementById('status').textContent=`Java ${neededVersion} required. Scanning for Java...`;
-  updateStopButtons();
+  document.getElementById('status').textContent=\`Java $\{neededVersion} required. Scanning for Java...\`;
+  document.getElementById('stop-btn').style.display='none';
   document.getElementById('launch-btn').disabled=false;
   showPage('settings-page');
   setTimeout(async()=>{
@@ -1195,7 +1080,7 @@ ipcRenderer.on('no-java-found',(_,neededVersion)=>{
     await loadJava();
     document.getElementById('rescan-java-btn').textContent='↻ Rescan Java';
     if(!document.getElementById('javaSelect').value){
-      document.getElementById('status').textContent=`No Java found. Download Java ${neededVersion} from adoptium.net`;
+      document.getElementById('status').textContent=\`No Java found. Download Java $\{neededVersion} from adoptium.net\`;
     }
   }, 300);
 });
@@ -1204,6 +1089,7 @@ document.getElementById('stop-btn').addEventListener('click',()=>{
   const toStop = selectedInstanceId || currentInstanceId;
   if(toStop) ipcRenderer.send('stop-minecraft', toStop);
 });
+
 document.getElementById('stop-all-btn').addEventListener('click',()=>{
   const running = Object.values(instances).filter(i=>i.status==='running');
   running.forEach(inst => ipcRenderer.send('stop-minecraft', inst.id));
@@ -1222,21 +1108,19 @@ ipcRenderer.on('launch-progress',(_,d)=>{
 });
 // Switch to logs tab when MC actually starts
 ipcRenderer.on('mc-launched',(_,instanceId)=>{
-  if(settings.openLogsAfterLaunch) showPage('logs-page');
+  showPage('logs-page');
 });
 ipcRenderer.on('instance-started',(_,inst)=>{
   instances[inst.id]={...inst, logs:[], status:'running'};
   currentInstanceId=inst.id;
   selectedInstanceId=inst.id;
-  updateStopButtons();
   renderInstanceList();
   refreshLogSelect();
   updateRunningBadge();
   const sel=document.getElementById('log-instance-select');
   if(sel) sel.value=inst.id;
   document.getElementById('logs-container').innerHTML='';
-  if(settings.openLogsAfterLaunch) showPage('logs-page');
-  if(settings.closeLauncherWhilePlaying) ipcRenderer.send('close-launcher');
+  showPage('logs-page');
 });
 ipcRenderer.on('instance-log',(_,{instanceId,line})=>{
   if(!instances[instanceId])return;
@@ -1247,26 +1131,25 @@ ipcRenderer.on('instance-log',(_,{instanceId,line})=>{
 ipcRenderer.on('instance-closed',(_,{instanceId,code})=>{
   if(instances[instanceId]){instances[instanceId].status=code===0?'closed':'crashed';}
   if(currentInstanceId===instanceId){ currentInstanceId=null; }
-  updateStopButtons();
+  document.getElementById('stop-btn').style.display='none';
   document.getElementById('launch-btn').disabled=false;
   updateRunningBadge();
   renderInstanceList();
   refreshLogSelect();
-  if(settings.closeLauncherWhilePlaying) ipcRenderer.send('show-launcher');
 });
 ipcRenderer.on('instance-crashed',(_,{instanceId})=>{
   if(instances[instanceId])instances[instanceId].status='crashed';
-  updateStopButtons();
   updateRunningBadge();
   renderInstanceList();
   refreshLogSelect();
 });
+
 async function autoDownloadForVersion(mcVersion){
   for(const mod of installedMods){
     if(!mod.downloadAllVersions||mod.disabled||!mod.modrinthId)continue;
     if(installedMods.some(m=>m.modrinthId===mod.modrinthId&&m.mcVersion===mcVersion))continue;
     try{
-      const vd=await(await fetch(`https://api.modrinth.com/v2/project/${mod.modrinthId}/version`)).json();
+      const vd=await(await fetch(\`https://api.modrinth.com/v2/project/$\{mod.modrinthId}/version\`)).json();
       if(vd.some(v=>v.game_versions.includes(mcVersion))){
         installedMods.push({...mod,mcVersion,autoInstalled:true}); saveMods(); renderModList();
       }
@@ -1280,8 +1163,9 @@ async function autoDownloadForVersion(mcVersion){
 function updateRunningBadge(){
   const running = Object.values(instances).filter(i=>i.status==='running').length;
   const badge = document.getElementById('running-badge');
+  const stopAllBtn = document.getElementById('stop-all-btn');
   if(badge){ if(running>0){badge.textContent=running;badge.style.display='inline';}else{badge.style.display='none';} }
-  updateStopButtons();
+  if(stopAllBtn) stopAllBtn.style.display = running > 0 ? '' : 'none';
 }
 
 function renderInstanceList(){
@@ -1293,7 +1177,7 @@ function renderInstanceList(){
     item.className='instance-item'+(inst.id===selectedInstanceId?' sel':'');
     const badge=inst.status==='running'?'<span class="instance-badge badge-running">Running</span>':inst.status==='crashed'?'<span class="instance-badge badge-crashed">Crashed</span>':'<span class="instance-badge badge-closed">Closed</span>';
     const t=new Date(inst.startTime).toLocaleTimeString();
-    item.innerHTML=`<div style="flex:1"><div style="font-weight:bold;font-size:.85em">${inst.version}</div><div style="color:#555;font-size:.72em">${t}</div></div>${badge}`;
+    item.innerHTML=\`<div style="flex:1"><div style="font-weight:bold;font-size:.85em">$\{inst.version}</div><div style="color:#555;font-size:.72em">$\{t}</div></div>$\{badge}\`;
     item.addEventListener('click',()=>{ selectedInstanceId=inst.id; renderInstanceList(); refreshLogSelect(); document.getElementById('log-instance-select').value=inst.id; renderLogsForInstance(inst.id); });
     el.appendChild(item);
   });
@@ -1306,9 +1190,9 @@ function refreshLogSelect(){
   list.forEach((inst, idx)=>{
     const o=document.createElement('option');
     o.value=inst.id;
-    const profileName = inst.profileName ? ` · ${inst.profileName}` : '';
+    const profileName = inst.profileName ? \` . $\{inst.profileName}\` : '';
     const status = inst.status==='running' ? ' ▶' : inst.status==='crashed' ? ' ✗' : ' ■';
-    o.textContent=`#${idx+1} ${inst.version}${profileName} (${new Date(inst.startTime).toLocaleTimeString()})${status}`;
+    o.textContent=\`#$\{idx+1} $\{inst.version}$\{profileName} ($\{new Date(inst.startTime).toLocaleTimeString()})$\{status}\`;
     if(inst.id===selectedInstanceId) o.selected=true;
     sel.appendChild(o);
   });
@@ -1318,7 +1202,9 @@ document.getElementById('log-instance-select').addEventListener('change',e=>{
   selectedInstanceId=e.target.value||null;
   if(selectedInstanceId) renderLogsForInstance(selectedInstanceId);
   else document.getElementById('logs-container').innerHTML='';
-  updateStopButtons();
+  // Show stop button only if selected instance is still running
+  const inst = selectedInstanceId ? instances[selectedInstanceId] : null;
+  document.getElementById('stop-btn').style.display = (inst&&inst.status==='running') ? '' : 'none';
 });
 
 function renderLogsForInstance(instanceId){
@@ -1349,7 +1235,7 @@ function renderProfileList(){
   profiles.forEach(p=>{
     const item=document.createElement('div');
     item.className='profile-item'+(p.id===settings.selectedProfile?' sel':'');
-    item.innerHTML=`<span class="profile-name">${p.name}${p.isModpack?'<span style="font-size:.7em;margin-left:.4em;padding:.1em .35em;border-radius:999px;background:#1bd96a22;color:#1bd96a;border:1px solid #1bd96a44">modpack</span>':''}</span><span class="profile-meta">${p.mcVersion||'Latest'} · ${p.modLoader||'fabric'} · ${(p.mods||[]).length} mods</span><button class="btn profile-edit-btn">Edit</button>`;
+    item.innerHTML=\`<span class="profile-name">$\{p.name}$\{p.isModpack?'<span style="font-size:.7em;margin-left:.4em;padding:.1em .35em;border-radius:999px;background:#1bd96a22;color:#1bd96a;border:1px solid #1bd96a44">modpack</span>':''}</span><span class="profile-meta">$\{p.mcVersion||'Latest'} · $\{p.modLoader||'fabric'} · $\{(p.mods||[]).length} mods</span><button class="btn profile-edit-btn">Edit</button>\`;
     item.addEventListener('click',e=>{ if(e.target.classList.contains('profile-edit-btn'))return; settings.selectedProfile=p.id; saveSettings(); renderProfileList(); updateLaunchProfileSelect(); });
     item.querySelector('.profile-edit-btn').addEventListener('click',()=>openProfileModal(p.id));
     el.appendChild(item);
@@ -1381,38 +1267,6 @@ function updateModLoaderVisibility(){
   if(modsSection) modsSection.style.pointerEvents=loader==='vanilla'?'none':'';
 }
 
-async function checkLoaderAvailability(mcVersion){
-  const fabricBtn=document.getElementById('ml-fabric');
-  const forgeBtn =document.getElementById('ml-forge');
-  if(!mcVersion){ fabricBtn.disabled=false; forgeBtn.disabled=false; return; }
-
-  // Check Fabric
-  try {
-    const res=await fetch(`https://meta.fabricmc.net/v2/versions/loader/${mcVersion}`);
-    if(!res.ok) throw new Error('Not found');
-    const data=await res.json();
-    fabricBtn.disabled=!(Array.isArray(data)&&data.length>0);
-    fabricBtn.title=fabricBtn.disabled?`Fabric not available for MC ${mcVersion}`:'';
-  } catch { fabricBtn.disabled=false; fabricBtn.title=''; }
-
-  // Check Forge
-  try {
-    const res=await fetch('https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json');
-    if(!res.ok) throw new Error('Not found');
-    const data=await res.json();
-    forgeBtn.disabled=!(data.promos&&(data.promos[`${mcVersion}-recommended`]||data.promos[`${mcVersion}-latest`]));
-    forgeBtn.title=forgeBtn.disabled?`Forge not available for MC ${mcVersion}`:'';
-  } catch { forgeBtn.disabled=false; forgeBtn.title=''; }
-
-  // If current selection no longer available, switch to a valid option
-  const checked=document.querySelector('input[name="modLoader"]:checked');
-  if(checked&&checked.disabled){
-    const vanilla=document.getElementById('ml-vanilla');
-    if(vanilla&&!vanilla.disabled) vanilla.checked=true;
-    updateModLoaderVisibility();
-  }
-}
-
 function openProfileModal(profileId){
   editingProfileId=profileId;
   const p=profiles.find(x=>x.id===profileId); if(!p)return;
@@ -1421,7 +1275,7 @@ function openProfileModal(profileId){
 
   // Set modLoader
   const ml=p.modLoader||'fabric';
-  const mlEl=document.querySelector(`input[name="modLoader"][value="${ml}"]`);
+  const mlEl=document.querySelector(\`input[name="modLoader"][value="$\{ml}"]\`);
   if(mlEl) mlEl.checked=true;
   updateModLoaderVisibility();
   document.querySelectorAll('input[name="modLoader"]').forEach(r=>r.addEventListener('change',updateModLoaderVisibility));
@@ -1431,32 +1285,19 @@ function openProfileModal(profileId){
 
   // Always rebuild version select fresh
   const sel=document.getElementById('profile-version-select');
-  sel.innerHTML=`<option value="">${t('ver_latest')}</option><option value="__latest_snapshot__">${t('ver_latest_snap')}</option>`;
+  sel.innerHTML=\`<option value="">$\{t('ver_latest')}</option><option value="__latest_snapshot__">$\{t('ver_latest_snap')}</option>\`;
   if(mcVersionList.length>0){
     const releases  = mcVersionList.filter(v=>v.type==='release');
     const snapshots = mcVersionList.filter(v=>v.type==='snapshot');
     const others    = mcVersionList.filter(v=>v.type!=='release'&&v.type!=='snapshot');
     if(releases.length){ const g=document.createElement('optgroup'); g.label=t('ver_releases'); releases.forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.id;g.appendChild(o);}); sel.appendChild(g); }
     if(snapshots.length){ const g=document.createElement('optgroup'); g.label=t('ver_snapshots'); snapshots.forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.id;g.appendChild(o);}); sel.appendChild(g); }
-    if(others.length){ const g=document.createElement('optgroup'); g.label=t('ver_other'); others.forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=`${v.id} (${v.type})`;g.appendChild(o);}); sel.appendChild(g); }
+    if(others.length){ const g=document.createElement('optgroup'); g.label=t('ver_other'); others.forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=\`$\{v.id} ($\{v.type})\`;g.appendChild(o);}); sel.appendChild(g); }
   } else {
     loadVersions().then(()=>openProfileModal(profileId));
     return;
   }
   sel.value=p.mcVersion||'';
-
-  // Check loader availability for selected version
-  let checkVer = sel.value;
-  if (!checkVer) checkVer = mcVersionList.find(v=>v.type==='release')?.id || '';
-  else if (checkVer === '__latest_snapshot__') checkVer = mcVersionList.find(v=>v.type==='snapshot')?.id || '';
-  if (checkVer) checkLoaderAvailability(checkVer);
-
-  sel.addEventListener('change', () => {
-    let v = sel.value;
-    if (!v) v = mcVersionList.find(x=>x.type==='release')?.id || '';
-    else if (v === '__latest_snapshot__') v = mcVersionList.find(x=>x.type==='snapshot')?.id || '';
-    checkLoaderAvailability(v || '');
-  });
 
   renderProfilePackList('profile-mods-list','mods',true);
   renderPackTags('profile-datapacks','datapacks');
@@ -1497,10 +1338,9 @@ function renderProfilePackList(containerId, key, isMods=false){
   const el=document.getElementById(containerId); el.innerHTML='';
   (editingPackData[key]||[]).forEach((item,i)=>{
     const tag=document.createElement('span'); tag.className='pack-tag';
-    if(isMods&&item.iconUrl) tag.innerHTML=`<img src="${item.iconUrl}" style="width:1.1em;height:1.1em;border-radius:.15em;vertical-align:middle"> `;
+    if(isMods&&item.iconUrl) tag.innerHTML=\`<img src="$\{item.iconUrl}" style="width:1.1em;height:1.1em;border-radius:.15em;vertical-align:middle"> \`;
     const name=isMods?(item.name||item):item;
-    const ver=isMods&&item.mcVersion?` <span style="color:#555;font-weight:normal;font-size:.78em">MC ${item.mcVersion}</span>`:'';
-    tag.innerHTML+=`${name}${ver} <span class="rt" data-i="${i}">✕</span>`;
+    tag.innerHTML+=\`$\{name} <span class="rt" data-i="$\{i}">✕</span>\`;
     tag.querySelector('.rt').addEventListener('click',()=>{ editingPackData[key].splice(i,1); renderProfilePackList(containerId,key,isMods); });
     el.appendChild(tag);
   });
@@ -1521,7 +1361,7 @@ function renderAccountList(){
   sorted.forEach(acc=>{
     const item=document.createElement('div');
     item.className='account-item'+(acc.id===settings.selectedAccount?' sel':'');
-    item.innerHTML=`<canvas class="account-head-sm" width="32" height="32"></canvas><span class="account-name">${acc.name}</span><span class="account-type">${acc.type}</span><button class="btn account-del" data-id="${acc.id}">✕</button>`;
+    item.innerHTML=\`<canvas class="account-head-sm" width="32" height="32"></canvas><span class="account-name">$\{acc.name}</span><span class="account-type">$\{acc.type}</span><button class="btn account-del" data-id="$\{acc.id}">✕</button>\`;
     item.addEventListener('click',e=>{ if(e.target.classList.contains('account-del'))return; settings.selectedAccount=acc.id; saveSettings(); renderAccountList(); updateSkinDisplay(); updateAccountTabHead(); });
     item.querySelector('.account-del').addEventListener('click',()=>{ accounts=accounts.filter(a=>a.id!==acc.id); if(settings.selectedAccount===acc.id)settings.selectedAccount=accounts[0]?.id||null; ipcRenderer.send('save-accounts',accounts); saveSettings(); renderAccountList(); updateSkinDisplay(); updateAccountTabHead(); });
     drawHead2D(item.querySelector('canvas'),acc.skinUrl);
@@ -1535,22 +1375,6 @@ function updateAccountTabHead(){
   const canvas=document.getElementById('tb-account-head');
   if(acc&&acc.skinUrl){ canvas.style.display='inline-block'; drawHead2D(canvas,acc.skinUrl); }
   else{ canvas.style.display='none'; }
-}
-
-function updateSkinDisplay(){
-  const acc = getSelectedAccount();
-  const label = document.getElementById('skin-name-display');
-  if(acc){
-    label.textContent = acc.name || 'No account';
-    if(acc.skinUrl){
-      loadSkinTexture(acc.skinUrl);
-    } else {
-      buildSkinMesh(null);
-    }
-  } else {
-    label.textContent = 'No account';
-    buildSkinMesh(null);
-  }
 }
 
 function drawHead2D(canvas,skinUrl){
@@ -1638,9 +1462,8 @@ function init3DSkin(){
   if(!wrap||!window.THREE){setTimeout(init3DSkin,200);return;}
   const W=wrap.clientWidth||200, H=wrap.clientHeight||300;
   threeScene=new THREE.Scene();
-  threeCamera=new THREE.PerspectiveCamera(35,W/H,0.1,100);
-  threeCamera.position.set(0,1.3,11);
-  threeCamera.lookAt(0,0,0);
+  threeCamera=new THREE.PerspectiveCamera(40,W/H,0.1,100);
+  threeCamera.position.set(0,0,5);
   threeRenderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
   threeRenderer.setSize(W,H);
   threeRenderer.setClearColor(0x000000,0);
@@ -1656,13 +1479,12 @@ function init3DSkin(){
   wrap.addEventListener('mousedown',e=>{skin3DDrag.active=true;skin3DDrag.startX=e.clientX;skin3DDrag.startY=e.clientY;skin3DDrag.rotY=currentRotY;skin3DDrag.rotX=currentRotX;wrap.style.cursor='grabbing';});
   document.addEventListener('mousemove',e=>{if(!skin3DDrag.active)return;currentRotY=skin3DDrag.rotY+(e.clientX-skin3DDrag.startX)*0.6;currentRotX=Math.max(-35,Math.min(35,skin3DDrag.rotX+(e.clientY-skin3DDrag.startY)*0.3));});
   document.addEventListener('mouseup',()=>{skin3DDrag.active=false;wrap.style.cursor='grab';});
-  wrap.addEventListener('wheel',e=>{e.preventDefault();threeCamera.position.z=Math.max(5,Math.min(25,threeCamera.position.z+e.deltaY*0.01));},{passive:false});
   wrap.addEventListener('touchstart',e=>{const t=e.touches[0];skin3DDrag.active=true;skin3DDrag.startX=t.clientX;skin3DDrag.startY=t.clientY;skin3DDrag.rotY=currentRotY;skin3DDrag.rotX=currentRotX;});
   wrap.addEventListener('touchmove',e=>{const t=e.touches[0];if(!skin3DDrag.active)return;currentRotY=skin3DDrag.rotY+(t.clientX-skin3DDrag.startX)*0.6;currentRotX=Math.max(-35,Math.min(35,skin3DDrag.rotX+(t.clientY-skin3DDrag.startY)*0.3));e.preventDefault();},{passive:false});
   wrap.addEventListener('touchend',()=>{skin3DDrag.active=false;});
   const ro=new ResizeObserver(()=>{const w=wrap.clientWidth,h=wrap.clientHeight;if(w>0&&h>0){threeRenderer.setSize(w,h);threeCamera.aspect=w/h;threeCamera.updateProjectionMatrix();}});
   ro.observe(wrap);
-  (function loop(){requestAnimationFrame(loop);if(skinMeshGroup){skinMeshGroup.rotation.y=currentRotY*Math.PI/180;skinMeshGroup.rotation.x=currentRotX*Math.PI/180;}threeRenderer.render(threeScene,threeCamera);})();
+  (function loop(){requestAnimationFrame(loop);if(!skin3DDrag.active)currentRotY+=0.4;if(skinMeshGroup){skinMeshGroup.rotation.y=currentRotY*Math.PI/180;skinMeshGroup.rotation.x=currentRotX*Math.PI/180;}threeRenderer.render(threeScene,threeCamera);})();
 }
 
 function makeUV(sx,sy,sw,sh){const u0=sx/64,u1=(sx+sw)/64,v0=1-sy/64,v1=1-(sy+sh)/64;return{u0,u1,v0,v1};}
@@ -1689,33 +1511,22 @@ function buildSkinMesh(tex){
   if(!skinMeshGroup)return;
   while(skinMeshGroup.children.length)skinMeshGroup.remove(skinMeshGroup.children[0]);
   const U=0.25;
-  // HEAD — centered at Y=22px (5.5 units), flush against body top
-  const hg=new THREE.Group(); hg.position.set(0,U*22,0);
+  // HEAD
+  const hg=new THREE.Group(); hg.position.set(0,U*10,0);
   hg.add(skinBox(U*8,U*8,U*8,0,0,0,tex,uv(8,8,8,8),uv(24,8,8,8),uv(8,0,8,8),uv(16,0,8,8),uv(16,8,8,8),uv(0,8,8,8)));
-  if(tex){{const ov=skinBox(U*9,U*9,U*9,0,0,0,tex,uv(40,8,8,8),uv(56,8,8,8),uv(40,0,8,8),uv(48,0,8,8),uv(48,8,8,8),uv(32,8,8,8));ov.renderOrder=1;hg.add(ov);}}
+  if(tex){const ov=skinBox(U*9,U*9,U*9,0,0,0,tex,uv(40,8,8,8),uv(56,8,8,8),uv(40,0,8,8),uv(48,0,8,8),uv(48,8,8,8),uv(32,8,8,8));ov.renderOrder=1;hg.add(ov);}
   skinMeshGroup.add(hg);
-  // BODY — centered at Y=12px (3 units)
-  skinMeshGroup.add(skinBox(U*8,U*12,U*4,0,U*12,0,tex,uv(20,20,8,12),uv(32,20,8,12),uv(20,16,8,4),uv(28,16,8,4),uv(28,20,4,12),uv(16,20,4,12)));
-  // JACKET (body outer layer)
-  if(tex){{const j=skinBox(U*8.5,U*12.5,U*4.5,0,U*12,0,tex,uv(20,36,8,12),uv(32,36,8,12),uv(20,32,8,4),uv(28,32,8,4),uv(28,36,4,12),uv(16,36,4,12));j.renderOrder=1;skinMeshGroup.add(j);}}
-  // RIGHT ARM — centered at Y=12px (3 units), X=6px (1.5 units)
-  skinMeshGroup.add(skinBox(U*4,U*12,U*4,U*6,U*12,0,tex,uv(44,20,4,12),uv(52,20,4,12),uv(44,16,4,4),uv(48,16,4,4),uv(48,20,4,12),uv(40,20,4,12)));
-  // RIGHT SLEEVE (right arm outer layer)
-  if(tex){{const s=skinBox(U*4.5,U*12.5,U*4.5,U*6,U*12,0,tex,uv(44,36,4,12),uv(52,36,4,12),uv(44,32,4,4),uv(48,32,4,4),uv(48,36,4,12),uv(40,36,4,12));s.renderOrder=1;skinMeshGroup.add(s);}}
-  // LEFT ARM — centered at Y=12px (3 units), X=-6px (-1.5 units)
-  skinMeshGroup.add(skinBox(U*4,U*12,U*4,-U*6,U*12,0,tex,uv(36,52,4,12),uv(44,52,4,12),uv(36,48,4,4),uv(40,48,4,4),uv(40,52,4,12),uv(32,52,4,12)));
-  // LEFT SLEEVE (left arm outer layer)
-  if(tex){{const s=skinBox(U*4.5,U*12.5,U*4.5,-U*6,U*12,0,tex,uv(52,52,4,12),uv(60,52,4,12),uv(52,48,4,4),uv(56,48,4,4),uv(56,52,4,12),uv(48,52,4,12));s.renderOrder=1;skinMeshGroup.add(s);}}
-  // RIGHT LEG — centered at Y=0px (0 units), X=2px (0.5 units)
-  skinMeshGroup.add(skinBox(U*4,U*12,U*4,U*2,0,0,tex,uv(4,20,4,12),uv(12,20,4,12),uv(4,16,4,4),uv(8,16,4,4),uv(8,20,4,12),uv(0,20,4,12)));
-  // RIGHT PANTS (right leg outer layer)
-  if(tex){{const p=skinBox(U*4.5,U*12.5,U*4.5,U*2,0,0,tex,uv(4,36,4,12),uv(12,36,4,12),uv(4,32,4,4),uv(8,32,4,4),uv(8,36,4,12),uv(0,36,4,12));p.renderOrder=1;skinMeshGroup.add(p);}}
-  // LEFT LEG — centered at Y=0px (0 units), X=-2px (-0.5 units)
-  skinMeshGroup.add(skinBox(U*4,U*12,U*4,-U*2,0,0,tex,uv(20,52,4,12),uv(28,52,4,12),uv(20,48,4,4),uv(24,48,4,4),uv(24,52,4,12),uv(16,52,4,12)));
-  // LEFT PANTS (left leg outer layer)
-  if(tex){{const p=skinBox(U*4.5,U*12.5,U*4.5,-U*2,0,0,tex,uv(4,52,4,12),uv(12,52,4,12),uv(4,48,4,4),uv(8,48,4,4),uv(8,52,4,12),uv(0,52,4,12));p.renderOrder=1;skinMeshGroup.add(p);}}
-  // Center the whole model vertically (body center at origin)
-  skinMeshGroup.position.set(0,-U*12,0);
+  // BODY
+  skinMeshGroup.add(skinBox(U*8,U*12,U*4,0,U*2,0,tex,uv(20,20,8,12),uv(32,20,8,12),uv(20,16,8,4),uv(28,16,8,4),uv(28,20,4,12),uv(16,20,4,12)));
+  // RIGHT ARM
+  skinMeshGroup.add(skinBox(U*4,U*12,U*4,U*6,U*2,0,tex,uv(44,20,4,12),uv(52,20,4,12),uv(44,16,4,4),uv(48,16,4,4),uv(48,20,4,12),uv(40,20,4,12)));
+  // LEFT ARM
+  skinMeshGroup.add(skinBox(U*4,U*12,U*4,-U*6,U*2,0,tex,uv(36,52,4,12),uv(44,52,4,12),uv(36,48,4,4),uv(40,48,4,4),uv(40,52,4,12),uv(32,52,4,12)));
+  // RIGHT LEG
+  skinMeshGroup.add(skinBox(U*4,U*12,U*4,U*2,-U*8,0,tex,uv(4,20,4,12),uv(12,20,4,12),uv(4,16,4,4),uv(8,16,4,4),uv(8,20,4,12),uv(0,20,4,12)));
+  // LEFT LEG
+  skinMeshGroup.add(skinBox(U*4,U*12,U*4,-U*2,-U*8,0,tex,uv(20,52,4,12),uv(28,52,4,12),uv(20,48,4,4),uv(24,48,4,4),uv(24,52,4,12),uv(16,52,4,12)));
+  skinMeshGroup.position.set(0,-U*4,0);
 }
 
 function loadSkinTexture(url){
@@ -1749,7 +1560,6 @@ document.getElementById('btn-modrinth-global').addEventListener('click',()=>{ pr
 document.getElementById('btn-curseforge-global').addEventListener('click',()=>{ profileModMode=false; profilePackMode=null; openModModal('curseforge'); });
 document.getElementById('btn-rp-modrinth-global').addEventListener('click',()=>{ profileModMode=false; profilePackMode='clientRP'; openModModal('modrinth'); });
 document.getElementById('btn-rp-curseforge-global').addEventListener('click',()=>{ profileModMode=false; profilePackMode='clientRP'; openModModal('curseforge'); });
-// Client JAR upload handlers removed
 
 // ── Mod Modal ────────────────────────────────────────
 function openModModal(source){
@@ -1820,10 +1630,10 @@ async function fetchModrinthPage(q,offset){
       : profilePackMode==='datapacks'?'datapack'
       : profilePackMode==='resourcePacks'||profilePackMode==='clientRP'?'resourcepack'
       : profilePackMode==='shaderPacks'?'shader':'mod';
-    const facet=`[["project_type:${facetType}"]]`;
+    const facet=\`[["project_type:$\{facetType}"]\`;
     const url=q
-      ?`https://api.modrinth.com/v2/search?query=${encodeURIComponent(q)}&facets=${encodeURIComponent(facet)}&limit=${PAGE_SIZE}&offset=${offset}`
-      :`https://api.modrinth.com/v2/search?facets=${encodeURIComponent(facet)}&limit=${PAGE_SIZE}&offset=${offset}&index=downloads`;
+      ?\`https://api.modrinth.com/v2/search?query=$\{encodeURIComponent(q)}&facets=$\{encodeURIComponent(facet)}&limit=$\{PAGE_SIZE}&offset=$\{offset}\`
+      :\`https://api.modrinth.com/v2/search?facets=$\{encodeURIComponent(facet)}&limit=$\{PAGE_SIZE}&offset=$\{offset}&index=downloads\`;
     const d=await(await fetch(url)).json();
     return(d.hits||[]).map(h=>({id:h.project_id,name:h.title,description:h.description,iconUrl:h.icon_url||'',latestVersion:h.latest_version||'latest',downloads:h.downloads}));
   }catch{return[];}
@@ -1833,66 +1643,56 @@ async function appendModResults(results){
   for(const mod of results){
     let mcVersions=['latest'];
     try{
-      const vd=await(await fetch(`https://api.modrinth.com/v2/project/${mod.id}/version`)).json();
+      const vd=await(await fetch(\`https://api.modrinth.com/v2/project/$\{mod.id}/version\`)).json();
       const seen=new Set(); mcVersions=vd.flatMap(v=>v.game_versions).filter(v=>{if(seen.has(v))return false;seen.add(v);return true;}).slice(0,25);
       if(!mcVersions.length)mcVersions=['latest'];
     }catch{}
     const item=document.createElement('div'); item.className='mod-result-item';
-    const dl=mod.downloads?` · ${(mod.downloads/1000).toFixed(0)}k ↓`:'';
-    const profileMC=profileModMode&&editingProfileId?profiles.find(p=>p.id===editingProfileId)?.mcVersion:null;
-    const defaultV=profileMC||mcVersions[0]||'latest';
-    item.innerHTML=`
-      ${mod.iconUrl?`<img class="mod-result-icon" src="${mod.iconUrl}">`:'<div class="mod-result-icon"></div>'}
+    const opts=mcVersions.map(v=>\`<option value="$\{v}">$\{v}</option>\`).join('');
+    const dl=mod.downloads? \` . $\{(mod.downloads/1000).toFixed(0)}k ↓\`:'';
+    item.innerHTML= \`
+      $\{mod.iconUrl ?\`<img class="mod-result-icon" src="$\{mod.iconUrl}">\`:'<div class="mod-result-icon"></div>'}
       <div class="mod-result-info">
-        <div class="mod-result-name">${mod.name} ${mod.latestVersion!==mod.name?`<span style="color:#888;font-weight:normal;font-size:.78em">${mod.latestVersion}</span>`:''}<span style="color:#555;font-weight:normal;font-size:.8em">${dl}</span></div>
-        <div class="mod-result-desc">${mod.description||''}</div>
+        <div class="mod-result-name">$\{mod.name}<span style="color:#555;font-weight:normal;font-size:.8em">$\{dl}</span></div>
+        <div class="mod-result-desc">$\{mod.description||''}</div>
       </div>
       <div class="mod-result-actions">
-        <button class="btn mod-install-btn">${profilePackMode==='modpack'?'Import':'Install'}</button>
-      </div>`;
-    // Disable button if already installed
-    const alreadyInstalled=profileModMode&&profilePackMode
-      ? editingPackData.mods?.some(m=>m.modrinthId===mod.id)
-      : installedMods.some(m=>m.modrinthId===mod.id);
-    if(alreadyInstalled){const ib=item.querySelector('.mod-install-btn');ib.textContent='Installed ✓';ib.disabled=true;ib.style.opacity='.55';}
-    item.querySelector('.mod-install-btn').addEventListener('click',async e=>{
-      const btn=e.currentTarget; btn.disabled=true;
+        <select class="mod-version-select">$\{opts}</select>
+        <button class="btn mod-install-all-btn" title="Install for all launched versions">All vers.</button>
+        <button class="btn mod-install-btn">$\{profilePackMode==='modpack'?'Import':'Install'}</button>
+      </div>\`;
+    item.querySelector('.mod-install-btn').addEventListener('click',e=>{
+      const mcVer=item.querySelector('.mod-version-select').value;
+      const entry={name:mod.name,version:mod.latestVersion,mcVersion:mcVer,source:currentSource==='modrinth'?'Modrinth':'CurseForge',iconUrl:mod.iconUrl,modrinthId:mod.id,downloadAllVersions:false,disabled:false};
       if(profilePackMode==='modpack'){
+        // Import as a new profile
         closeModModal();
         modpackMode=false; profilePackMode=null;
         importModpackFromModrinth(mod.id, mod.name);
-        return;
-      }
-      if(profileModMode&&profilePackMode){
+      } else if(profileModMode&&profilePackMode){
         const key=profilePackMode;
-        if(key==='mods'&&!editingPackData.mods.some(m=>m.modrinthId===mod.id)){
-          editingPackData.mods.push({name:mod.name,version:mod.latestVersion,mcVersion:profileMC||'latest',source:currentSource==='modrinth'?'Modrinth':'CurseForge',iconUrl:mod.iconUrl,modrinthId:mod.id,downloadAllVersions:false,disabled:false});
-          renderProfilePackList('profile-mods-list','mods',true);
-        }else if(key!=='mods'&&!editingPackData[key].includes(mod.name)){
-          editingPackData[key].push(mod.name);renderPackTags('profile-'+key.toLowerCase(),key);
-        }
-        btn.textContent='Added ✓';btn.style.opacity='.55';return;
+        if(key==='mods'&&!editingPackData.mods.some(m=>m.modrinthId===mod.id&&m.mcVersion===mcVer)){editingPackData.mods.push(entry);renderProfilePackList('profile-mods-list','mods',true);}
+        else if(key!=='mods'&&!editingPackData[key].includes(mod.name)){editingPackData[key].push(mod.name);renderPackTags('profile-'+key.toLowerCase(),key);}
+      } else if(profilePackMode==='clientRP'){
+        // Add to client resource packs list
+        if(!clientResourcePacks.includes(mod.name)){ clientResourcePacks.push(mod.name); settings.clientResourcePacks=clientResourcePacks; saveSettings(); renderClientRPList(); }
+      } else {
+        if(!installedMods.some(m=>m.modrinthId===mod.id&&m.mcVersion===mcVer)){installedMods.push(entry);saveMods();renderModList();}
       }
-      if(profilePackMode==='clientRP'){
-        if(!clientResourcePacks.some(r=>(typeof r==='object'?r.modrinthId===mod.id:r===mod.name))){
-          clientResourcePacks.push({name:mod.name,modrinthId:mod.id,latestVersion:mod.latestVersion});
-          settings.clientResourcePacks=clientResourcePacks;saveSettings();renderClientRPList();
-        }
-        btn.textContent='Added ✓';btn.style.opacity='.55';return;
-      }
-      // Client mod: install for all launched versions
-      btn.textContent='Installing...';
-      const vers=launchedVersions.length?launchedVersions:[defaultV];
-      let n=0; const src=currentSource==='modrinth'?'Modrinth':'CurseForge';
+      const btn=e.currentTarget; btn.textContent='Added ✓'; btn.disabled=true; btn.style.opacity='.55';
+    });
+    item.querySelector('.mod-install-all-btn').addEventListener('click',async e=>{
+      const btn=e.currentTarget; btn.textContent='Installing...'; btn.disabled=true;
+      const vers=launchedVersions.length?launchedVersions:[item.querySelector('.mod-version-select').value];
+      let n=0;
       for(const v of vers){
         if(!mcVersions.includes(v))continue;
         if(!installedMods.some(m=>m.modrinthId===mod.id&&m.mcVersion===v)){
-          installedMods.push({name:mod.name,version:mod.latestVersion,mcVersion:v,source:src,iconUrl:mod.iconUrl,modrinthId:mod.id,downloadAllVersions:true,disabled:false,autoInstalled:n>0});n++;
+          installedMods.push({name:mod.name,version:mod.latestVersion,mcVersion:v,source:'Modrinth',iconUrl:mod.iconUrl,modrinthId:mod.id,downloadAllVersions:true,disabled:false,autoInstalled:n>0});n++;
         }
       }
-      if(!n){if(!installedMods.some(m=>m.modrinthId===mod.id&&m.mcVersion===defaultV)){installedMods.push({name:mod.name,version:mod.latestVersion,mcVersion:defaultV,source:src,iconUrl:mod.iconUrl,modrinthId:mod.id,downloadAllVersions:true,disabled:false});n++;}}
-      saveMods();renderModList();fetchMissingModIcons();
-      btn.textContent=`Added ✓ (${n})`;btn.style.opacity='.55';
+      if(!n){ const v=item.querySelector('.mod-version-select').value; if(!installedMods.some(m=>m.modrinthId===mod.id&&m.mcVersion===v)){installedMods.push({name:mod.name,version:mod.latestVersion,mcVersion:v,source:'Modrinth',iconUrl:mod.iconUrl,modrinthId:mod.id,downloadAllVersions:true,disabled:false});n++;} }
+      saveMods(); renderModList(); fetchMissingModIcons(); btn.textContent=\`All ✓ ($\{n})\`; btn.style.opacity='.55';
     });
     el.appendChild(item);
   }
@@ -1916,15 +1716,15 @@ document.getElementById('import-modpack-curseforge-btn').addEventListener('click
 
 async function importModpackFromModrinth(projectId, projectName) {
   try {
-    document.getElementById('status').textContent=`Importing modpack: ${projectName}...`;
+    document.getElementById('status').textContent=\`Importing modpack: $\{projectName}...\`;
 
     // Get latest version
-    const versions = await (await fetch(`https://api.modrinth.com/v2/project/${projectId}/version`)).json();
+    const versions = await (await fetch(\`https://api.modrinth.com/v2/project/$\{projectId}/version\`)).json();
     if(!versions||!versions.length) throw new Error('No versions found');
     const latest = versions[0];
 
     // Get project details for MC version and loader
-    const project = await (await fetch(`https://api.modrinth.com/v2/project/${projectId}`)).json();
+    const project = await (await fetch(\`https://api.modrinth.com/v2/project/$\{projectId}\`)).json();
     const mcVersion = latest.game_versions?.[0] || '';
     const loader = latest.loaders?.find(l=>['fabric','forge','quilt'].includes(l)) || 'fabric';
 
@@ -1938,7 +1738,7 @@ async function importModpackFromModrinth(projectId, projectName) {
         const buf  = await resp.arrayBuffer();
         // mrpack is a zip — we can't easily unzip in browser JS without a library
         // Instead, get dependency list from Modrinth API
-        const deps = await (await fetch(`https://api.modrinth.com/v2/project/${projectId}/dependencies`)).json();
+        const deps = await (await fetch(\`https://api.modrinth.com/v2/project/$\{projectId}/dependencies\`)).json();
         mods = (deps.projects||[]).map(p=>({
           name: p.title, modrinthId: p.id, version:'latest',
           mcVersion, source:'Modrinth', iconUrl: p.icon_url||'',
@@ -1964,10 +1764,10 @@ async function importModpackFromModrinth(projectId, projectName) {
     ipcRenderer.send('save-profiles', profiles);
     renderProfileList();
     updateLaunchProfileSelect();
-    document.getElementById('status').textContent=`✓ Imported: ${projectName} (${mods.length} mods, MC ${mcVersion})`;
+    document.getElementById('status').textContent=\`✓ Imported: $\{projectName} ($\{mods.length} mods, MC $\{mcVersion})\`;
     showPage('profiles-page');
   } catch(e) {
-    document.getElementById('status').textContent=`Modpack import failed: ${e.message}`;
+    document.getElementById('status').textContent=\`Modpack import failed: $\{e.message}\`;
   }
 }
 async function fetchMissingModIcons(){
@@ -1978,7 +1778,7 @@ async function fetchMissingModIcons(){
   for(let i=0; i<ids.length; i+=100){
     const chunk = ids.slice(i, i+100);
     try {
-      const url = `https://api.modrinth.com/v2/projects?ids=${encodeURIComponent(JSON.stringify(chunk))}`;
+      const url = \`https://api.modrinth.com/v2/projects?ids=\$\{encodeURIComponent(JSON.stringify(chunk))}\`;
       const projects = await (await fetch(url)).json();
       if(!Array.isArray(projects)) continue;
       let changed = false;
@@ -2004,7 +1804,6 @@ function loadClientRPSettings(){
   autoUseResourcePacks = settings.autoUseResourcePacks || false;
   renderClientRPToggle();
   renderClientRPList();
-  applyOpenLoaderMod();
 }
 
 function renderClientRPToggle(){
@@ -2029,8 +1828,7 @@ function renderClientRPList(){
   clientResourcePacks.forEach((rp, i) => {
     const tag = document.createElement('span');
     tag.className = 'pack-tag';
-    const label = typeof rp === 'object' ? rp.name : rp;
-    tag.innerHTML = `${label} <span class="rt" style="cursor:pointer;color:#555;margin-left:.3em" data-i="${i}">✕</span>`;
+    tag.innerHTML = \`$\{rp} <span class="rt" style="cursor:pointer;color:#555;margin-left:.3em" data-i="$\{i}">✕</span>\`;
     tag.querySelector('.rt').addEventListener('click', () => {
       clientResourcePacks.splice(i, 1);
       settings.clientResourcePacks = clientResourcePacks;
@@ -2087,9 +1885,7 @@ document.getElementById('client-rp-add-btn').addEventListener('click', () => {
 document.getElementById('client-rp-input').addEventListener('keydown', e => {
   if(e.key === 'Enter') document.getElementById('client-rp-add-btn').click();
 });
-
 const DEFAULT_CLIENT_MODS = [
-  // Fabric defaults
   { name:'ModMenu',                  modrinthId:'mOgUt4GM', loader:'fabric' },
   { name:'Sodium',                   modrinthId:'AANobbMI', loader:'fabric' },
   { name:'Entity Culling',           modrinthId:'NNAgCjsB', loader:'fabric' },
@@ -2106,42 +1902,22 @@ const DEFAULT_CLIENT_MODS = [
   { name:'More Chat History',        modrinthId:'8qkXwOnk', loader:'fabric' },
   { name:'Cubes Without Borders',    modrinthId:'ETlFGEpQ', loader:'fabric' },
   { name:'Remove Reloading Screen',  modrinthId:'t89TPBM0', loader:'fabric' },
+  { name:'FastQuit',                 modrinthId:'x1hIzbuY', loader:'fabric' },
   { name:'Bobby',                    modrinthId:'M08ruV16', loader:'fabric' },
   { name:'Fast IP Ping',             modrinthId:'g9Ic0TTW', loader:'fabric' },
   { name:'Better Statistics Screen', modrinthId:'n6PXGAoM', loader:'fabric' },
   { name:'Chunky',                   modrinthId:'fALzjamp', loader:'fabric' },
   { name:'Better Ping Display',      modrinthId:'MS1ZFoKX', loader:'fabric' },
-  // Optimisation mods (Fabric)
-  { name:'FerriteCore',              modrinthId:'uXXizFIs', loader:'fabric' },
-  { name:'ModernFix',                modrinthId:'nmDcB62a', loader:'fabric' },
-  { name:'ImmediatelyFast',          modrinthId:'5ZwdcRci', loader:'fabric' },
-  { name:'MemoryLeakFix',            modrinthId:'NRjRiSSD', loader:'fabric' },
-  { name:'Clumps',                   modrinthId:'Wnxd13zP', loader:'fabric' },
-  { name:'Krypton',                  modrinthId:'fQEb0iXm', loader:'fabric' },
-  { name:'LazyDFU',                  modrinthId:'hvFnDODi', loader:'fabric' },
-  { name:'C2ME',                     modrinthId:'VSNURh3q', loader:'fabric' },
-  // Forge defaults
-  { name:'JEI',                      modrinthId:'u6dRKJwZ', loader:'forge' },
-  { name:'Jade',                     modrinthId:'nvQzSEkH', loader:'forge' },
-  { name:'Embeddium',                modrinthId:'sk9rgfiA', loader:'forge' },
-  { name:'Oculus',                   modrinthId:'GchcoXML', loader:'forge' },
-  { name:'Curios API',               modrinthId:'vvuO3ImH', loader:'forge' },
-  // Optimisation mods (Forge)
-  { name:'FerriteCore',              modrinthId:'uXXizFIs', loader:'forge' },
-  { name:'ModernFix',                modrinthId:'nmDcB62a', loader:'forge' },
-  { name:'ImmediatelyFast',          modrinthId:'5ZwdcRci', loader:'forge' },
-  { name:'MemoryLeakFix',            modrinthId:'NRjRiSSD', loader:'forge' },
-  { name:'Clumps',                   modrinthId:'Wnxd13zP', loader:'forge' },
 ];
 
 function ensureDefaultMods() {
   let changed = false;
   for (const def of DEFAULT_CLIENT_MODS) {
-    if (!installedMods.some(m => m.modrinthId === def.modrinthId && m.loader === def.loader)) {
+    if (!installedMods.some(m => m.modrinthId === def.modrinthId)) {
       installedMods.push({
         name: def.name, version: 'latest', mcVersion: 'all',
         source: 'Modrinth', iconUrl: '', modrinthId: def.modrinthId,
-        downloadAllVersions: true, disabled: false, // pre-installed and ENABLED
+        downloadAllVersions: true, disabled: true, // pre-installed but DISABLED
         loader: def.loader, isDefault: true
       });
       changed = true;
@@ -2169,8 +1945,8 @@ function renderModList() {
   list.querySelectorAll('.mod-item').forEach(e=>e.remove());
 
   let filtered = installedMods;
-  if (modFilter === 'fabric')   filtered = installedMods.filter(m => !m.loader || m.loader === 'fabric' || m.loader === 'any');
-  if (modFilter === 'forge')    filtered = installedMods.filter(m => m.loader === 'forge' || m.loader === 'any');
+  if (modFilter === 'fabric')   filtered = installedMods.filter(m => !m.loader || m.loader === 'fabric');
+  if (modFilter === 'forge')    filtered = installedMods.filter(m => m.loader === 'forge');
   if (modFilter === 'disabled') filtered = installedMods.filter(m => m.disabled);
 
   if (!filtered.length) { empty.style.display=''; return; }
@@ -2191,20 +1967,18 @@ function renderModList() {
     const item = document.createElement('div');
     item.className = 'mod-item';
     const op = mod.disabled ? 'opacity:0.45' : '';
-    const versionDisplay = mod.mcVersion === 'all' ? 'All versions' : `MC ${mod.mcVersion}`;
-    const modVer = mod.version && mod.version !== 'latest' ? ` · ${mod.version}` : '';
-    const typeLabel = '';
-    const loaderBadge = mod.loader ? `<span style="font-size:.7em;padding:.1em .35em;border-radius:999px;border:1px solid ${mod.loader==='forge'?'#f1642255':'#1bd96a44'};color:${mod.loader==='forge'?'#f16422':'#1bd96a'};margin-left:.3em">${mod.loader==='any'?'Any':mod.loader||'Fabric'}</span>` : '';
-    item.innerHTML = `
-      ${mod.iconUrl ? `<img class="mod-icon" src="${mod.iconUrl}" style="${op}">` : `<div class="mod-icon" style="${op}"></div>`}
-      <div class="mod-info" style="${op}">
-        <div class="mod-name">${mod.name}${typeLabel}${loaderBadge}${mod.disabled?'<span style="color:#555;font-weight:normal;font-size:.76em"> (disabled)</span>':''}${mod.autoInstalled?'<span style="color:var(--acc);font-weight:normal;font-size:.76em"> (auto)</span>':''}</div>
-        <div class="mod-meta">${versionDisplay}${modVer} · ${mod.source || 'Client Mod'}</div>
+    const versionDisplay = mod.downloadAllVersions ? 'All versions' : \`MC $\{mod.mcVersion}\`;
+    const loaderBadge = mod.loader ? \`<span style="font-size:.7em;padding:.1em .35em;border-radius:999px;border:1px solid $\{mod.loader==='forge'?'#f1642255':'#1bd96a44'};color:$\{mod.loader==='forge'?'#f16422':'#1bd96a'};margin-left:.3em">$\{mod.loader||'fabric'}</span>\` : '';
+    item.innerHTML = \`
+      $\{mod.iconUrl ? \`<img class="mod-icon" src="$\{mod.iconUrl}" style="$\{op}">\` : \`<div class="mod-icon" style="$\{op}"></div>\`}
+      <div class="mod-info" style="$\{op}">
+        <div class="mod-name">$\{mod.name}$\{loaderBadge}$\{mod.disabled?'<span style="color:#555;font-weight:normal;font-size:.76em"> (disabled)</span>':''}$\{mod.autoInstalled?'<span style="color:var(--acc);font-weight:normal;font-size:.76em"> (auto)</span>':''}</div>
+        <div class="mod-meta">$\{versionDisplay} · $\{mod.source}</div>
       </div>
       <div class="mod-btns">
-        <button class="btn mod-btn mod-toggle" data-idx="${realIdx}">${mod.disabled?'Enable':'Disable'}</button>
-        <button class="btn mod-btn mod-remove" data-idx="${realIdx}">Remove</button>
-      </div>`;
+        <button class="btn mod-btn mod-toggle" data-idx="$\{realIdx}">$\{mod.disabled?'Enable':'Disable'}</button>
+        <button class="btn mod-btn mod-remove" data-idx="$\{realIdx}">Remove</button>
+      </div>\`;
     list.appendChild(item);
   });
   list.querySelectorAll('.mod-toggle').forEach(btn => btn.addEventListener('click', () => {
@@ -2266,56 +2040,43 @@ document.getElementById('skin-url-apply-btn').addEventListener('click', async ()
 });
 
 // ════════════════════════════════════════
-// UNINSTALL
+// ORIGINAL LAUNCHER TOGGLE
 // ════════════════════════════════════════
-document.getElementById('uninstall-btn').addEventListener('click', () => {
-  if (!confirm('Uninstall Crux Client?\n\nThis will remove the launcher and all its data from your system.')) return;
-  ipcRenderer.send('close-launcher');
-  ipcRenderer.invoke('uninstall-app');
-});
-
-// ════════════════════════════════════════
-// RESET ALL DATA
-// ════════════════════════════════════════
-document.getElementById('reset-all-btn').addEventListener('click', () => {
-  if (!confirm('Reset ALL launcher data?\n\nThis will delete all accounts, profiles, settings, and mods.\nThe launcher will restart as if first opened.')) return;
-  settings = {};
-  accounts = [];
-  profiles = [{ id:'default', name:'Default', mcVersion:'', modLoader:'fabric', mods:[], datapacks:[], resourcePacks:[], shaderPacks:[] }];
-  installedMods = [];
-  launchedVersions = [];
-  clientResourcePacks = [];
-  autoUseResourcePacks = false;
-  currentAccentIdx = 5;
-  ipcRenderer.send('save-settings', settings);
-  ipcRenderer.send('save-accounts', accounts);
-  ipcRenderer.send('save-profiles', profiles);
-  ipcRenderer.send('save-mods', installedMods);
-  ipcRenderer.send('save-launched-versions', launchedVersions);
-  location.reload();
-});
-
-// ════════════════════════════════════════
-// SETTINGS TOGGLES
-// ════════════════════════════════════════
-document.getElementById('open-logs-toggle').addEventListener('change', e => {
-  settings.openLogsAfterLaunch = e.target.checked;
-  saveSettings();
-});
-document.getElementById('close-launcher-toggle').addEventListener('change', e => {
-  settings.closeLauncherWhilePlaying = e.target.checked;
-  saveSettings();
-});
 document.getElementById('use-original-launcher-toggle').addEventListener('change', e => {
   settings.useOriginalLauncher = e.target.checked;
   saveSettings();
 });
+// Apply saved setting
+if (settings.useOriginalLauncher) {
+  document.getElementById('use-original-launcher-toggle').checked = true;
+}
+
+// Pass useOriginalLauncher in launch — patch the existing send
+// Override the ipcRenderer.send for launch-minecraft to include the setting
 
 
 // ════════════════════════════════════════
 // BINDsettings extra bindings
 // ════════════════════════════════════════
-// (RAM display is initialized in bindSettings)
+// RAM init (must run after bindSettings which may not have set these)
+(function initRamDisplay() {
+  const ramUnit = settings.ramUnit || 'gb';
+  const slider = document.getElementById('ramSlider');
+  const unitLabel = document.getElementById('ramUnitLabel');
+  if (!slider || !unitLabel) return;
+  if (ramUnit === 'mb') {
+    slider.min=512; slider.max=8192; slider.step=256;
+    slider.value=settings.ram||1024;
+    document.getElementById('ramValue').textContent=slider.value;
+    unitLabel.textContent='MB';
+    document.getElementById('ram-unit-btn').textContent='Switch to GB';
+  } else {
+    slider.min=1; slider.max=8; slider.step=1;
+    slider.value=settings.ram||1;
+    document.getElementById('ramValue').textContent=slider.value;
+    unitLabel.textContent='GB';
+  }
+})();
 </script>
 </body>
 </html>`;
