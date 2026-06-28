@@ -23,11 +23,11 @@ useHead({ title: t('index.launcher') })
 
         <a href="#" class="download-btn">
             <span class="btn-title">{{ t('launcher.download') }} Linux</span>
-            <span class="btn-sub">.deb / .rpm</span></a>
+            <span class="btn-sub">.zip</span></a>
 
         <a href="#" class="download-btn">
             <span class="btn-title">{{ t('launcher.download') }} Mac</span>
-            <span class="btn-sub">.dmg</span></a>
+            <span class="btn-sub">.zip</span></a>
             
     </div>
 
