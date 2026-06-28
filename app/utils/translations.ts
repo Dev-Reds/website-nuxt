@@ -81,6 +81,7 @@ export const de: Record<string, string> = {
 
   'lg.mode.landscape': 'Länder',
   'lg.mode.flags': 'Flaggen',
+  'lg.mode.names': 'Ländernamen',
   'lg.streakLabel': 'erzielt',
   'lg.placeholder': 'Land eingeben...',
   'lg.submit': 'Übernehmen',
@@ -239,6 +240,7 @@ export const en: Record<string, string> = {
 
   'lg.mode.landscape': 'Countries',
   'lg.mode.flags': 'Flags',
+  'lg.mode.names': 'Country Names',
   'lg.streakLabel': 'streak',
   'lg.placeholder': 'Enter a country...',
   'lg.submit': 'Submit',

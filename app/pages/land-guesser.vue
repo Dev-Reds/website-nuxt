@@ -4,6 +4,7 @@
       <div v-if="mapReady" class="mode-bar">
         <button :class="['mode-btn', { active: gameMode === 'landscape' }]" @click="gameMode = 'landscape'">{{ t('lg.mode.landscape') }}</button>
         <button :class="['mode-btn', { active: gameMode === 'flags' }]" @click="gameMode = 'flags'">{{ t('lg.mode.flags') }}</button>
+        <button :class="['mode-btn', { active: gameMode === 'names' }]" @click="gameMode = 'names'">{{ t('lg.mode.names') }}</button>
       </div>
       <!-- Landscape mode: top bar + name + streak + map -->
       <template v-if="gameMode === 'landscape'">
@@ -31,16 +32,39 @@
         </div>
       </template>
 
-      <!-- Flag mode: flag + input + buttons -->
+      <!-- Flags mode: show name, pick flag -->
       <template v-if="gameMode === 'flags'">
+        <div v-if="mapReady" class="target-name">{{ target.nameDe }}</div>
+        <div v-if="mapReady" class="streak-display">
+          <span v-if="streak > 0" class="streak-fire">🔥</span>
+          <span class="streak-num">{{ streak }}</span>
+          <span class="streak-label">{{ t('lg.streakLabel') }}</span>
+        </div>
+        <div v-if="!evaluated" class="flag-guess-area">
+          <div class="flag-img-buttons">
+            <button
+              v-for="c in countries" :key="c.code"
+              class="flag-img-btn"
+              @click="submitFlagGuess(c.nameDe)"
+            >
+              <img :src="`https://flagcdn.com/w60/${c.code.toLowerCase()}.png`" :alt="c.nameDe">
+            </button>
+          </div>
+        </div>
+        <div v-if="evaluated" class="flag-result">{{ distanceText }}</div>
+      </template>
+
+      <!-- Names mode: show flag, pick name -->
+      <template v-if="gameMode === 'names'">
         <div v-if="mapReady" class="target-area">
           <img :src="`https://flagcdn.com/w160/${target.code.toLowerCase()}.png`" :alt="target.nameDe" class="flag-img">
         </div>
+        <div v-if="mapReady" class="streak-display">
+          <span v-if="streak > 0" class="streak-fire">🔥</span>
+          <span class="streak-num">{{ streak }}</span>
+          <span class="streak-label">{{ t('lg.streakLabel') }}</span>
+        </div>
         <div v-if="!evaluated" class="flag-guess-area">
-          <div class="flag-input-row">
-            <input v-model="flagGuess" @keyup.enter="submitFlagGuess(flagGuess)" :placeholder="t('lg.placeholder')" class="country-input">
-            <button @click="submitFlagGuess(flagGuess)" class="ok-btn">{{ t('lg.guess') }}</button>
-          </div>
           <div class="flag-buttons">
             <button
               v-for="c in countries" :key="c.code"
@@ -63,7 +87,7 @@
 const { t } = useLanguage()
 useHead({ title: 'Land-Guesser' })
 
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, nextTick, computed } from 'vue'
 import type { Map as LeafletMap, LeafletMouseEvent } from 'leaflet'
 
 const route = useRoute()
@@ -97,7 +121,7 @@ watch(gameMode, async (newMode) => {
   if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_mode', newMode)
   cleanup()
   if (map) { map.remove(); map = null }
-  target.value = countries[Math.floor(Math.random() * countries.length)] as Country
+  target.value = countries.value[Math.floor(Math.random() * countries.value.length)] as Country
   fetchTargetData()
   if (newMode === 'landscape') {
     await nextTick()
@@ -112,7 +136,9 @@ let line: any = null
 let evaluating = false
 let L: any
 
-const countries: Country[] = [
+const isNamibiaDomain = typeof window !== 'undefined' && window.location.hostname === 'namibiareferatgeo.vercel.app'
+
+const allCountries: Country[] = [
   { nameDe: 'Ägypten', nameEn: 'Egypt', code: 'EG' }, { nameDe: 'Äthiopien', nameEn: 'Ethiopia', code: 'ET' },
   { nameDe: 'Afghanistan', nameEn: 'Afghanistan', code: 'AF' }, { nameDe: 'Albanien', nameEn: 'Albania', code: 'AL' },
   { nameDe: 'Algerien', nameEn: 'Algeria', code: 'DZ' }, { nameDe: 'Angola', nameEn: 'Angola', code: 'AO' },
@@ -176,6 +202,12 @@ const countries: Country[] = [
   { nameDe: 'Weißrussland', nameEn: 'Belarus', code: 'BY' },
 ]
 
+const countries = computed(() =>
+  isNamibiaDomain
+    ? allCountries.filter((c) => c.nameDe === 'Namibia')
+    : allCountries
+)
+
 onMounted(async () => {
   const leaflet = await import('leaflet')
   await import('leaflet/dist/leaflet.css')
@@ -184,7 +216,7 @@ onMounted(async () => {
   mapReady.value = true
   const shared = route.query.country
   if (shared) {
-    const match = countries.find((c) => c.nameEn === shared || c.nameDe === shared)
+    const match = countries.value.find((c) => c.nameEn === shared || c.nameDe === shared)
     if (match) target.value = match as Country
   }
   fetchTargetData()
@@ -230,7 +262,7 @@ async function evaluate() {
     const data = await res.json()
     const clickedCountry = data.address?.country
     if (clickedCountry) {
-      const matched = countries.find(
+      const matched = countries.value.find(
         (c) => c.nameEn.toLowerCase() === clickedCountry.toLowerCase() ||
                c.nameDe.toLowerCase() === clickedCountry.toLowerCase()
       )
@@ -288,7 +320,7 @@ function nearestBorder(point: any, geojson: any) {
   return nearest
 }
 
-const target = ref<Country>(countries[Math.floor(Math.random() * countries.length)] as Country)
+const target = ref<Country>(countries.value[Math.floor(Math.random() * countries.value.length)] as Country)
 let targetGeoCache: any = null
 let targetCacheLat = 0
 let targetCacheLng = 0
@@ -341,12 +373,12 @@ async function submitFlagGuess(name: string) {
 
 function nextRound() {
   cleanup()
-  target.value = countries[Math.floor(Math.random() * countries.length)] as Country
+  target.value = countries.value[Math.floor(Math.random() * countries.value.length)] as Country
   fetchTargetData()
 }
 
 function selectCountry() {
-  const match = countries.find(
+  const match = countries.value.find(
     (c) => c.nameDe.toLowerCase() === customTarget.value.toLowerCase() ||
            c.nameEn.toLowerCase() === customTarget.value.toLowerCase()
   )
@@ -481,7 +513,7 @@ function cleanup() {
   justify-content: center;
 }
 
-.flag-buttons {
+.flag-buttons, .flag-img-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -491,6 +523,27 @@ function cleanup() {
   flex: 1;
   width: 80%;
   margin: 0 auto;
+}
+
+.flag-img-btn {
+  padding: 4px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color .15s;
+  line-height: 0;
+}
+
+.flag-img-btn:hover {
+  border-color: rgb(188, 0, 0);
+}
+
+.flag-img-btn img {
+  display: block;
+  width: 60px;
+  height: auto;
+  border-radius: 3px;
 }
 
 .flag-btn {
