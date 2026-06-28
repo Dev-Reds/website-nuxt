@@ -68,9 +68,9 @@ function leave() {
 <style scoped>
 .online-display {
   position: fixed;
-  top: 14px;
+  top: 36px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   z-index: 10000;
   display: flex;
   align-items: center;
