@@ -16,7 +16,7 @@ useHead({ title: t('index.launcher') })
         <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/launcher.zip" class="download-btn">
             {{ t('launcher.download') }} (.zip)</a>
             
-        <a href="/download/installer.exe" class="download-btn">
+        <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/Crux.Client-Installer-1.0.0.exe" class="download-btn">
             {{ t('launcher.download') }} (Installer)</a>
             
     </div>
