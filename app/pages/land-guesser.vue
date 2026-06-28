@@ -368,7 +368,7 @@ async function submitFlagGuess(name: string) {
   if (isCorrect) { streak.value++; if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_streak', String(streak.value)) }
   else { streak.value = 0; if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_streak', '0') }
   evaluated.value = true
-  distanceText.value = isCorrect ? t('lg.correct') : t('lg.wrong', { name: target.value.nameDe })
+  distanceText.value = isCorrect ? t('lg.correct') : t('lg.wrong', { name: name })
 }
 
 function nextRound() {
