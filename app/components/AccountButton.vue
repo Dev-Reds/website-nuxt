@@ -1,5 +1,5 @@
 <template>
-  <div class="account-button" v-if="currentUser" @click="showMenu = !showMenu">
+  <div class="account-button" :class="{ 'in-bar': inTopBar }" v-if="currentUser" @click="showMenu = !showMenu">
     <div class="account-av" :style="avatarBg(currentUser)">
       <img v-if="currentUser.avatar" :src="currentUser.avatar" class="av-img"/>
       <span v-else>{{ currentUser.name[0].toUpperCase() }}</span>
@@ -25,7 +25,7 @@
       <div class="menu-item" @click.stop="handleLogout">{{ t('account.logout') }}</div>
     </div>
   </div>
-  <div v-else class="account-button" @click="showLogin = !showLogin">
+  <div v-else class="account-button" :class="{ 'in-bar': inTopBar }" @click="showLogin = !showLogin">
     <div class="account-av guest">{{ t('account.guest') }}</div>
     <div v-if="showLogin" class="account-menu login-menu" @click.stop>
       <div class="login-tabs">
@@ -51,6 +51,7 @@
 <script setup>
 const { currentUser, login, register, logout, restore } = useAuth()
 const { t } = useLanguage()
+defineProps<{ inTopBar?: boolean }>()
 
 const showMenu = ref(false)
 const showLogin = ref(false)
@@ -146,6 +147,12 @@ function avatarBg(user) {
   right: 14px;
   z-index: 10000;
   cursor: pointer;
+}
+
+.account-button.in-bar {
+  position: relative;
+  top: auto;
+  right: auto;
 }
 
 .account-av {

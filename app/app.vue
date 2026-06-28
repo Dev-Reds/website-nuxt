@@ -121,9 +121,7 @@ function startTimer() {
 
 <template>
   <div>
-    <NavBar v-if="!isNamibiaDomain"/>
-    <OnlineDisplay v-if="!isNamibiaDomain"/>
-    <AccountButton v-if="!isNamibiaDomain"/>
+    <TopBar v-if="!isNamibiaDomain"/>
     <div class="page-wrap">
       <NuxtPage/>
     </div>
@@ -209,7 +207,7 @@ body {
 .page-wrap {
   background: #000 url('/background.png') center/cover no-repeat fixed;
   min-height: 100vh;
-  padding-top: 60px;
+  padding-top: 72px;
   padding-bottom: 0;
   box-sizing: border-box;
   transition: padding-bottom .2s;
