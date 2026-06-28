@@ -18,11 +18,7 @@ useHead({ title: t('index.launcher') })
             
     </div>
 
-    <div class="code-panels-row">
-        <CodePanel title="HTML" :code="HTML_SNIPPET"/>
-
-        <CodePanel title="JavaScript" :code="JS_SNIPPET"/>
-    </div>
+    
 
 
 
