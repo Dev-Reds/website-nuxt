@@ -14,10 +14,12 @@ useHead({ title: t('index.launcher') })
     <div class="download-box">
 
         <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/launcher.zip" class="download-btn">
-            {{ t('launcher.download') }} (.zip)</a>
+            <span class="btn-title">{{ t('launcher.download') }}</span>
+            <span class="btn-sub">launcher.zip</span></a>
             
         <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/Crux.Client-Installer-1.0.0.exe" class="download-btn">
-            {{ t('launcher.download') }} (Installer)</a>
+            <span class="btn-title">{{ t('launcher.download') }}</span>
+            <span class="btn-sub">Crux.Client-Installer-1.0.0.exe</span></a>
             
     </div>
 
@@ -46,7 +48,9 @@ h1 {
         }
 
         .download-btn {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin: 0px auto;
             background-color: #b50000;
             color: #bbbbbb;
@@ -55,16 +59,19 @@ h1 {
             border-radius: 6px;
             font-weight: bold;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
             transition: background-color 0.2s;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
+        .btn-title {
+            font-size: 14px;
+        }
+        .btn-sub {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
         .download-btn:hover {
-            display: block;
-            margin: 0px auto;
             background-color: #ff0000;
         }
 
