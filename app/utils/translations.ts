@@ -52,7 +52,7 @@ export const de: Record<string, string> = {
   'index.launcherTitle': 'MC Launcher (still in development)',
   'index.launcher': 'MC Launcher',
 
-  'launcher.download': '📁 Download',
+  'launcher.download': '⬇️ Download',
 
   'youtube.title': 'YouTube',
   'youtube.link': 'Mein Youtube (Klick)',
@@ -211,7 +211,7 @@ export const en: Record<string, string> = {
   'index.launcherTitle': 'MC Launcher (still in development)',
   'index.launcher': 'MC Launcher',
 
-  'launcher.download': '📁 Download',
+  'launcher.download': '⬇️ Download',
 
   'youtube.title': 'YouTube',
   'youtube.link': 'My YouTube (Click)',
