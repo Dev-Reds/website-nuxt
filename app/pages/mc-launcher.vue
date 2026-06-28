@@ -53,6 +53,7 @@ h1 {
             width: 100%;
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .download-btn {
@@ -81,6 +82,13 @@ h1 {
 
         .download-btn:hover {
             background-color: #ff0000;
+        }
+
+        @media (max-width: 460px) {
+            .download-box {
+                flex-direction: column;
+                align-items: center;
+            }
         }
 
         .code-panels-row {
