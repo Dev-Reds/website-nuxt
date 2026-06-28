@@ -13,19 +13,19 @@ useHead({ title: t('index.launcher') })
  
     <div class="download-box">
 
-        <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/launcher.zip" class="download-btn">
+        <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/Launcher.zip" class="download-btn">
             <span class="btn-title">{{ t('launcher.download') }}</span>
             <span class="btn-sub">launcher.zip</span></a>
             
-        <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/Crux.Client-Installer-1.0.0.exe" class="download-btn">
+        <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/Crux-Client-Windows-Installer.exe" class="download-btn">
             <span class="btn-title">{{ t('launcher.download') }} Windows</span>
             <span class="btn-sub">.exe</span></a>
 
-        <a href="#" class="download-btn">
+        <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/Crux-Client-Linux-x64.tar.gz" class="download-btn">
             <span class="btn-title">{{ t('launcher.download') }} Linux</span>
-            <span class="btn-sub">.zip</span></a>
+            <span class="btn-sub">.tar.gz</span></a>
 
-        <a href="#" class="download-btn">
+        <a href="https://github.com/Dev-Reds/website-nuxt/releases/latest/download/Crux-Client-Mac-x64.zip" class="download-btn">
             <span class="btn-title">{{ t('launcher.download') }} Mac</span>
             <span class="btn-sub">.zip</span></a>
             
