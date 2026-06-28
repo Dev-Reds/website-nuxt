@@ -47,7 +47,7 @@
               class="flag-img-btn"
               @click="submitFlagGuess(c.nameDe)"
             >
-              <img :src="`https://flagcdn.com/w60/${c.code.toLowerCase()}.png`" :alt="c.nameDe">
+              <img :src="`https://flagcdn.com/80x60/${c.code.toLowerCase()}.png`" :alt="c.nameDe">
             </button>
           </div>
         </div>
@@ -526,13 +526,18 @@ function cleanup() {
 }
 
 .flag-img-btn {
-  padding: 4px;
+  padding: 2px;
   background: #1a1a1a;
-  border: 1px solid #444;
+  border: 2px solid transparent;
   border-radius: 6px;
   cursor: pointer;
   transition: border-color .15s;
-  line-height: 0;
+  width: 84px;
+  height: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .flag-img-btn:hover {
@@ -541,8 +546,8 @@ function cleanup() {
 
 .flag-img-btn img {
   display: block;
-  width: 60px;
-  height: auto;
+  width: 80px;
+  height: 60px;
   border-radius: 3px;
 }
 
