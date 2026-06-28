@@ -4,7 +4,7 @@
       <div v-if="mapReady" class="mode-bar">
         <button :class="['mode-btn', { active: gameMode === 'landscape' }]" @click="gameMode = 'landscape'">{{ t('lg.mode.landscape') }}</button>
         <button :class="['mode-btn', { active: gameMode === 'flags' }]" @click="gameMode = 'flags'">{{ t('lg.mode.flags') }}</button>
-        <button :class="['mode-btn', { active: gameMode === 'names' }]" @click="gameMode = 'names'">{{ t('lg.mode.names') }}</button>
+        <button v-if="!isNamibiaDomain" :class="['mode-btn', { active: gameMode === 'names' }]" @click="gameMode = 'names'">{{ t('lg.mode.names') }}</button>
       </div>
       <!-- Landscape mode: top bar + name + streak + map -->
       <template v-if="gameMode === 'landscape'">
@@ -43,7 +43,7 @@
         <div v-if="!evaluated" class="flag-guess-area">
           <div class="flag-img-buttons">
             <button
-              v-for="c in countries" :key="c.code"
+              v-for="c in allCountries" :key="c.code"
               class="flag-img-btn"
               @click="submitFlagGuess(c.nameDe)"
             >
