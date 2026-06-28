@@ -1,12 +1,11 @@
 <template>
-  <div class="online-display" :class="{ 'in-bar': inTopBar }" v-if="count > 0">
+  <div class="online-display" v-if="count > 0">
     <div class="online-dot"></div>
     <span class="online-count">{{ t('online.label', { count }) }}</span>
   </div>
 </template>
 
 <script setup>
-defineProps<{ inTopBar?: boolean }>()
 const { t } = useLanguage()
 const SK = 'ol_'
 const count = ref(0)
@@ -97,12 +96,5 @@ function leave() {
 .online-count {
   font-weight: 700;
   color: rgb(188, 0, 0);
-}
-
-.online-display.in-bar {
-  position: relative;
-  left: auto;
-  top: auto;
-  transform: none;
 }
 </style>

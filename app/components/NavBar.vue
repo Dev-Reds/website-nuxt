@@ -1,11 +1,10 @@
 <script setup>
 const isOpen = ref(false)
 const { t } = useLanguage()
-defineProps<{ inTopBar?: boolean }>()
 </script>
 
 <template>
-  <div class="nav-wrapper" :class="{ open: isOpen, 'in-bar': inTopBar }">
+  <div class="nav-wrapper" :class="{ open: isOpen }">
     <div class="nav-backdrop" v-if="isOpen" @click="isOpen = false"></div>
     <nav class="nav-panel" v-if="isOpen">
       <div class="nav-item"><NuxtLink to="/" @click="isOpen = false">{{ t('nav.projects') }}</NuxtLink></div>
@@ -29,12 +28,6 @@ defineProps<{ inTopBar?: boolean }>()
   left: 0;
   top: 0;
   z-index: 9999;
-}
-
-.nav-wrapper.in-bar {
-  position: relative;
-  left: auto;
-  top: auto;
 }
 
 .hamburger {

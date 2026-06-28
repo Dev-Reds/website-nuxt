@@ -121,7 +121,12 @@ function startTimer() {
 
 <template>
   <div>
-    <TopBar v-if="!isNamibiaDomain"/>
+    <template v-if="!isNamibiaDomain">
+      <TopBar/>
+      <NavBar/>
+      <OnlineDisplay/>
+      <AccountButton/>
+    </template>
     <div class="page-wrap">
       <NuxtPage/>
     </div>
