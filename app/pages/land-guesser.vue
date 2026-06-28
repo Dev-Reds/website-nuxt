@@ -372,6 +372,10 @@ async function submitFlagGuess(name: string) {
 }
 
 function nextRound() {
+  if (!evaluated.value) {
+    streak.value = 0
+    if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('geo_streak', '0')
+  }
   cleanup()
   target.value = countries.value[Math.floor(Math.random() * countries.value.length)] as Country
   fetchTargetData()
